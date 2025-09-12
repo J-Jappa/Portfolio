@@ -1,9 +1,8 @@
 export const SITE = {
-  website: "https://github.com/J-Jappa/Portfolio/settings/pages", // replace this with your deployed domain
+  website: "https://jasperjapp.com", // replace this with your deployed domain
   author: "Jasper Japp",
-  profile: "https://satnaing.dev/",
-  desc: "A minimal, responsive and SEO-friendly Astro blog theme.",
-  title: "AstroPaper",
+  desc: "Jasper Japp's Engineering Portfolio",
+  title: "Jasper Japp's Portfolio",
   ogImage: "astropaper-og.jpg",
   lightAndDarkMode: true,
   postPerIndex: 4,

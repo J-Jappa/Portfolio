@@ -13,8 +13,7 @@ import { SITE } from "./src/config";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://J-Jappa.github.io",
-  base: "/Portfolio",
+  site: "https://jasperjapp.com",
   integrations: [
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
