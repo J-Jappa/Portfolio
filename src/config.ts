@@ -25,6 +25,7 @@ export const SITE = {
   },
 
   // Open Graph image behaviour
+  ogImage: "og.png",  
   dynamicOgImage: false,          // set true if you’ve configured the OG generator
 
   // Locale
