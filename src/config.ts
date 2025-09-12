@@ -1,22 +1,13 @@
+// src/config.ts
 export const SITE = {
-  website: "https://jasperjapp.com", // replace this with your deployed domain
-  author: "Jasper Japp",
+  website: 'https://jasperjapp.com',
+  author: 'Jasper Japp',
   desc: "Jasper Japp's Engineering Portfolio",
   title: "Jasper Japp's Portfolio",
-  ogImage: "astropaper-og.jpg",
+  ogImage: '/og-image.png',      // or remove if your theme sets it elsewhere
   lightAndDarkMode: true,
-  postPerIndex: 4,
-  postPerPage: 4,
-  scheduledPostMargin: 15 * 60 * 1000, // 15 minutes
-  showArchives: true,
-  showBackButton: true, // show back button in post detail
-  editPost: {
-    enabled: true,
-    text: "Edit page",
-    url: "https://github.com/satnaing/astro-paper/edit/main/",
-  },
-  dynamicOgImage: true,
-  dir: "ltr", // "rtl" | "auto"
-  lang: "en", // html lang code. Set this empty and default will be "en"
-  timezone: "Asia/Bangkok", // Default global timezone (IANA format) https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  postPerPage: 8,
+  timezone: 'Australia/Sydney',
+  profile: '/avatar.jpg'         // <-- add this line
 } as const;
+
