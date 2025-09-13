@@ -1,0 +1,80 @@
+---
+import Layout from "../layouts/Layout.astro";
+---
+
+<Layout title="About" description="About Jasper Japp">
+  <article class="prose max-w-none dark:prose-invert">
+    <h1>About</h1>
+    <p>
+      I’m <strong>Jasper Japp</strong>, a final-year Engineering (Honours)
+      student at the
+      <strong>Australian National University</strong>, majoring in
+      <strong>Electronics &amp; Communication Systems</strong> with a minor in
+      <strong>Mechatronic Systems</strong>. My work sits at the intersection of
+      <strong>aerodynamics &amp; composites</strong>, <strong
+        >embedded systems</strong
+      >, and <strong>machine learning for sensing</strong>. I focus on turning
+      complex, messy problems into clean, testable designs that work in
+      practice.
+    </p>
+
+    <!-- Two photos side-by-side (stacks on mobile) -->
+    <div class="not-prose my-4 grid gap-3 sm:grid-cols-2">
+      <div class="aspect-[3/2] overflow-hidden rounded-xl">
+        <img
+          src="/images/me/Profile.jpg"
+          alt="Profile Picture"
+          class="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+      <div class="aspect-[3/2] overflow-hidden rounded-xl">
+        <img
+          src="/images/me/speaking.jpg"
+          alt="Presenting the solar car"
+          class="h-full w-full object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+      </div>
+    </div>
+
+    <h2>What I’m into</h2>
+    <ul>
+      <li>
+        <strong>ANU Solar Racing — Aero &amp; Structures:</strong> shaped a low-drag
+        catamaran body, automated Fluent runs with Python, and manufactured &amp;
+        full carbon-fibre car and stucture. Optimised structrual layout with interfacing
+        between all electrical and mechanical systems.
+      </li>
+      <li>
+        <strong>ANU Solar Racing — Mechanical Design:</strong> Designed four bar
+        linkage systems for driver egress and for solar array tilting.
+      </li>
+      <li>
+        <strong>Early bushfire detection:</strong> built a GRU/GMM-VAE and a hybrid
+        STFT-CNN and GRU-VAE pipeline on eCO₂/TVOC streams and designed experiment-level
+        decision rules.
+      </li>
+    </ul>
+
+    <h2>Tooling I reach for</h2>
+    <p class="m-0">
+      SolidWorks · ANSYS Fluent · Python (automation &amp; data) ·
+      MATLAB/Simulink · microcontrollers · a lot of careful measurement.
+    </p>
+
+    <h2>Outside of Engineering</h2>
+    <p>
+      I enjoy brewing a really good cup of coffee, skiing when I can, and
+      playing team sports. I'm also always experimenting with new ways to bring
+      various projects to life and learning new skills, like building this
+      website.
+    </p>
+
+    <p class="mt-4">
+      <a class="underline" href="/JasperJapp_CV.pdf">Download CV (PDF)</a>
+    </p>
+  </article>
+</Layout>

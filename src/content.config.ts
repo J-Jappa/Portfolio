@@ -1,26 +1,33 @@
 import { defineCollection, z } from "astro:content";
-import { glob } from "astro/loaders";
-import { SITE } from "@/config";
-
-export const BLOG_PATH = "src/data/blog";
-
-const blog = defineCollection({
-  loader: glob({ pattern: "**/[^_]*.md", base: `./${BLOG_PATH}` }),
-  schema: ({ image }) =>
-    z.object({
-      author: z.string().default(SITE.author),
-      pubDatetime: z.date(),
-      modDatetime: z.date().optional().nullable(),
-      title: z.string(),
-      featured: z.boolean().optional(),
-      draft: z.boolean().optional(),
-      tags: z.array(z.string()).default(["others"]),
-      ogImage: image().or(z.string()).optional(),
-      description: z.string(),
-      canonicalURL: z.string().optional(),
-      hideEditPost: z.boolean().optional(),
-      timezone: z.string().optional(),
-    }),
+const img = z.object({
+  src: z.string(),
+  alt: z.string().optional(),
+  caption: z.string().optional(),
 });
 
-export const collections = { blog };
+const row = z.object({
+  cols: z.number().int().min(2).max(3).default(2), // 2 or 3 side-by-side
+  images: z.array(img).min(2),
+});
+const projects = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    date: z.string().optional(),             // ISO date
+    hero: z.string().optional(),             // e.g., "/images/solar/hero.png"
+    images: z.array(z.object({
+      src: z.string(),
+      alt: z.string().optional()
+    })).default([]),
+    tags: z.array(z.string()).default([]),
+    role: z.string().optional(),
+    repo: z.string().url().optional(),
+    link: z.string().url().optional(),
+    outcomes: z.array(z.string()).default([]),
+    order: z.number().default(10),          // ← add this
+    featured: z.boolean().default(false),
+    gallery: z.array(z.union([img, row])).default([]),
+  })
+});
+
+export const collections = { projects };

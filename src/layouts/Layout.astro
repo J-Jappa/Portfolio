@@ -2,6 +2,7 @@
 import { ClientRouter } from "astro:transitions";
 import { PUBLIC_GOOGLE_SITE_VERIFICATION } from "astro:env/client";
 import { SITE } from "@/config";
+import Header from "@/components/Header.astro";
 import "@/styles/global.css";
 
 export interface Props {
@@ -32,17 +33,11 @@ const socialImageURL = new URL(ogImage, Astro.url);
 
 const structuredData = {
   "@context": "https://schema.org",
-  "@type": "BlogPosting",
+  "@type": "WebPage",
   headline: `${title}`,
   image: `${socialImageURL}`,
-  datePublished: `${pubDatetime?.toISOString()}`,
-  ...(modDatetime && { dateModified: modDatetime.toISOString() }),
   author: [
-    {
-      "@type": "Person",
-      name: `${author}`,
-      ...(profile && { url: profile }),
-    },
+    { "@type": "Person", name: `${author}`, ...(profile && { url: profile }) },
   ],
 };
 ---
@@ -133,7 +128,12 @@ const structuredData = {
     <script is:inline src="/toggle-theme.js"></script>
   </head>
   <body>
-    <slot />
+    <Header />
+    <main id="main-content">
+      <div class="mx-auto max-w-app px-4 sm:px-4 lg:px-6">
+        <slot />
+      </div>
+    </main>
   </body>
 </html>
 

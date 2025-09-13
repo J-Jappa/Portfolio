@@ -1,0 +1,27 @@
+---
+/** props:
+ *  - images: { src: string; alt?: string; caption?: string }[]
+ *  - cols: 2 | 3 (default 2)
+ */
+const { images = [], cols = 2 } = Astro.props;
+const gridCols = cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
+---
+
+<div class={`not-prose grid gap-3 my-3 ${gridCols}`}>
+  {
+    images.map(img => (
+      <figure class="m-0">
+        <img
+          src={img.src}
+          alt={img.alt ?? ""}
+          class="w-full rounded-xl object-cover"
+          loading="lazy"
+          decoding="async"
+        />
+        {img.caption && (
+          <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>
+        )}
+      </figure>
+    ))
+  }
+</div>

@@ -3,6 +3,8 @@ import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
+import mdx from '@astrojs/mdx';
+
 import {
   transformerNotationDiff,
   transformerNotationHighlight,
@@ -11,6 +13,7 @@ import {
 import { transformerFileName } from "./src/utils/transformers/fileName";
 import { SITE } from "./src/config";
 
+
 // https://astro.build/config
 export default defineConfig({
   site: "https://jasperjapp.com",
@@ -18,6 +21,7 @@ export default defineConfig({
     sitemap({
       filter: page => SITE.showArchives || !page.endsWith("/archives"),
     }),
+    mdx()
   ],
   markdown: {
     remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],

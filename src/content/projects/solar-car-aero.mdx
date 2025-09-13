@@ -1,0 +1,88 @@
+---
+title: "Solar Car Aerodynamics"
+summary: "Designed, simulated, and manufactured an ultra-lowdrag Catamaran-style solar car body using SolidWorks CAD, ANSYS Fluent and Carbon-fibre composites."
+order: 1
+date: "2025-06-01"
+hero: "/images/solar/hero.png"
+images:
+  - src: "/images/solar/CAD-AERO.PNG"
+    alt: "Solidworks CAD designs"
+  - src: "/images/solar/CFD-AERO.jpg"
+    alt: "CFD Simulations"
+  - src: "/images/solar/RACING-AERO.jpg"
+    alt: "Finished Car: Monty on the BWSC"
+
+tags:
+  - Aerodynamics
+  - Composites
+  - CFD
+  - CAD
+  - Solar Racing
+role: "Aero & Structures"
+outcomes:
+  - "Competed in the 2025 Bridgestone World Solar Challenge (BWSC)"
+  - "Reduced CdA by ~20% from previous iterations by leading iterative ANSYS Fluent CFD simulations and optimisation,"
+  - "Developed CFD methodology to improve crosswind studies"
+  - "Improved crosswind stability across ±30° yaw"
+  - "Used Python Scripting to automate CFD processes reducing setup time and increasing consitancy of results."
+  - "Found real-world drag correlation of within 10% using constant speed tests"
+  - "Produced technical handover documentation"
+
+#repo: "https://github.com/youruser/solar-car"
+link: "https://anusolarracing.com/" # (optional)
+---
+
+import ImageRow from "@/components/ImageRow.astro";
+import Figure from "@/components/Figure.astro";
+
+## Design, Iteration, and Evaluation
+
+#### Early Stages and Concept evaluation
+
+After the realses of the 2025 BWSC regulations, the concept of the car was up in the air. After consulting solar racing history and exploring new ideas, four varying concepts were developed as front runners.
+<ImageRow
+  cols={2}
+  images={[
+    { src: "/images/solar/early/CAT.PNG", alt: "Early Catermaran" },
+    { src: "/images/solar/early/MONO.PNG", alt: "Monohull Concept" },
+    { src: "/images/solar/early/SLUG.PNG", alt: "Slug Concept" },
+    { src: "/images/solar/early/TRI.PNG", alt: "Trimaran Concept" },
+
+  ]}
+/>
+The catamaran was chosen as the concept we would develop into ANU solar Racing's fourth car.
+
+#### Fine Tuning
+<ImageRow
+  cols={2}
+  images={[
+    { src: "/images/solar/domain/1.jpg", alt: "Side Domain" },
+    { src: "/images/solar/domain/2.jpg", alt: "Top Domain" },
+    { src: "/images/solar/domain/3.jpg", alt: "Top Crosswind Domain" },
+    { src: "/images/solar/domain/4.jpg", alt: "Wheel Setup" },
+
+  ]}
+/>
+<Figure src="/images/solar/slices.PNG" alt="CFD Pressure Slices" maxWidth="512px" />
+
+## Manufacturing
+<ImageRow
+  cols={3}
+  images={[
+    { src: "/images/solar/manufacturing/1.jpg", alt: "Side Domain" },
+    { src: "/images/solar/manufacturing/2.jpg", alt: "Top Domain" },
+    { src: "/images/solar/manufacturing/3.jpg", alt: "Top Crosswind Domain" },
+    { src: "/images/solar/manufacturing/4.jpg", alt: "Wheel Setup" },
+    { src: "/images/solar/manufacturing/5.jpg", alt: "Wheel Setup" },
+    { src: "/images/solar/manufacturing/6.jpg", alt: "Wheel Setup" },
+    { src: "/images/solar/manufacturing/7.jpg", alt: "Wheel Setup" },
+    { src: "/images/solar/manufacturing/8.jpg", alt: "Wheel Setup" },
+    { src: "/images/solar/manufacturing/9.jpg", alt: "Wheel Setup" },
+
+  ]}
+/>
+## Testing
+
+<Figure src="/images/solar/hero.png" alt="Top view" maxWidth="512px" />
+<Figure src="/images/solar/testing.jpg" alt="Top view" maxWidth="512px" />
+

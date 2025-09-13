@@ -1,0 +1,29 @@
+---
+const {
+  src,
+  alt = "",
+  width = "100%",
+  maxWidth = "none",
+  caption,
+} = Astro.props;
+---
+
+<figure
+  class="not-prose my-3"
+  style={`width:${width};max-width:${maxWidth};margin-inline:auto;`}
+>
+  <img
+    src={src}
+    alt={alt}
+    loading="lazy"
+    decoding="async"
+    class="w-full rounded-xl object-cover"
+  />
+  {
+    caption && (
+      <figcaption class="mt-1 text-center text-sm opacity-70">
+        {caption}
+      </figcaption>
+    )
+  }
+</figure>
