@@ -66,16 +66,23 @@ const p = project.data;
     }
 
     <script>
-      document.querySelectorAll("[data-open]").forEach(btn => {
-        const id = btn.getAttribute("data-open");
-        const dlg = document.getElementById(id);
-        btn.addEventListener("click", () => dlg?.showModal());
-        dlg?.addEventListener("click", e => {
-          if (e.target === dlg) dlg.close();
-        });
-      });
-    </script>
+      // Type-safe lightbox handlers for <dialog>
+      document
+        .querySelectorAll<HTMLButtonElement>("[data-open]")
+        .forEach(btn => {
+          const id = btn.getAttribute("data-open");
+          if (!id) return; // guard null
 
+          const dlg = document.getElementById(id) as HTMLDialogElement | null;
+
+          btn.addEventListener("click", () => dlg?.showModal());
+
+          dlg?.addEventListener("click", e => {
+            const target = e.target as HTMLElement;
+            if (target === dlg) dlg.close();
+          });
+        });
+    </script>
     {
       p.outcomes?.length ? (
         <section class="mt-6">
