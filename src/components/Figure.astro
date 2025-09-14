@@ -1,29 +1,119 @@
 ---
+/** Props:
+ *  - src: string
+ *  - alt?: string
+ *  - width?: string = "100%"
+ *  - maxWidth?: string = "none"
+ *  - caption?: string
+ *  - lightbox?: boolean = true
+ */
+interface Props {
+  src: string;
+  alt?: string;
+  width?: string;
+  maxWidth?: string;
+  caption?: string;
+  lightbox?: boolean;
+}
+
 const {
   src,
   alt = "",
   width = "100%",
   maxWidth = "none",
   caption,
-} = Astro.props;
+  lightbox = true,
+} = Astro.props as Props;
+
+const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
 <figure
   class="not-prose my-3"
   style={`width:${width};max-width:${maxWidth};margin-inline:auto;`}
 >
-  <img
-    src={src}
-    alt={alt}
-    loading="lazy"
-    decoding="async"
-    class="w-full rounded-xl object-cover"
-  />
-  {
-    caption && (
-      <figcaption class="mt-1 text-center text-sm opacity-70">
-        {caption}
-      </figcaption>
-    )
-  }
+  {lightbox ? (
+    <>
+      <!-- Keep original sizing: image flows naturally (no aspect box) -->
+      <button
+        class="block w-full overflow-hidden rounded-xl p-0 m-0 border-0 bg-transparent"
+        data-open={uid}
+        aria-label="Open image"
+      >
+        <img
+          src={src}
+          alt={alt}
+          loading="lazy"
+          decoding="async"
+          class="w-full rounded-xl object-cover"
+        />
+      </button>
+
+      <dialog id={uid} class="p-0 border-0 bg-transparent backdrop:bg-black/70">
+        <!-- Edge padding -->
+        <div class="m-4 sm:m-8">
+          <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
+            <img
+              src={src}
+              alt={alt}
+              class="block w-auto h-auto
+                     max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
+                     max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
+              decoding="async"
+              loading="eager"
+            />
+            {caption && <p class="m-3 text-sm opacity-80 text-center">{caption}</p>}
+
+            <form method="dialog">
+              <button
+                class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
+                aria-label="Close"
+              >
+                Close
+              </button>
+            </form>
+          </div>
+        </div>
+      </dialog>
+
+      {caption && (
+        <figcaption class="mt-1 text-center text-sm opacity-70">{caption}</figcaption>
+      )}
+    </>
+  ) : (
+    <>
+      <img
+        src={src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        class="w-full rounded-xl object-cover"
+      />
+      {caption && (
+        <figcaption class="mt-1 text-center text-sm opacity-70">{caption}</figcaption>
+      )}
+    </>
+  )}
 </figure>
+
+{lightbox && (
+  <script is:inline>
+    (function () {
+      const btn = document.querySelector('[data-open="{uid}"]');
+      const dlg = document.getElementById("{uid}");
+      if (!btn || !dlg) return;
+
+      btn.addEventListener("click", () => {
+        if (typeof dlg.showModal === "function") dlg.showModal();
+      });
+
+      dlg.addEventListener("click", (e) => {
+        if (e.target === dlg && typeof dlg.close === "function") dlg.close();
+      });
+
+      dlg.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && typeof dlg.close === "function") dlg.close();
+      });
+    })();
+  </script>
+)}
