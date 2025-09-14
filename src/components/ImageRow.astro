@@ -34,39 +34,40 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
           </button>
 
           <dialog
-  id={`${uid}-dlg-${i}`}
-  class="p-0 border-0 bg-transparent backdrop:bg-black/70"
->
-  <!-- Outer wrapper gives margin from screen edges -->
-  <div class="m-4 sm:m-8">
-    <!-- Panel with rounded corners & shadow -->
-    <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
-      <img
-        src={img.src}
-        alt={img.alt ?? ""}
-        class="block w-auto h-auto
-               max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
-               max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
-        decoding="async"
-        loading="eager"
-      />
-      {img.caption && <p class="m-3 text-sm opacity-80">{img.caption}</p>}
+            id={`${uid}-dlg-${i}`}
+            class="p-0 border-0 bg-transparent backdrop:bg-black/70"
+          >
+            <!-- Outer wrapper gives margin from screen edges -->
+            <div class="m-4 sm:m-8">
+              <!-- Panel with rounded corners & shadow -->
+              <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
+                <img
+                  src={img.src}
+                  alt={img.alt ?? ""}
+                  class="block w-auto h-auto
+                         max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
+                         max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
+                  decoding="async"
+                  loading="eager"
+                />
+                {img.caption && <p class="m-3 text-sm opacity-80">{img.caption}</p>}
 
-      <!-- Close button -->
-      <form method="dialog">
-        <button
-          class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
-          aria-label="Close"
-        >
-          Close
-        </button>
-      </form>
-    </div>
-  </div>
-</dialog>
+                <!-- Close button -->
+                <form method="dialog">
+                  <button
+                    class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
+                    aria-label="Close"
+                  >
+                    Close
+                  </button>
+                </form>
+              </div>
+            </div>
+          </dialog>
 
-
-          {img.caption && <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>}
+          {img.caption && (
+            <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>
+          )}
         </>
       ) : (
         <>
@@ -77,7 +78,9 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
             loading="lazy"
             decoding="async"
           />
-          {img.caption && <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>}
+          {img.caption && (
+            <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>
+          )}
         </>
       )}
     </figure>
@@ -85,25 +88,28 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
 </div>
 
 {lightbox && (
-  <script is:inline>
-    // Scoped lightbox handlers for this ImageRow
-    const root = document.getElementById("{uid}");
-    if (root) {
-      root.querySelectorAll("[data-open]").forEach((btn) => {
-        const id = btn.getAttribute("data-open");
-        if (!id) return;
-        const dlg = document.getElementById(id) as HTMLDialogElement | null;
+<script is:inline define:vars={{ uid }}>
+  const root = document.getElementById(uid);
+  if (!root) return;
 
-        btn.addEventListener("click", () => dlg?.showModal());
+  root.querySelectorAll('[data-open]').forEach((btn) => {
+    const id = btn.getAttribute('data-open');
+    if (!id) return;
 
-        dlg?.addEventListener("click", (e) => {
-          if (e.target === dlg) (dlg as HTMLDialogElement).close();
-        });
+    const dlg = document.getElementById(id);
 
-        dlg?.addEventListener("keydown", (e) => {
-          if ((e as KeyboardEvent).key === "Escape") (dlg as HTMLDialogElement).close();
-        });
-      });
-    }
-  </script>
+    btn.addEventListener('click', () => {
+      if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+    });
+
+    dlg && dlg.addEventListener('click', (e) => {
+      if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
+    });
+
+    dlg && dlg.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && typeof dlg.close === 'function') dlg.close();
+    });
+  });
+</script>
+
 )}
