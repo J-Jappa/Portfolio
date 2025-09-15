@@ -1,0 +1,258 @@
+---
+import Layout from "../layouts/Layout.astro";
+import Figure from "@/components/Figure.astro";
+import ImageRow from "@/components/ImageRow.astro";
+---
+
+<Layout
+  title="What is Solar Racing?"
+  description="A quick intro to the sport, the BWSC, ANU Solar Racing, and my role."
+>
+  <article class="prose max-w-none dark:prose-invert">
+    <h1>What is Solar Racing?</h1>
+    <p>
+      Solar racing is about building ultra-efficient, road-capable EVs that run
+      primarily on sunlight. Teams push on aerodynamics, lightweight structures,
+      solar array performance, battery management, and strategy to cover long
+      distances on very little energy.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc4 highway.jpg"
+      alt="Solar car on the Stuart Highway"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+    <!-- Page TL;DR -->
+    <div class="my-6 rounded-xl border bg-white/60 p-4 dark:bg-neutral-900/40">
+      <h3 class="m-0 text-base font-semibold">TL;DR</h3>
+      <ul class="mt-2 ml-5 list-disc">
+        <li>
+          Solar racing builds ultra efficient EVs that run on sunlight with a
+          small battery buffer.
+        </li>
+        <li>
+          BWSC is ~3,000 km from Darwin to Adelaide every two years, with
+          Challenger and Cruiser classes.
+        </li>
+        <li>
+          Race days run 8:00 to 17:00 with 30 minute control stops. Teams camp
+          by the road at night.
+        </li>
+        <li>
+          Convoy has a lead car, the solar car, and a chase car. The chase sets
+          speeds and strategy from live data and forecasts.
+        </li>
+        <li>
+          ANU Solar Racing is a student team that brings composites, array work,
+          battery, and machining in-house.
+        </li>
+        <li>
+          My role covers aero, carbon structure, CFD automation, hands-on
+          manufacturing, and race strategy.
+        </li>
+        <li>
+          Why it matters: better aero, lighter structures, and smarter controls
+          that carry into real EVs.
+        </li>
+      </ul>
+    </div>
+
+    <h2>The Bridgestone World Solar Challenge (BWSC)</h2>
+    <p>
+      The BWSC is the flagship event. The route is roughly 3,000 km from Darwin
+      to Adelaide across Australia, and it is held every two years. Cars
+      complete the route over several days, harvesting energy from the sun and
+      managing a small battery buffer. There are two main classes: <em
+        >Challenger</em
+      > for single-seat, pure efficiency, and <em>Cruiser</em> for multi-occupant
+      practicality with efficiency.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/bwsc_route_poster.png"
+      alt="BWSC route map"
+      maxWidth="512px"
+      caption="Bridgestone World Solar Challenge, Darwin to Adelaide. Source: https://worldsolarchallenge.org/about-us/route-map"
+      lightbox={true}
+    />
+
+    <h2>Brief history</h2>
+    <p>
+      In 1982 Hans Tholstrup and Larry Perkins drove the solar car
+      <em>Quiet Achiever</em> across Australia from Perth to Sydney. It showed that
+      long-distance solar travel is possible.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/Quiet achiever.jpg"
+      alt="The Quiet Achiever at the National Museum in Canberra"
+      maxWidth="512px"
+      caption="A visit to the Quiet Achiever at the National Museum in Canberra."
+      lightbox={true}
+    />
+
+    <p>
+      In 1987 the first World Solar Challenge ran from Darwin to Adelaide. It
+      has continued to evolve with new technology, tighter rules, and strong
+      international fields every cycle. In 2025 the event brought with 34 teams
+      from 18 countries.
+    </p>
+
+    <h2>How the BWSC runs</h2>
+    <p>
+      Each day runs on a simple rhythm: cars may drive from 8:00 am to 5:00 pm.
+      At 5:00 pm you stop where you are, pull off safely, and camp
+      self-sufficiently by the highway. In the morning you line up again and
+      roll at 8:00 am. That daily box defines almost every decision.
+    </p>
+
+    <h3>Control stops</h3>
+    <p>
+      The route has official control stops in towns and roadhouses. Every team
+      must pull in and serve a 30 minute stop. For most of that time the car
+      cannot be touched. These stops are where you reset, charge if the sun is
+      good, and check everyone is coping.
+    </p>
+
+    <h3>Convoy on public roads</h3>
+    <p>
+      The solar car does not travel alone. There is a lead vehicle in front to
+      scout traffic and hazards, the solar car in the middle, and a chase
+      vehicle close behind that handles comms, telemetry and decisions. Teams
+      also have logistics and media vehicles further back. Everything happens in
+      live traffic, so you drive to the normal road rules and work with other
+      road users. This includes hazrds such as cattle grids and massive road
+      trains.
+    </p>
+    <Figure
+      src="/images/solar/racing/cattle grids.jpg"
+      alt="cattle grids"
+      maxWidth="1100px"
+      caption="SC4 on a cattle grid"
+      lightbox={true}
+    />
+    <h3>Race strategy in practice</h3>
+    <p>
+      Strategy is about turning weather, battery state, terrain and traffic into
+      a target speeds for the car to finish in the least time possible. The
+      chase car watches live telemetry, forecasts and road notes, then calls
+      speeds to the driver and decides when to push, when to bank energy, and
+      when to change drivers. At stops you point the array for the best light,
+      tidy losses, and plan the next segment.
+    </p>
+
+    <h3>Nights in the bush</h3>
+    <p>
+      After 5:00 pm you camp where you stopped. The team uses the time to
+      inspect fasteners, tyres, brakes and HV systems, log issues, and prepare
+      for the next day. You also look after people: food, hydration, sleep, and
+      a plan everyone understands before the morning roll-out.
+    </p>
+    <Figure
+      src="/images/solar/racing/sc4 night.jpg"
+      alt="SC4 at night"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <h2>ANU Solar Racing</h2>
+    <p>
+      <strong>ANU Solar Racing</strong> is a student-run team from the Australian
+      National University. We design, build, and race a solar car end to end, from
+      concept and CAD through composites, electronics, testing, and race operations.
+      We bring as much technical work in-house as possible, including composites,
+      solar encapsulation, battery, and machining, and we are active in outreach.
+    </p>
+
+    <ImageRow
+      cols={2}
+      images={[
+        {
+          src: "/images/solar/racing/2023 finish.jpg",
+          alt: "2023 BWSC finish",
+          caption: "BWSC finish, 2023",
+        },
+        {
+          src: "/images/solar/racing/2025 finish.jpg",
+          alt: "2025 BWSC finish",
+          caption: "BWSC finish, 2025",
+        },
+      ]}
+    />
+
+    <h3>My role on the team</h3>
+    <p>
+      Our team cycles run for about two years. I have been part of two. I joined
+      in 2022 on the Aerodynamics team. I learned the fundamentals, started new
+      concepts, and made updates to the current car, SC3.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc3.jpg"
+      alt="SC3"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <p>
+      Later I worked on battery cooling, helped with the solar array, and
+      designed and manufactured a rotating wheel-fairing system. That iteration
+      culminated in the 2023 BWSC.
+    </p>
+
+    <p>
+      In the next cycle (2024 to 2025) I moved to Structures with responsibility
+      for a new aerodynamic shell and a carbon-fibre chassis from scratch. I led
+      the aero design. The regulations changed from 2023, so we committed to a
+      very different concept. I then interfaced every subsystem into the carbon
+      structure. I worked closely across the technical team to make the
+      structure as efficient as possible. For the first time in team history we
+      also brought a lot of carbon work in-house. I spent two intensive periods
+      in Sydney laying up, ply by ply, from the aero shell through to secondary
+      bonding for bulkheads.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc4 storm.jpg"
+      alt="SC4 in storm conditions"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <p>
+      I also worked on hinges for driver egress and optimal charging, and
+      transparent light covers for brake, indicator, and daytime running lights
+      to meet regulations. On the race I was a strategist, working with the
+      chase car to set optimal speeds and to manage difficult weather, including
+      severe storms and strong winds.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc4 highway 2.jpg"
+      alt="SC4 on the highway"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <h2>Why it matters</h2>
+    <p>
+      The constraints of BWSC push extreme efficiency: less drag, less mass, and
+      smarter controls. The lessons translate to real EVs and to lightweight
+      engineering more broadly.
+    </p>
+
+    <h2>Explore related work</h2>
+    <p>
+      See my <a href="/projects/">projects</a> for aerodynamics, composites, and
+      simulation work. For more on the event, visit
+      <a
+        href="https://worldsolarchallenge.org/"
+        target="_blank"
+        rel="external noopener"
+      >
+        the official BWSC site
+      </a>.
+    </p>
+  </article>
+</Layout>

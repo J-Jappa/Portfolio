@@ -3,27 +3,49 @@ import Layout from "../layouts/Layout.astro";
 
 const roles = [
   {
-    title: "Aerodynamics & Structures — ANU Solar Racing",
-    period: "Mar 2022 – Present",
+    title: "Electrical Engineer Intern — BP",
+    period: "Nov 2023 – Feb 2024",
     bullets: [
-      "Shaped low-drag catamaran body; improved crosswind stability (±20° yaw).",
-      "Foam seals & linkage tolerances; reduced CdA vs prior iteration.",
-      "Composite layup decisions; manufacturing constraints and quality control.",
+      "Built an Excel-based modelling tool to compare HV transmission lines vs hydrogen pipelines (standards, SIL, reactive compensation).",
+      "Added advanced loss models (corona, skin effect, bundling, phase spacing) with inputs up to 500 km / 30 GW.",
+      "Extended to n-1 and multi-line scenarios for AREH/GERI reliability analysis; validated against ETAP and consultant benchmarks.",
+      "Integrated 50+ year lifecycle costs (CAPEX/OPEX, inflation-adjusted) for NPV; identified ~10% lifecycle savings (~$400M) across scenarios.",
+      "Assessed Dynamic Line Rating (wind + thermal algorithms) with potential ~$20M savings; delivered docs and a user guide; presented to senior engineers.",
     ],
-    tags: ["Aero", "Composites", "CFD"],
+    tags: ["Power Systems", "HV Modelling", "NPV/Costing", "DLR", "ETAP"],
   },
   {
-    title: "Early Bushfire Detection (GMM-VAE) — Honours Project",
-    period: "2025",
+    title: "Team Member — Structures, ANU Solar Racing",
+    period: "Mar 2022 – Present",
     bullets: [
-      "Built GRU/GMM-VAE on eCO₂/TVOC; experiment-level decision rule.",
-      "Logged per-experiment detection times; precision/recall analysis.",
-      "Prepared pipeline for on-device inference on MCU-class hardware.",
+      "Aero & structures for BWSC vehicles (2023 & 2025).",
+      "Led iterative CFD in ANSYS Fluent; ~20% drag reduction and improved efficiency in realistic conditions.",
+      "Automated CFD workflows in Python, accelerating validation cycles.",
+      "SolidWorks composites design aligned to tooling/layup constraints; integrated structural/electrical packaging.",
     ],
-    tags: ["ML", "Anomaly Detection", "IoT"],
+    tags: ["Aero", "Composites", "CFD", "Python", "SolidWorks"],
+  },
+  {
+    title: "Researcher — Individual Honours Project",
+    period: "Feb 2025 – Present",
+    bullets: [
+      "Designed a GRU-based Gaussian-mixture variational autoencoder for early wildfire anomaly detection from eCO₂/VOC sensor streams.",
+      "Trained on normal conditions to improve sensitivity while reducing false positives.",
+      "Built scalable Python/TensorFlow pipelines targeting resource-constrained MCU deployment.",
+      "Unified gas & environmental streams to improve latency and detection accuracy; evaluated model/accuracy/hardware trade-offs for field use.",
+    ],
+    tags: ["ML", "Anomaly Detection", "IoT", "TensorFlow", "Embedded"],
   },
 ];
-const cvHref = "/JasperJapp_CV.pdf"; // place your PDF in /public
+
+const education = {
+  uni: "Bachelor of Engineering (Honours), Australian National University",
+  details:
+    "Major: Electronic & Communication Systems · Minor: Mechatronic Systems",
+  period: "Expected Nov 2025 · GPA 6.6/7.0 · WAM 81",
+};
+
+const cvHref = "/JasperJapp_CV.pdf"; // ensure this file is in /public
 ---
 
 <Layout title="Experience" description="Experience and CV">
@@ -43,11 +65,13 @@ const cvHref = "/JasperJapp_CV.pdf"; // place your PDF in /public
             <h2 class="text-lg font-semibold">{r.title}</h2>
             <span class="text-sm opacity-70">{r.period}</span>
           </header>
+
           <ul class="mt-3 ml-6 list-disc">
             {r.bullets.map(b => (
               <li>{b}</li>
             ))}
           </ul>
+
           {r.tags?.length ? (
             <div class="mt-3 text-xs opacity-70">{r.tags.join(" · ")}</div>
           ) : null}
@@ -55,4 +79,11 @@ const cvHref = "/JasperJapp_CV.pdf"; // place your PDF in /public
       ))
     }
   </div>
+
+  <section class="mt-10 rounded-2xl border p-5">
+    <h2 class="text-lg font-semibold">Education</h2>
+    <p class="mt-1">{education.uni}</p>
+    <p class="opacity-80">{education.details}</p>
+    <p class="text-sm opacity-70">{education.period}</p>
+  </section>
 </Layout>
