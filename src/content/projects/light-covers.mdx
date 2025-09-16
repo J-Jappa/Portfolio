@@ -1,0 +1,63 @@
+---
+title: "Transparent Light Covers"
+summary: "Designed clear covers for brake, indicator and daytime running lights that meet rules and keep drag and water out."
+order: 5
+date: "2025-01-20"
+hero: "/images/solar/lights/hero.jpg"
+images:
+  - src: "/images/solar/lights/regulation checks.PNG"
+    alt: "Light cone regulation checks"
+  - src: "/images/solar/lights/formed.jpg"
+    alt: "Vacuum formed cover and buck test-fit"
+  - src: "/images/solar/lights/front car.jpg"
+    alt: "Installed covers sealed"
+tags:
+  - Lighting
+  - CAD
+  - Manufacturing
+  - Regulations
+  - Solar Racing
+role: "Mechanisms and Finishing"
+outcomes:
+  - "Passed lighting and enclosure checks at scrutineering."
+  - "Reduced water ingress and kept wiring clean."
+  - "Kept surfaces flush and smooth for lower drag."
+#repo: ""
+#link: ""
+---
+
+import ImageRow from "@/components/ImageRow.astro";
+import Figure from "@/components/Figure.astro";
+
+## Design
+
+I shaped the covers in CAD to follow the shell and keep a clean aerodynamic profile. The lighting needs to satisfy strict rules on brightness and visibility cones. I first laid out lamp positions to meet the cone requirements, then designed the cover geometry and flanges around that.
+
+I evaluated a few manufacturing options. The goal was high optical clarity so the lamps could be compact without wasting power. The previous car used fibreglass covers that fit the carbon shell well but were noticeably opaque. I chose vacuum forming for cost, speed and clarity, then printed several forming tools to iterate quickly.
+
+<ImageRow
+  cols={3}
+  images={[
+    { src: "/images/solar/lights/regulation checks.PNG", alt: "Visibility cone checks" },
+    { src: "/images/solar/lights/formed.jpg", alt: "Formed cover on printed buck" },
+    { src: "/images/solar/lights/front car.jpg", alt: "Installed cover with fair transition" },
+  ]}
+/>
+
+## Regulations summary
+
+- Meet required visibility cones for indicators, brakes and daytime running lights.  
+- Keep lamp surfaces and covers clean and unobstructed.  
+- Ensure enclosure and sealing so water and dust do not reach live parts.  
+- Maintain consistent colour and intensity through the cover material.
+
+## Build
+
+Covers are clear PETG, vacuum formed over the printed tooling. I trimmed to a scribe line, drilled pilot holes and test fit on the shell. The seal is a thin adhesive bead around the flange. I then faired the outer edge into the surface with a small amount of body filler and wet sanded to a smooth transition.
+
+Materials and notes:
+- PETG sheet, 1 to 2.0 mm depending on stiffness and curvature  
+- Printed tooling with light draft and a smooth finish to avoid imprint  
+- Clear adhesive for the flange, light clamping while it cures  
+- Body filler to blend into carbon-fibre and then wrapped
+

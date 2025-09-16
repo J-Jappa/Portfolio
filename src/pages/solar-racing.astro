@@ -9,12 +9,19 @@ import ImageRow from "@/components/ImageRow.astro";
   description="A quick intro to the sport, the BWSC, ANU Solar Racing, and my role."
 >
   <article class="prose max-w-none dark:prose-invert">
+    <nav class="my-4 flex flex-wrap gap-2 text-sm">
+        <a href="#anu-solar-racing" class="rounded-md border px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10">ANU Solar Racing</a>
+        <a href="#my-role" class="rounded-md border px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10">My role</a>
+        <a href="#bwsc" class="rounded-md border px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10">BWSC overview</a>
+        <a href="#history" class="rounded-md border px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10">History</a>
+        <a href="#format" class="rounded-md border px-2 py-1 hover:bg-black/5 dark:hover:bg-white/10">Format</a>
+        
+      </nav>
     <h1>What is Solar Racing?</h1>
     <p>
-      Solar racing is about building ultra-efficient, road-capable EVs that run
-      primarily on sunlight. Teams push on aerodynamics, lightweight structures,
-      solar array performance, battery management, and strategy to cover long
-      distances on very little energy.
+      Solar racing is building very efficient, road-ready EVs that run on
+      sunlight. We focus on aero, light structures, the array, battery control,
+      and race strategy so the car goes a long way on a small energy budget.
     </p>
 
     <Figure
@@ -58,7 +65,86 @@ import ImageRow from "@/components/ImageRow.astro";
       </ul>
     </div>
 
-    <h2>The Bridgestone World Solar Challenge (BWSC)</h2>
+<h2 id="anu-solar-racing">ANU Solar Racing</h2>
+    <p>
+      <strong>ANU Solar Racing</strong> is a student-run team from the Australian
+      National University. We design, build, and race a solar car end to end, from
+      concept and CAD through composites, electronics, testing, and race operations.
+      This is done all while studying at uni. We bring as much technical work in-house
+      as possible, including composites, solar encapsulation, battery, and machining,
+      and we are active in outreach.
+    </p>
+
+    <ImageRow
+      cols={2}
+      images={[
+        {
+          src: "/images/solar/racing/2023 finish.jpg",
+          alt: "2023 BWSC finish",
+          caption: "BWSC finish, 2023",
+        },
+        {
+          src: "/images/solar/racing/2025 finish.jpg",
+          alt: "2025 BWSC finish",
+          caption: "BWSC finish, 2025",
+        },
+      ]}
+    />
+
+    <h3 id="my-role">My role on the team</h3>
+    <p>
+      Our team cycles run for about two years. I have been part of two. I joined
+      in 2022 on the Aerodynamics team. I learned the fundamentals, started new
+      concepts, and made updates to the current car, SC3.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc3.jpg"
+      alt="SC3"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <p>
+      Later I worked on battery cooling, helped with the solar array, and
+      designed and manufactured a rotating wheel-fairing system. That iteration
+      culminated in the 2023 BWSC.
+    </p>
+
+    <p>
+      In the next cycle (2024 to 2025) I moved to Structures with responsibility
+      for a new aerodynamic shell and a carbon-fibre chassis from scratch. I led
+      the aero design. The regulations changed from 2023, so we committed to a
+      very different concept. I then interfaced every subsystem into the carbon
+      structure. I worked closely across the technical team to make the
+      structure as efficient as possible. For the first time in team history we
+      also brought a lot of carbon work in-house. I spent two intensive periods
+      in Sydney laying up, ply by ply, from the aero shell through to secondary
+      bonding for bulkheads.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc4 storm.jpg"
+      alt="SC4 in storm conditions"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+
+    <p>
+      I also worked on hinges for driver egress and optimal charging, and
+      transparent light covers for brake, indicator, and daytime running lights
+      to meet regulations. On the race I was a strategist, working with the
+      chase car to set optimal speeds and to manage difficult weather, including
+      severe storms and strong winds.
+    </p>
+
+    <Figure
+      src="/images/solar/racing/sc4 highway 2.jpg"
+      alt="SC4 on the highway"
+      maxWidth="1100px"
+      lightbox={true}
+    />
+    <h2 id="bwsc">The Bridgestone World Solar Challenge (BWSC)</h2>
     <p>
       The BWSC is the flagship event. The route is roughly 3,000 km from Darwin
       to Adelaide across Australia, and it is held every two years. Cars
@@ -77,7 +163,7 @@ import ImageRow from "@/components/ImageRow.astro";
       lightbox={true}
     />
 
-    <h2>Brief history</h2>
+    <h2 id="history">Brief history</h2>
     <p>
       In 1982 Hans Tholstrup and Larry Perkins drove the solar car
       <em>Quiet Achiever</em> across Australia from Perth to Sydney. It showed that
@@ -87,7 +173,7 @@ import ImageRow from "@/components/ImageRow.astro";
     <Figure
       src="/images/solar/racing/Quiet achiever.jpg"
       alt="The Quiet Achiever at the National Museum in Canberra"
-      maxWidth="512px"
+      maxWidth="1100pxpx"
       caption="A visit to the Quiet Achiever at the National Museum in Canberra."
       lightbox={true}
     />
@@ -99,7 +185,7 @@ import ImageRow from "@/components/ImageRow.astro";
       from 18 countries.
     </p>
 
-    <h2>How the BWSC runs</h2>
+    <h2 id="format">How the BWSC runs</h2>
     <p>
       Each day runs on a simple rhythm: cars may drive from 8:00 am to 5:00 pm.
       At 5:00 pm you stop where you are, pull off safely, and camp
@@ -156,86 +242,6 @@ import ImageRow from "@/components/ImageRow.astro";
       lightbox={true}
     />
 
-    <h2>ANU Solar Racing</h2>
-    <p>
-      <strong>ANU Solar Racing</strong> is a student-run team from the Australian
-      National University. We design, build, and race a solar car end to end, from
-      concept and CAD through composites, electronics, testing, and race operations.
-      This is done all while studying at uni. We bring as much technical work in-house
-      as possible, including composites, solar encapsulation, battery, and machining,
-      and we are active in outreach.
-    </p>
-
-    <ImageRow
-      cols={2}
-      images={[
-        {
-          src: "/images/solar/racing/2023 finish.jpg",
-          alt: "2023 BWSC finish",
-          caption: "BWSC finish, 2023",
-        },
-        {
-          src: "/images/solar/racing/2025 finish.jpg",
-          alt: "2025 BWSC finish",
-          caption: "BWSC finish, 2025",
-        },
-      ]}
-    />
-
-    <h3>My role on the team</h3>
-    <p>
-      Our team cycles run for about two years. I have been part of two. I joined
-      in 2022 on the Aerodynamics team. I learned the fundamentals, started new
-      concepts, and made updates to the current car, SC3.
-    </p>
-
-    <Figure
-      src="/images/solar/racing/sc3.jpg"
-      alt="SC3"
-      maxWidth="1100px"
-      lightbox={true}
-    />
-
-    <p>
-      Later I worked on battery cooling, helped with the solar array, and
-      designed and manufactured a rotating wheel-fairing system. That iteration
-      culminated in the 2023 BWSC.
-    </p>
-
-    <p>
-      In the next cycle (2024 to 2025) I moved to Structures with responsibility
-      for a new aerodynamic shell and a carbon-fibre chassis from scratch. I led
-      the aero design. The regulations changed from 2023, so we committed to a
-      very different concept. I then interfaced every subsystem into the carbon
-      structure. I worked closely across the technical team to make the
-      structure as efficient as possible. For the first time in team history we
-      also brought a lot of carbon work in-house. I spent two intensive periods
-      in Sydney laying up, ply by ply, from the aero shell through to secondary
-      bonding for bulkheads.
-    </p>
-
-    <Figure
-      src="/images/solar/racing/sc4 storm.jpg"
-      alt="SC4 in storm conditions"
-      maxWidth="1100px"
-      lightbox={true}
-    />
-
-    <p>
-      I also worked on hinges for driver egress and optimal charging, and
-      transparent light covers for brake, indicator, and daytime running lights
-      to meet regulations. On the race I was a strategist, working with the
-      chase car to set optimal speeds and to manage difficult weather, including
-      severe storms and strong winds.
-    </p>
-
-    <Figure
-      src="/images/solar/racing/sc4 highway 2.jpg"
-      alt="SC4 on the highway"
-      maxWidth="1100px"
-      lightbox={true}
-    />
-
     <h2>Why it matters</h2>
     <p>
       The constraints of BWSC push extreme efficiency: less drag, less mass, and
@@ -245,7 +251,7 @@ import ImageRow from "@/components/ImageRow.astro";
 
     <h2>Explore related work</h2>
     <p>
-      See my <a href="/projects/">projects</a> for aerodynamics, composites, and
+      See my <a href="/">projects</a> for aerodynamics, composites, and
       simulation work. For more on the event, visit
       <a
         href="https://worldsolarchallenge.org/"
@@ -253,6 +259,14 @@ import ImageRow from "@/components/ImageRow.astro";
         rel="external noopener"
       >
         the official BWSC site
+      </a>
+      or
+      <a
+        href="https://anusolarracing.com/"
+        target="_blank"
+        rel="external noopener"
+      >
+        the ANU Solar Racing site
       </a>.
     </p>
   </article>
