@@ -6,11 +6,11 @@ date: "2025-05-15"
 hero: "/images/solar/bulkheads/hero.jpg"
 images:
   - src: "/images/solar/bulkheads/isometric 1.jpg"
-    alt: "SolidWorks Bulkhead CAD"
+    alt: "SolidWorks bulkhead CAD"
   - src: "/images/solar/bulkheads/Installation.jpg"
-    alt: "Fitment and bonding of Bulkheads"
+    alt: "Fitment and bonding of bulkheads"
   - src: "/images/solar/bulkheads/complete.jpg"
-    alt: "Complete Bulkheads with all Subsystems"
+    alt: "Complete bulkheads with subsystems installed"
 tags:
   - Structures
   - Composites
@@ -33,37 +33,96 @@ New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick ov
 
 ## Scope and constraints
 
-The bulkheads are carbon-fibre sandwich panels that link the aerodynamic shell to every subsystem within the car. The goal was simple: clean load paths, minimal mass, and fast service on the side of the road. The constraints were the occupant cell and roll structure, the external aero-shell, and to have minimal impact to ideal subsystem packaging.
+The bulkheads are carbon-fibre sandwich panels that link the aerodynamic shell to every subsystem in the car. The goals were clean load paths, minimal mass and fast service on the side of the road. Key constraints were the occupant cell and roll structure, the external aero shell and keeping ideal subsystem packaging intact where possible. Several bulkhead features also tie into the [Solar Array Hinging and Charging Setup](/projects/solar-hinging/) and the driver [Four Bar Hinges for Egress](/projects/fourbar-egress/). For body shape, drag targets and trade-offs, see [Solar Car Aerodynamics](/projects/solar-car-aero/).
 
 <Figure
-    src= "/images/solar/bulkheads/holes.jpg"
-    alt= "Cutting Holes"
-    maxWidth="1100px"
+  src="/images/solar/bulkheads/holes.jpg"
+  alt="Cutting lightening and service holes"
+  maxWidth="1100px"
 />
 
-## Design and analysis
+## Design
 
-The bulkheads went through many iterations and started when the aerodynamic concept was selected. The early bulkhead designs served primarily to help subsystem design occur concurrently with the aero body design.
+Bulkhead design started as soon as the aerodynamic concept was selected. Early panels were used to let mechanical and electrical teams place their hardware while the aero body matured. We iterated many times in SolidWorks with full-assembly snapshots to surface clashes early, then locked the aero body and drove into detail design.
 
 <Figure
   src="/images/solar/bulkheads/early.PNG"
-  alt="Forward bulkhead assembly"
+  alt="Very early bulkhead concept"
   maxWidth="1100px"
-  caption="Very early bulkhead concept"
+  caption="Early concept used to unblock concurrent subsystem design"
 />
-The bulkhead design was dictated by load paths from key systems such as the offset front right and left steering, the occupant cell, steering system and battery.
 
-Several Full Assembly versions were issued using SolidWorks. These served to find, highlight, and solve interfacing problems. Once the aero body was complete and the design locked down, the bulkheads moved into a detailed design process. 
+Load paths from front suspension, steering, the occupant cell and the battery pack drove most geometry. The final layout uses:
 
-## Manufacturing and assembly
+- **Two longitudinal bulkheads** running front to back. These mount left and right front suspension, constrain the battery and form one wall of the occupant cell.
+- **Two diagonals** tying suspension loads into the shell. The rear diagonal also carries hardware for the [Solar Array Hinging](/projects/solar-hinging/).
+- **Several lateral bulkheads** that run left to right for remaining mounts and stiffness over the 2.0 × 4.6 m body.
 
-Bulkheads are carbon sandwich with local solid carbon in high load zones. We used secondary bonding to bring panels into the shell, then tied in seat mounts, pedal mounts, steering, pack, LV boxes, and array feedthroughs.
+<Figure
+  src="/images/solar/bulkheads/topdown.jpg"
+  alt="In-progress top-down assembly"
+  maxWidth="1100px"
+  caption="In-progress full assembly highlighting front steering rack and battery constraints"
+/>
+
+<Figure
+  src="/images/solar/bulkheads/topdown final.JPG"
+  alt="Finalised bulkheads"
+  maxWidth="1100px"
+  caption="Finalised bulkheads after cross-team reviews"
+/>
+
+### Battery constraint
+
+Rules require the battery pack to be constrained for 20 g in all axes. We explored options to balance removal for service, complexity and mass. Three bulkheads around the compartment plus a local foam-core region in the shell constrained most directions. The final restraints addressed the remaining axes without adding heavy frames.
+
 <ImageRow
   cols={3}
   images={[
-    { src: "/images/solar/bulkheads/Installation 2.jpg", alt: "Bonding and fit-up" },
-    { src: "/images/solar/bulkheads/holes.jpg", alt: "Cutting Holes" },
-    { src: "/images/solar/bulkheads/battery fit.jpg", alt: "Access cut-outs" },
+    { src: "/images/solar/bulkheads/batt cad.jpg", alt: "Battery constraint CAD", caption: "Constraint concept in CAD" },
+    { src: "/images/solar/bulkheads/battery fit.jpg", alt: "Battery box fitment", caption: "Fit checks and access" },
+    { src: "/images/solar/bulkheads/final.PNG", alt: "Final battery box", caption: "Finalised arrangement" },
   ]}
 />
 
+The final design uses rated eyelets on the aero body and the longitudinal bulkhead with two cam-buckle straps to take the remaining loads. It is fast to remove, light and passes checks. Thermal routing and monitoring are covered in [Battery Cooling System](/projects/battery-cooling/).
+
+## Manufacturing and assembly
+
+Panels are carbon sandwich with local solid carbon in high-load zones. We used secondary bonding to install panels into the shell, then tied in seat mounts, pedals, steering, battery, LV boxes and array feedthroughs.
+
+<Figure
+  src="/images/solar/bulkheads/Installation.jpg"
+  alt="Bulkheads bonded in"
+  maxWidth="1100px"
+  caption="Bulkheads bonded in with structural adhesive"
+/>
+
+<Figure
+  src="/images/solar/bulkheads/Installation 2.jpg"
+  alt="Bulkheads masked for bidirectional overlaminate"
+  maxWidth="1100px"
+  caption="Masked and ready for bidirectional overlaminate at key joints"
+/>
+
+After bonding, a two week integration push drilled mounting holes and cable pass-throughs and added local reinforcement where needed. Examples include carbon tubes embedded in light core for the rear suspension, and 1 mm monolithic plates under bearing seats. Interfaces for the [Four Bar Egress](/projects/fourbar-egress/) were captured so service stays clean.
+
+## Testing and checks
+
+- Fit and access checks for all service panels and pass-throughs  
+- Torque retention on inserts and hard points after vibration  
+- Visual inspection of bonds and overlaminate edges  
+- Dry run of removal and re-install of the battery box
+
+## Materials and notes
+
+- Carbon sandwich with foam cores; local solid carbon under mounts  
+- Structural adhesive with controlled bondline thickness  
+- Simple drill templates and edge distances to keep holes consistent  
+
+### Related projects
+
+- [Solar Car Aerodynamics](/projects/solar-car-aero/)
+- [Solar Array Hinging and Charging Setup](/projects/solar-hinging/)  
+- [Four Bar Hinges for Driver Egress](/projects/fourbar-egress/)  
+- [Transparent Light Covers](/projects/light-covers/)
