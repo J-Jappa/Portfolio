@@ -27,7 +27,7 @@ export const SITE = {
   linkedinUrl: "https://www.linkedin.com/in/jasper-japp",
 
   // Open Graph image behaviour
-  ogImage: "og.png",  
+  ogImage: "og.jpg",  
   dynamicOgImage: false,          // set true if you’ve configured the OG generator
 
   // Locale
@@ -37,9 +37,19 @@ export const SITE = {
 
   // Scheduling tolerance (ms) — allow posts dated slightly in the future to render
   scheduledPostMargin: 0,
+
+
 } as const;
 export const NAV_LINKS = [
   { title: 'Projects', path: '/' },
   { title: 'About', path: '/about' },
   { title: 'Experience', path: '/experience' },
 ];
+
+import { defineConfig } from "astro/config";
+import sitemap from "@astrojs/sitemap";
+
+export default defineConfig({
+  site: "https://jasperjapp.com",
+  integrations: [sitemap()],
+});
