@@ -6,11 +6,11 @@ date: "2025-01-20"
 hero: "/images/solar/lights/hero.jpg"
 images:
   - src: "/images/solar/lights/regulation checks.PNG"
-    alt: "Light cone regulation checks"
+    alt: "Light-cone regulation checks in CAD"
   - src: "/images/solar/lights/formed.jpg"
-    alt: "Vacuum formed cover and buck test-fit"
+    alt: "Vacuum-formed cover and buck test-fit"
   - src: "/images/solar/lights/front car.jpg"
-    alt: "Installed covers sealed"
+    alt: "Installed covers sealed to the shell"
 tags:
   - Lighting
   - CAD
@@ -29,35 +29,77 @@ outcomes:
 import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
 
+New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
+
+## Requirements
+
+Meet visibility cones and brightness for indicators, brakes and DRLs.  
+Keep covers sealed and smooth for low drag.  
+Allow access for service without damaging the finish.
+
 ## Design
 
-I shaped the covers in CAD to follow the shell and keep a clean aerodynamic profile. The lighting needs to satisfy strict rules on brightness and visibility cones. I first laid out lamp positions to meet the cone requirements, then designed the cover geometry and flanges around that.
+I shaped the covers in CAD to follow the shell and keep a clean aerodynamic profile. I first placed the lamps to satisfy the cone requirements, then designed the cover geometry and flanges around that.
 
-I evaluated a few manufacturing options. The goal was high optical clarity so the lamps could be compact without wasting power. The previous car used fibreglass covers that fit the carbon shell well but were noticeably opaque. I chose vacuum forming for cost, speed and clarity, then printed several forming tools to iterate quickly.
+I compared a few manufacturing options. The goal was high optical clarity so the lamps could stay compact without wasting power. The previous car used fibreglass covers that fit the carbon shell well but were opaque. I chose vacuum forming for cost, speed and clarity, then printed several forming tools to iterate.
 
 <ImageRow
-  cols={3}
+  cols={2}
   images={[
-    { src: "/images/solar/lights/regulation checks.PNG", alt: "Visibility cone checks" },
-    { src: "/images/solar/lights/formed.jpg", alt: "Formed cover on printed buck" },
-    { src: "/images/solar/lights/front car.jpg", alt: "Installed cover with fair transition" },
+    { src: "/images/solar/lights/front.jpg",   alt: "Front lights",       caption: "Front light cluster behind a clear formed cover." },
+    { src: "/images/solar/lights/central.jpg", alt: "Central stop light", caption: "High-mounted central stop light." },
+    { src: "/images/solar/lights/left.jpg",    alt: "Left indicator",     caption: "Left indicator cover aligned to the shell curvature." },
+    { src: "/images/solar/lights/right.jpg",   alt: "Right indicator",    caption: "Right indicator cover trimmed to a scribe and sealed." },
   ]}
 />
 
-## Regulations summary
+Most covers formed cleanly over **male moulds** thanks to gentle curvature. The **two rear covers** were more complex and needed **female moulds**. I tuned the vacuum port sizes to avoid print-through while still pulling enough suction to form. Below are two tool approaches used on the rear left cover.
 
-- Meet required visibility cones for indicators, brakes and daytime running lights.  
-- Keep lamp surfaces and covers clean and unobstructed.  
-- Ensure enclosure and sealing so water and dust do not reach live parts.  
-- Maintain consistent colour and intensity through the cover material.
+<ImageRow
+  cols={2}
+  images={[
+    { src: "/images/solar/lights/prototype mould.jpg", alt: "Prototype female mould, pre-prep", caption: "Prototype female mould before surface prep and port tuning." },
+    { src: "/images/solar/lights/one shot.jpg",        alt: "Formed cover and mould",           caption: "Formed cover next to a one-piece male tool used in early trials." },
+  ]}
+/>
+
+The rear left was difficult because of size and shape. A male draw thinned PETG too much and it lacked stiffness. The female approach uses two halves bonded together. The split line is less transparent than a single draw, but overall clarity is still a big improvement on the last iteration.
+
+<Figure
+  src="/images/solar/lights/comparison.jpg"
+  alt="Comparison of new vs old light covers"
+  maxWidth="720px"
+  caption="New vacuum-formed PETG covers compared with the older fibreglass covers. Higher clarity allows lower lamp power for the same visibility."
+/>
+<ImageRow
+  cols={2}
+  images={[
+    { src: "/images/solar/lights/rear right.jpg", alt: "Rear right light", caption: "Finished rear right light." },
+    { src: "/images/solar/lights/rear left.jpg",        alt: "Rear left light",           caption: "Finished Raer Left Light" },
+  ]}
+/>
 
 ## Build
 
-Covers are clear PETG, vacuum formed over the printed tooling. I trimmed to a scribe line, drilled pilot holes and test fit on the shell. The seal is a thin adhesive bead around the flange. I then faired the outer edge into the surface with a small amount of body filler and wet sanded to a smooth transition.
+Covers are clear PETG, vacuum formed over printed tools. I trimmed to a scribe line, test fit on the shell, then sealed with a thin adhesive bead around the flange. I faired the outer edge into the surface with a small fillet of body filler, wet-sanded to a smooth transition, and wrapped over the area.
 
-Materials and notes:
-- PETG sheet, 1 to 2.0 mm depending on stiffness and curvature  
-- Printed tooling with light draft and a smooth finish to avoid imprint  
-- Clear adhesive for the flange, light clamping while it cures  
-- Body filler to blend into carbon-fibre and then wrapped
+## Materials and notes
 
+- PETG sheet, 1.0–2.0 mm depending on stiffness and curvature  
+- Printed tooling with light draft and a smooth surface to avoid imprint  
+- Clear structural adhesive on the flange with light clamping during cure  
+- Small body-filler fillet to blend into the carbon shell, then wet-sand and wrap  
+- Service access planned for lamp PCBs and cable runs
+
+## What I would refine next
+
+- Bond covers earlier in the build to allow more fairing time and a cleaner wrap finish  
+- Use printed resin tools for the complex rear geometry to improve surface quality  
+- Standardise access for PCB replacement and sealing checks
+
+---
+
+### Related projects
+
+- [Solar Car Aerodynamics](/projects/solar-car-aerodynamics/)  
+- [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/)

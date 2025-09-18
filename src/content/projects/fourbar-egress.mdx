@@ -8,7 +8,7 @@ images:
   - src: "/images/solar/canopy OM/CAD.JPG"
     alt: "Hinge concept in CAD"
   - src: "/images/solar/canopy OM/linkage.jpg"
-    alt: "Aluminium Mechanism"
+    alt: "Aluminium mechanism"
   - src: "/images/solar/canopy OM/race open.jpg"
     alt: "Installed hinge with latches"
 tags:
@@ -22,7 +22,7 @@ outcomes:
   - "Met egress timing and opening size requirements during checks."
   - "Ensured good aerodynamic fitment."
   - "Proved repeatable with good feel and no play after cycles."
-  - "Interfaced with latches."
+  - "Interfaced cleanly with latches and the bulkhead mounts."
 #repo: ""
 #link: ""
 ---
@@ -32,23 +32,39 @@ import Figure from "@/components/Figure.astro";
 
 ## Requirements
 
-Fast egress, minimal intrusion into the airflow, and a path that does not chip the shell. I set the throw and link lengths to clear the canopy and land in a stable open position that is easy to handle in wind.
+Fast egress, minimal intrusion into the airflow, and a motion path that does not foul with the shell. I set the throw and link lengths to clear the canopy and to land in a stable open position that is easy to handle in wind. The closed position needed to sit flush with the body shape from [Solar Car Aerodynamics](/projects/solar-car-aerodynamics/) and bolt into hard points on the [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/).
 
 ## Development
 
+There were limits on available material and time. We had a small amount of aluminium stock and a handful of linkage parts from an older design. The aim was to reuse what we could and keep mass and complexity down while still building a safe, reliable mechanism.
+
+The first concept reused the old linkages and top mount (welded aluminium). I made a temporary base from 3D printed carbon-fibre reinforced PA-12. That base handled static loads and all dynamic loads except large wind loads, which was enough for fit and motion checks.
 
 <ImageRow
-  cols={3}
+  cols={2}
   images={[
-    { src: "/images/solar/egress/1.jpg", alt: "CAD concept" },
-    { src: "/images/solar/egress/2.jpg", alt: "Mock-up testing" },
-    { src: "/images/solar/egress/3.jpg", alt: "Installed assembly" },
+    { src: "/images/solar/canopy OM/WIP CAD.JPG", alt: "Initial CAD concept", caption: "Initial CAD concept" },
+    { src: "/images/solar/canopy OM/test part.jpg", alt: "Prototype using CF-reinforced PA-12", caption: "Printed base for motion checks" },
   ]}
 />
 
+The prototype showed two issues: small manufacture-to-CAD differences that reduced clearance, and lateral flex that added slop. I rebuilt the linkage geometry as a set of CAD sketches with constraints, then added structure to increase lateral stiffness.
+
+The final part used brass tophat bushings to reduce friction at joints and added bolt-on plates so I could split the design into pieces that fit the material we had. Aluminium parts were made with water-jet, laser and manual milling to tight tolerances.
+
+<ImageRow
+  cols={2}
+  images={[
+    { src: "/images/solar/canopy OM/FINAL CAD.JPG", alt: "Final CAD", caption: "Final linkage and mounts" },
+    { src: "/images/solar/canopy OM/final part.jpg", alt: "Final part on car", caption: "Installed mechanism" },
+  ]}
+/>
+
+The top mount was bonded with structural epoxy using an aluminium backing plate with extra holes to increase bond area and torque resistance. This avoided exposing fasteners to external airflow. The lower mounts bolted through the bulkhead in the occupant cell, with a small carbon L-bracket added at the upper holes to spread load. Interfaces and clearances were checked against the latches and the canopy seal.
+
 ## Testing
 
-We cycle tested the hinge and did timed egress checks. It stayed tight and predictable, and it did not mark the shell.
+We cycle-tested the hinge and ran timed egress checks. Early tests showed either Nylock nuts loosening or the mechanism binding depending on pre-load. Nylon spacers between mounts and linkages fixed this. After that the mechanism stayed tight and predictable, with good fit to the aerodynamic shell and a clean interface to the latching system.
 
 <video
   controls
@@ -57,10 +73,28 @@ We cycle tested the hinge and did timed egress checks. It stayed tight and predi
   class="w-full rounded-xl"
   playsinline
 >
-  <source src="/videos/canopy closing.mp4"  type="video/mp4" />
-
+  <source src="/videos/canopy closing.mp4" type="video/mp4" />
   Sorry, your browser does not support embedded video.
 </video>
 
+## Materials and notes
 
+- Aluminium links and mounts, brass tophat bushings, stainless fasteners  
+- Structural epoxy for the bonded top mount, controlled bondline thickness  
+- Printed PA-12 base used for early fit and motion checks  
+- Nylon spacers
 
+## What I would refine next
+
+- Link left and right sides to reduce twist and improve fitment.
+- Machine single mounts to reduce fasteners and mass.
+- Change Canopy split angle to allow for shorter, lighter linkages without fouling.
+
+---
+
+### Related projects
+
+- [Solar Car Aerodynamics](/projects/solar-car-aerodynamics/)  
+- [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/)  
+- [Transparent Light Covers](/projects/light-covers/)  
+- [Solar Array Hinging and Charging Setup](/projects/solar-hinging/)

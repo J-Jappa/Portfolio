@@ -58,8 +58,24 @@ html[data-theme="dark"] {
   @apply max-w-3xl;
 }
 
-.active-nav {
-  @apply underline decoration-wavy decoration-2 underline-offset-4;
+/* Animated underline for header nav */
+#nav-menu a{
+  text-decoration: none;                      /* kill default underline */
+  background: linear-gradient(currentColor, currentColor)
+              no-repeat 0 100% / 0 2px;       /* starts at 0 width */
+  transition: background-size .25s ease;
+  padding-bottom: 2px;                        /* room for the rule */
+}
+
+/* Expand the rule on hover AND when active */
+#nav-menu a:hover,
+#nav-menu a.active-nav{
+  background-size: 100% 2px;                  /* full-width underline */
+}
+
+/* Optional: tint the active link */
+#nav-menu a.active-nav{
+  color: var(--color-accent);
 }
 
 /* Source: https://piccalil.li/blog/a-more-modern-css-reset/ */

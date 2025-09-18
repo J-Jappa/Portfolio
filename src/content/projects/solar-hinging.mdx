@@ -1,16 +1,16 @@
 ---
 title: "Solar Array Hinging and Charging Setup"
-summary: "Designed simple, fast array hinges and supports for control stops and roadside camp charging."
+summary: "Designed fast, stable array hinges and supports for roadside camp charging."
 order: 4
 date: "2025-02-10"
-hero: "/images/solar/array/hero.jpg"
+hero: "/images/solar/array/track charge.jpg"
 images:
   - src: "/images/solar/OM/OM CAD.JPG"
-    alt: "Array hinge detail"
-  - src: "/images/solar/OM/ts bh.jpg"
-    alt: "Bonding on Composite Mounts"
+    alt: "Array hinge detail in CAD"
+  - src: "/images/solar/OM/poles 3.jpg"
+    alt: "Carbon support poles and hardware"
   - src: "/images/solar/OM/charging 1.jpg"
-    alt: "Deployed in the field"
+    alt: "Array deployed for charging in the field"
 tags:
   - Mechanisms
   - Solar
@@ -19,9 +19,9 @@ tags:
   - Solar Racing
 role: "Mechanisms and Ops"
 outcomes:
-  - "Cut setup time at control stops with clear positions and fast pins."
   - "Improved array angle range for morning and afternoon charging."
-  - "Stable in wind with simple tie-downs and a light stand."
+  - "Repeatable opening for repairs and installations."
+  - "Stable in wind."
 #repo: ""
 #link: ""
 ---
@@ -29,23 +29,81 @@ outcomes:
 import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
 
-## Goals
+New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview. For how this interfaces to the car structure, see [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/). The motion concept follows the [Canopy Opening Mechanism for Driver Egress](/projects/fourbar-egress/).
 
-Quick deploy, positive locks, and safe handling in wind. I picked hinge axes that give useful tilt without risking cables or skin contacts.
+## Requirements
+
+Quick deploy, secure stays and safe handling in wind. Hinge axes were chosen to give useful tilt without fouling cables or the shell. Target opening was ~60° so early-morning and late-afternoon charging is worthwhile with our limited battery buffer.
 
 ## Design
 
-The hinge brackets land on reinforced inserts in the shell. The stand is light and nests in the car. 
+The hinge is a compact four-bar. The geometry hits the 60° target while maintaining clearance to the shell and wiring. Tilting reduces array incidence to the sun, increasing collected power at low sun angles.
+
+<Figure
+  src="/images/solar/OM/Array Opening.JPG"
+  alt="Effect of tilt angle on collected solar irradiance"
+  maxWidth="1100px"
+  caption="Effect of tilt angle on collected irradiance. Tilting at the ends of the day recovers power a horizontal array would miss."
+/>
+
+Top hinge mounts land on composite bulkheads bonded to the topshell. Bottom mounts pick up hard points on the main lower bulkheads. Space around the lower mounts is tight, so hardware is low-profile.
+
+<Figure
+  src="/images/solar/OM/ts bh.jpg"
+  alt="Bonding of the topshell bulkhead"
+  maxWidth="1100px"
+  caption="Bonding a topshell bulkhead that carries the upper hinge. Adhesive bondlines are controlled and an overlaminate is applied."
+/>
+
+Support poles are 24 mm OD carbon-fibre tubes. Ends are machined aluminium with brass tophat bushings to reduce friction. Countersunk bolts avoid fouling in the narrow bay.
+
+<Figure
+  src="/images/solar/OM/pole cad.JPG"
+  alt="Support pole CAD with end inserts"
+  maxWidth="1100px"
+  caption="Support pole CAD. Grooved aluminium inserts increase bond area and resist pull-out."
+/>
+
+To bond inserts, grooves were machined into the aluminium to increase bond area. An aluminium plate jig kept the poles straight while the structural epoxy cured. Hole patterns were drilled with laser-cut acrylic jigs. Backing plates on the rear face of the top bulkheads distribute tension loads.
 
 <ImageRow
-  cols={3}
+  cols={2}
   images={[
-    { src: "/images/solar/array/1.jpg", alt: "Hinge and insert" },
-    { src: "/images/solar/array/2.jpg", alt: "Stand layout" },
-    { src: "/images/solar/array/3.jpg", alt: "Field deployment" },
+    { src: "/images/solar/OM/poles.jpg", alt: "Front view of support poles", caption: "Front view — low-profile fasteners clear the bay." },
+    { src: "/images/solar/OM/poles 2.jpg", alt: "Rear view of support poles", caption: "Rear view — backing plates spread tension into the bulkhead." },
+    { src: "/images/solar/OM/open.jpg", alt: "Array open on the start line", caption: "Start-line open position for checks and comms access." },
+    { src: "/images/solar/OM/open 1.jpg", alt: "Field deployment for charging", caption: "Field deployment at a stop with stays set to angle." },
   ]}
 />
 
-## Field use
+Two additional carbon poles act as stays to hold the array open at the desired angle.
 
-At stops we set the angle, check cables and locks, and start data logging. The setup held up in gusty conditions and packed away cleanly.
+<Figure
+  src="/images/solar/OM/track charge.jpg"
+  alt="Sunset charging at the track"
+  maxWidth="1100px"
+  caption="Sunset charging at the track."
+/>
+
+## Materials and notes
+
+- Four-bar links and mounts in aluminium with brass tophat bushings  
+- 24 mm OD carbon-fibre tubes with bonded aluminium inserts  
+- Structural epoxy with controlled bondline thickness and curing jigs  
+- Laser-cut drill jigs for hole accuracy and repeatability  
+- Low-profile, countersunk fasteners where clearances are tight  
+
+## What I would refine next
+
+- Add more adjustability to ensure first-install fitment  
+- Add opening assistance (e.g., gas struts) for drivers at control stops  
+- Install before the solar array is fitted to improve access and reduce shell mass during setup
+
+---
+
+### Related projects
+
+- [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/)  
+- [Canopy Opening Mechanism for Driver Egress](/projects/fourbar-egress/)  
+- [Transparent Light Covers](/projects/light-covers/)  
+- [Solar Car Aerodynamics](/projects/solar-car-aerodynamics/)
