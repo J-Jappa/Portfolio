@@ -27,7 +27,7 @@ export const SITE = {
   linkedinUrl: "https://www.linkedin.com/in/jasper-japp",
 
   // Open Graph image behaviour
-  ogImage: "og.jpg",  
+  ogImage: "public/og.jpg",  
   dynamicOgImage: false,          // set true if you’ve configured the OG generator
 
   // Locale
