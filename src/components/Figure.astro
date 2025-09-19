@@ -7,7 +7,7 @@
  *  - caption?: string
  *  - lightbox?: boolean = true
  */
-interface Props {
+ interface Props {
   src: string;
   alt?: string;
   width?: string;
@@ -15,27 +15,19 @@ interface Props {
   caption?: string;
   lightbox?: boolean;
 }
-
 const {
-  src,
-  alt = "",
-  width = "100%",
-  maxWidth = "none",
-  caption,
-  lightbox = true,
+  src, alt = "", width = "100%", maxWidth = "none", caption, lightbox = true,
 } = Astro.props as Props;
 
 const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
+const styleObj = { width, maxWidth, marginInline: "auto" };
 ---
 
-<figure
-  class="not-prose my-3"
-  style={`width:${width};max-width:${maxWidth};margin-inline:auto;`}
->
+<figure class="not-prose my-3" style={styleObj}>
   {lightbox ? (
     <>
-      <!-- Keep original sizing: image flows naturally (no aspect box) -->
       <button
+        type="button"
         class="block w-full overflow-hidden rounded-xl p-0 m-0 border-0 bg-transparent"
         data-open={uid}
         aria-label="Open image"
@@ -49,8 +41,8 @@ const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
         />
       </button>
 
-      <dialog id={uid} class="p-0 border-0 bg-transparent backdrop:bg-black/70">
-        <!-- Edge padding -->
+      <!-- Centered by global CSS via [data-lightbox] -->
+      <dialog id={uid} data-lightbox class="bg-transparent">
         <div class="m-4 sm:m-8">
           <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
             <img
@@ -66,6 +58,7 @@ const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
 
             <form method="dialog">
               <button
+                type="submit"
                 class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
                 aria-label="Close"
               >
@@ -98,22 +91,32 @@ const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
 
 {lightbox && (
   <script is:inline>
-    (function () {
-      const btn = document.querySelector('[data-open="{uid}"]');
-      const dlg = document.getElementById("{uid}");
-      if (!btn || !dlg) return;
+    (() => {
+      const uid = "{uid}";
 
-      btn.addEventListener("click", () => {
-        if (typeof dlg.showModal === "function") dlg.showModal();
-      });
+      function wire() {
+        const btn = document.querySelector(`[data-open="${uid}"]`);
+        const dlg = document.getElementById(uid);
+        if (!btn || !dlg) return;
 
-      dlg.addEventListener("click", (e) => {
-        if (e.target === dlg && typeof dlg.close === "function") dlg.close();
-      });
+        // prevent duplicate bindings after nav swaps
+        if (dlg.dataset._lbBound === "1") return;
+        dlg.dataset._lbBound = "1";
 
-      dlg.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && typeof dlg.close === "function") dlg.close();
-      });
+        const open = () => { if (typeof (dlg as any).showModal === "function") (dlg as any).showModal(); };
+        const backdropClose = (e) => { if (e.target === dlg && typeof (dlg as any).close === "function") (dlg as any).close(); };
+        const esc = (e) => { if (e.key === "Escape" && typeof (dlg as any).close === "function") (dlg as any).close(); };
+
+        btn.addEventListener("click", open);
+        dlg.addEventListener("click", backdropClose);
+        dlg.addEventListener("keydown", esc);
+      }
+
+      // initial load
+      wire();
+      // rebind on Astro client navigations
+      document.addEventListener("astro:page-load", wire);
+      document.addEventListener("astro:after-swap", wire);
     })();
   </script>
 )}

@@ -83,3 +83,28 @@ html[data-theme="dark"] {
 :target {
   scroll-margin-block: 1rem;
 }
+/* Center any <dialog data-lightbox> in the viewport */
+/* Lightbox dialogs: hidden by default, centered when open */
+/* Lightbox: hidden by default */
+dialog[data-lightbox]{
+  position: fixed;          /* key for centering */
+  inset: 0;                 /* cover full viewport */
+  padding: 0;
+  border: 0;
+  background: transparent;  /* panel provides its own bg */
+  display: none;            /* hidden until [open] */
+}
+
+/* When opened, center content */
+dialog[data-lightbox][open]{
+  display: grid;
+  place-items: center;      /* perfectly center first child */
+}
+
+/* Dimmed backdrop */
+dialog[data-lightbox]::backdrop{
+  background: rgba(0,0,0,.7);
+}
+
+
+

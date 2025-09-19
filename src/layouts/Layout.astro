@@ -145,6 +145,57 @@ const structuredData = {
     <ClientRouter />
 
     <script is:inline src="/toggle-theme.js"></script>
+    <script is:inline>
+      // Delegated lightbox handler: works across partial navigations
+      (() => {
+        const OPEN_ATTR = 'data-open';
+    
+        function getDialog(id) {
+          return id ? document.getElementById(id) : null;
+        }
+    
+        // Close helper wired per-open to avoid stale listeners
+        function wireDialogAutoclose(dlg) {
+          if (dlg.dataset.lbAutoclose === '1') return;
+          dlg.dataset.lbAutoclose = '1';
+    
+          dlg.addEventListener('click', (e) => {
+            if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
+          });
+    
+          dlg.addEventListener('close', () => {
+            // allow re-open without duplicating listeners next time this element is recreated
+            delete dlg.dataset.lbAutoclose;
+          });
+        }
+    
+        // Single delegated click handler for any [data-open]
+        document.addEventListener('click', (e) => {
+          const btn = (e.target instanceof Element)
+            ? e.target.closest(`[${OPEN_ATTR}]`)
+            : null;
+          if (!btn) return;
+    
+          const id = btn.getAttribute(OPEN_ATTR);
+          const dlg = getDialog(id);
+          if (!dlg || typeof dlg.showModal !== 'function') return;
+    
+          wireDialogAutoclose(dlg);
+          dlg.showModal();
+        });
+    
+        // On Astro swaps, proactively close any open dialogs
+        const closeAllDialogs = () => {
+          document.querySelectorAll('dialog[open]').forEach(d => {
+            try { d.close(); } catch {}
+          });
+        };
+    
+        document.addEventListener('astro:after-swap', closeAllDialogs);
+        document.addEventListener('astro:page-load', closeAllDialogs);
+      })();
+    </script>
+    
   </head>
   <body>
     <Header />
