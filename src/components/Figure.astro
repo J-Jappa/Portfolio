@@ -15,6 +15,7 @@
   caption?: string;
   lightbox?: boolean;
 }
+
 const {
   src, alt = "", width = "100%", maxWidth = "none", caption, lightbox = true,
 } = Astro.props as Props;
@@ -41,8 +42,12 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
         />
       </button>
 
-      <!-- Centered by global CSS via [data-lightbox] -->
-      <dialog id={uid} data-lightbox class="bg-transparent">
+      <!-- Centered lightbox dialog -->
+      <dialog
+        id={uid}
+        data-lightbox
+        class="p-0 border-0 bg-transparent"
+      >
         <div class="m-4 sm:m-8">
           <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
             <img
@@ -99,13 +104,19 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
         const dlg = document.getElementById(uid);
         if (!btn || !dlg) return;
 
-        // prevent duplicate bindings after nav swaps
+        // prevent duplicate bindings after Astro client nav
         if (dlg.dataset._lbBound === "1") return;
         dlg.dataset._lbBound = "1";
 
-        const open = () => { if (typeof (dlg as any).showModal === "function") (dlg as any).showModal(); };
-        const backdropClose = (e) => { if (e.target === dlg && typeof (dlg as any).close === "function") (dlg as any).close(); };
-        const esc = (e) => { if (e.key === "Escape" && typeof (dlg as any).close === "function") (dlg as any).close(); };
+        const open = () => {
+          if (dlg && typeof dlg.showModal === "function") dlg.showModal();
+        };
+        const backdropClose = (e) => {
+          if (e.target === dlg && typeof dlg.close === "function") dlg.close();
+        };
+        const esc = (e) => {
+          if (e.key === "Escape" && typeof dlg.close === "function") dlg.close();
+        };
 
         btn.addEventListener("click", open);
         dlg.addEventListener("click", backdropClose);
