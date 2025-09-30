@@ -45,13 +45,9 @@ const sorted = [...projects].sort((a, b) => {
             data-project={p.slug}
             data-title={p.data.title}
           >
-            <h2
-              class="text-lg font-semibold tracking-tight
-                     decoration-accent/70 decoration-2 underline-offset-4
-                     group-hover:underline"
-            >
-              {p.data.title}
-            </h2>
+            <h2 class="text-lg font-semibold tracking-tight">
+  <span class="u-ink">{p.data.title}</span>
+</h2>
 
             <p class="mt-1 text-sm opacity-80">{p.data.summary}</p>
 
