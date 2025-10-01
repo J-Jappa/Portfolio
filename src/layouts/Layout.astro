@@ -48,13 +48,12 @@ const structuredData = {
 <!doctype html>
 <html
   dir={SITE.dir}
-  lang=`${SITE.lang ?? "en"}`
-  class={`${scrollSmooth && "scroll-smooth"}`}
+  lang={SITE.lang ?? "en"}
+  class={scrollSmooth ? "scroll-smooth" : ""}
 >
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalURL} />
     <meta name="generator" content={Astro.generator} />
 
@@ -64,24 +63,28 @@ const structuredData = {
     <meta name="description" content={description} />
     <meta name="author" content={author} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+
     <!-- Icons -->
-    {favicon ? (
-      <>
-        <!-- Per-page override -->
-        <link rel="icon" href={favicon} sizes="any" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <meta name="theme-color" content="#111827" />
-      </>
-    ) : (
-      <>
-        <!-- Site defaults -->
-        <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
-        <link rel="icon" href="/icons/favicon.ico" sizes="any" />
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
-        <link rel="manifest" href="/icons/manifest.webmanifest" />
-        <meta name="theme-color" content="#111827" />
-      </>
-    )}
+    {
+      favicon ? (
+        <>
+          <!-- Per-page override -->
+          <link rel="icon" href={favicon} sizes="any" />
+          <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+          <meta name="theme-color" content="#111827" />
+        </>
+      ) : (
+        <>
+          <!-- Site defaults -->
+          <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+          <link rel="icon" href="/icons/favicon.ico" sizes="any" />
+          <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+          <link rel="manifest" href="/icons/manifest.webmanifest" />
+          <meta name="theme-color" content="#111827" />
+        </>
+      )
+    }
+
     <!-- Open Graph / Facebook -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -120,8 +123,7 @@ const structuredData = {
       set:html={JSON.stringify(structuredData)}
     />
 
-    <!-- Enable RSS feed auto-discovery  -->
-    <!-- https://docs.astro.build/en/recipes/rss/#enabling-rss-feed-auto-discovery -->
+    <!-- RSS auto-discovery -->
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -129,12 +131,7 @@ const structuredData = {
       href={new URL("rss.xml", Astro.site)}
     />
 
-    <meta name="theme-color" content="" />
-
     {
-      // If PUBLIC_GOOGLE_SITE_VERIFICATION is set in the environment variable,
-      // include google-site-verification tag in the heading
-      // Learn more: https://support.google.com/webmasters/answer/9008080#meta_tag_verification&zippy=%2Chtml-tag
       PUBLIC_GOOGLE_SITE_VERIFICATION && (
         <meta
           name="google-site-verification"
@@ -143,79 +140,121 @@ const structuredData = {
       )
     }
 
+    <!-- Astro client router (partial navs) -->
     <ClientRouter />
 
+    <!-- Theme toggle -->
     <script is:inline src="/toggle-theme.js"></script>
+
+    <!-- Lightbox: delegated handler, safe across partial navigations -->
     <script is:inline>
-      // Delegated lightbox handler: works across partial navigations
-      (() => {
+      (function () {
         const OPEN_ATTR = 'data-open';
-    
+
         function getDialog(id) {
           return id ? document.getElementById(id) : null;
         }
-    
-        // Close helper wired per-open to avoid stale listeners
+
         function wireDialogAutoclose(dlg) {
           if (dlg.dataset.lbAutoclose === '1') return;
           dlg.dataset.lbAutoclose = '1';
-    
-          dlg.addEventListener('click', (e) => {
+
+          dlg.addEventListener('click', function (e) {
             if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
           });
-    
-          dlg.addEventListener('close', () => {
-            // allow re-open without duplicating listeners next time this element is recreated
+
+          dlg.addEventListener('close', function () {
             delete dlg.dataset.lbAutoclose;
           });
         }
-    
-        // Single delegated click handler for any [data-open]
-        document.addEventListener('click', (e) => {
-          const btn = (e.target instanceof Element)
-            ? e.target.closest(`[${OPEN_ATTR}]`)
-            : null;
-          if (!btn) return;
-    
-          const id = btn.getAttribute(OPEN_ATTR);
-          const dlg = getDialog(id);
+
+        document.addEventListener('click', function (e) {
+          var target = e.target instanceof Element ? e.target.closest('[' + OPEN_ATTR + ']') : null;
+          if (!target) return;
+
+          var id = target.getAttribute(OPEN_ATTR);
+          var dlg = getDialog(id);
           if (!dlg || typeof dlg.showModal !== 'function') return;
-    
+
           wireDialogAutoclose(dlg);
           dlg.showModal();
         });
-    
-        // On Astro swaps, proactively close any open dialogs
-        const closeAllDialogs = () => {
-          document.querySelectorAll('dialog[open]').forEach(d => {
-            try { d.close(); } catch {}
+
+        function closeAllDialogs() {
+          document.querySelectorAll('dialog[open]').forEach(function (d) {
+            try { d.close(); } catch (_) {}
           });
-        };
-    
+        }
+
         document.addEventListener('astro:after-swap', closeAllDialogs);
         document.addEventListener('astro:page-load', closeAllDialogs);
       })();
     </script>
-    
+
+    <!-- GoatCounter: load (no auto onload) -->
+    <script
+      data-goatcounter="https://jasperjapp.goatcounter.com/count"
+      data-goatcounter-settings='{"no_onload": true}'
+      async
+      src="//gc.zgo.at/count.js"></script>
+
+    <!-- GoatCounter: manual pageview + event tracking -->
+    <script is:inline>
+      (function () {
+        function gcReady() {
+          return typeof window !== 'undefined' &&
+                 window.goatcounter &&
+                 typeof window.goatcounter.count === 'function';
+        }
+
+        function gcCountPage() {
+          if (!gcReady()) return;
+          var path = location.pathname + location.search + location.hash;
+          window.goatcounter.count({ path: path, title: document.title });
+        }
+
+        // Page views
+        document.addEventListener('DOMContentLoaded', gcCountPage);
+        document.addEventListener('astro:page-load', gcCountPage);
+        document.addEventListener('astro:after-swap', gcCountPage);
+
+        // Simple click events
+        document.addEventListener('click', function (e) {
+          var el = e.target instanceof Element ? e.target.closest('a,button,[data-analytics]') : null;
+          if (!el || !gcReady()) return;
+
+          // Project cards
+          if (el.tagName === 'A' && el.getAttribute('data-analytics') === 'project') {
+            var slug = el.getAttribute('data-project') || 'unknown';
+            var title = el.getAttribute('data-title') || 'Project click';
+            window.goatcounter.count({ path: '/event/project-click/' + slug, title: title, event: true });
+          }
+
+          // LinkedIn example
+          if (el.tagName === 'A' && /linkedin\.com/i.test(el.href)) {
+            window.goatcounter.count({ path: '/event/linkedin', title: 'LinkedIn Click', event: true });
+          }
+        });
+      })();
+    </script>
   </head>
+
   <body>
     <Header />
     <main id="main-content">
-      <div
-        class="mx-auto max-w-app px-4 sm:px-4 lg:px-10 pb-16 sm:pb-24 pb-[max(4rem,env(safe-area-inset-bottom))]"
-      >
+      <div class="mx-auto max-w-app px-4 sm:px-4 lg:px-10 pb-16 sm:pb-24 pb-[max(4rem,env(safe-area-inset-bottom))]">
         <slot />
       </div>
     </main>
-    <Footer />  
+    <Footer />
+
+    <!-- GoatCounter noscript pixel (keep in body to avoid head layout quirks) -->
+    <noscript>
+      <img src="https://jasperjapp.goatcounter.com/count?p=/noscript" alt="" />
+    </noscript>
   </body>
 </html>
 
 <style>
-  html,
-  body {
-    margin: 0;
-    width: 100%;
-    height: 100%;
-  }
+  html, body { margin: 0; width: 100%; height: 100%; }
 </style>
