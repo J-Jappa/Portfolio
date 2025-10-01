@@ -147,6 +147,45 @@ const structuredData = {
 
     <script is:inline src="/toggle-theme.js"></script>
     <script is:inline>
+      (function () {
+        function gcCount() {
+          var gc = window['goatcounter'];
+          if (!gc || typeof gc.count !== 'function') return;
+          var path = location.pathname + location.search + location.hash;
+          gc.count({ path: path, title: document.title });
+        }
+    
+        // initial load + every client-side route change
+        document.addEventListener('DOMContentLoaded', gcCount);
+        document.addEventListener('astro:page-load', gcCount);
+        document.addEventListener('astro:after-swap', gcCount);
+    
+        // optional: custom event tracking for your project cards / external links
+        document.addEventListener('click', function (e) {
+          var el = (e.target instanceof Element) ? e.target.closest('a,button,[data-analytics]') : null;
+          if (!el) return;
+          var gc = window['goatcounter'];
+          if (!gc || typeof gc.count !== 'function') return;
+    
+          // project cards (uses your existing data attributes)
+          if (el.tagName === 'A' && el.getAttribute('data-analytics') === 'project') {
+            var slug = el.getAttribute('data-project') || 'unknown';
+            var title = el.getAttribute('data-title') || 'Project click';
+            gc.count({ path: '/event/project-click/' + slug, title: title, event: true });
+          }
+    
+          // LinkedIn / GitHub examples
+          if (el.tagName === 'A' && /linkedin\.com/i.test(el.href)) {
+            gc.count({ path: '/event/linkedin', title: 'LinkedIn Click', event: true });
+          }
+          if (el.tagName === 'A' && /github\.com/i.test(el.href)) {
+            gc.count({ path: '/event/github', title: 'GitHub Click', event: true });
+          }
+        });
+      })();
+    </script>
+    
+    <script is:inline>
       // Delegated lightbox handler: works across partial navigations
       (() => {
         const OPEN_ATTR = 'data-open';
@@ -196,9 +235,15 @@ const structuredData = {
         document.addEventListener('astro:page-load', closeAllDialogs);
       })();
     </script>
-<script data-goatcounter="https://jasperjapp.goatcounter.com/count"
-async src="//gc.zgo.at/count.js"></script>
-  </head>
+<!-- in <head>, replace your current GC tag with this -->
+  <script
+  data-goatcounter="https://jasperjapp.goatcounter.com/count"
+  data-goatcounter-settings='{"no_onload": true}'
+  async
+  src="//gc.zgo.at/count.js"></script>
+<noscript>
+  <img src="https://jasperjapp.goatcounter.com/count?p=/noscript" alt="">
+</noscript>
   <body>
     <Header />
     <main id="main-content">
