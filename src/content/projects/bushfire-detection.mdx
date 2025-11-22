@@ -1,0 +1,217 @@
+---
+title: "Early Bushfire Detection on IoT Sensors (GGM-VAE & Hybrid-VAE)"
+summary: "For my Honours Project, two unsupervised GRU-based VAEs on eCO₂ and TVOC. A compact GGM-VAE and a Hybrid STFT-CNN-GRU-VAE both detect all ignition events in about four minutes on average; the GGM-VAE wins on F1 and false positives and is deployed on an STM32WLE5 LoRa node."
+date: "2025-11-22"
+order: 1
+hero: "/images/bushfire/GGM-VAE Pipeline.png.png"
+images:
+  - { src: "/images/bushfire/GGM-VAE Pipeline.png", alt: "Algorithm pipeline" }
+  - { src: "/images/bushfire/Training Curve.png", alt: "VAE loss curves" }
+  - { src: "/images/bushfire/Hardware.jpg", alt: "Microcontroller and sensors" }
+tags: ["ML", "Anomaly Detection", "IoT", "Time-series"]
+role: "Research & Implementation"
+outcomes:
+  - "Experiment-level hit rate 100 percent across eight ignitions with average first detection about 4 minutes"
+  - "GGM-VAE halves the false positive rate of the Hybrid-VAE while using about 20× fewer FLOPs and fitting the MCU flash budget"
+  - "Hybrid-VAE explores a time-frequency STFT-CNN branch that slightly reduces detection time but is currently too large for this node"
+---
+
+import ImageRow from "@/components/ImageRow.astro";
+import Figure from "@/components/Figure.astro";
+
+As I’m sure we’re all too aware, bushfires are becoming more frequent and more severe, in Australia and around the world. To reduce their impact on people, wildlife and infrastructure, we need to **know about fires early**. Fire spreads quickly – minutes matter.
+
+Most current systems (satellites, cameras, fire towers) rely on **line of sight** and fires being large enough to see. By the time a plume is visible from orbit, the fire can already be huge.
+
+This project looks at a different layer in the early-warning stack: **environmental ground sensors**. These small Internet of Things (IoT) nodes measure things like estimated CO₂ and total volatile compounds (TVOC), key indicators of smoke. The idea is simple:
+
+> Train on what “normal air” looks like, then flag fires as anomalies – and do it **on the node**.
+
+I focus on the **edge node**: the sensor that takes the reading and makes the first decision about whether something is wrong. There’s been work on combining many nodes to reduce false alarms, but my scope is: _given a single node, how far can we push unsupervised deep learning for early detection, under tight hardware constraints?_
+
+I framed the work around two questions:
+
+1. **What unsupervised deep learning anomaly detection algorithms can we develop and optimise for early bushfire detection on IoT sensor nodes?**  
+2. **Can those algorithms actually run on inexpensive, constrained IoT hardware effectively?**
+
+To answer that, I built and compared two models:
+
+- A **GRU Gaussian-Mixture VAE (GGM-VAE)**  
+- A **Hybrid-VAE (STFT-CNN-GRU-VAE)** that adds a frequency-domain branch
+
+
+
+## Dataset and metrics
+
+The dataset comes from the ANU Bushfire Initiative and uses measurements sampled at **1 Hz**. For this project I use:
+
+- **eCO₂ and TVOC** as the main features  
+- **6 burn experiments**, giving **8 valid ignitions**  
+- About **65k** burn samples and **245k** background samples
+
+In an ideal world we’d have perfect labels saying “this sample is fire” and “this sample is not fire”. In practice, **smoke flow is messy**:
+
+- If the wind blows smoke away from a sensor, that node may never “see” the fire.  
+- During training, a standard labelled approach would **punish the model** for failing to detect a fire it never had evidence for.  
+- Over time, the model can actually learn that some normal-but-windy cases look like “fire” because of the labels. This is the **ground-truth ambiguity** problem.
+
+To avoid baking this into the model, I use **unsupervised training**: only non-burn background data is used to learn what “normal” looks like. Fires are treated as **out-of-distribution events** at test time.
+
+Because the labels are unreliable at the window level, the evaluation is defined at the **experiment level**:
+
+- Any detection within **20 minutes** after ignition counts as a **true positive** for that burn.  
+- Only the **first detection** counts; double-ups don’t increase the score.  
+- If an experiment has a fire and we never detect it within the allowed window, that is a **false negative**.  
+- On the background test split, every window is a chance for a **false positive**, so the dataset is highly imbalanced.
+
+Key metrics:
+
+- **Experiment-level hit rate** – how many of the 8 ignitions were detected at least once.  
+- **False positive rate (FPR)** – fraction of background windows misclassified as fire.  
+- **F1-score** – balances true positives and false positives, but in this setting it is heavily penalised by even small FPRs because there are so many more background windows than fire events.  
+- **Latency to first hit** – time from ignition to first detection; this is where “minutes matter”.
+
+Under this setup, a model can easily have an **overall accuracy around 0.99** (because almost every window is normal) while still getting a relatively **low F1-score**, simply because even a tiny FPR contributes a lot of false positives. So my F1-scores aren’t directly comparable to much of the literature, but they are **honest** about the imbalance and label uncertainty in this kind of data.
+
+## Model 1 – GGM-VAE (time-domain GRU VAE with mixture prior)
+
+The first model is a **Gated Recurrent Unit (GRU) Gaussian Mixture Variational Autoencoder**, or GGM-VAE. It builds on LSTM-VAEs from the literature, swapping the LSTM for a GRU to reduce parameters and complexity.
+
+<Figure src="/images/bushfire/GGM-VAE Pipeline.png" alt="GGM-VAE anomaly pipeline" maxWidth="720px" />
+
+**Input features**
+
+- eCO₂ and TVOC at 1 Hz  
+- First-order differences of each, so the model sees **trend and rate of change** as well as absolute level
+
+**Architecture**
+
+- A **GRU encoder** reads the time series window and compresses it into one latent vector.  
+- A **VAE head** outputs parameters of a latent distribution and a **Gaussian mixture** prior, so the model can represent multi-modal “normal” behaviour.  
+- A **GRU decoder** reconstructs the input window during training.
+
+The VAE doesn’t just compress – it **structures the latent space**. In a standard GRU-VAE we encourage all normal data to form a single Gaussian “blob” in latent space. The Gaussian mixture model relaxes that assumption and lets normal behaviour split into multiple clusters, for example:
+
+- Day vs night  
+- Different background regimes  
+- Human/animal disturbance near the sensor
+
+**Anomaly score**
+
+I use a **latent-only score** based on KL divergence between the approximate posterior and the learned mixture prior. Intuitively: if a latent point sits in a region the model believes is unlikely under the “normal” mixture, it’s more anomalous.
+
+The threshold is chosen in a way that’s consistent across models:  
+> the lowest false positive rate at which **all fires are still detected**.
+
+This choice is important because it reflects the deployment reality: we don’t want to miss fires, and within that constraint we want to push FPR as low as possible.
+
+Interestingly, on this dataset the optimal GGM-VAE **collapses to a single effective mode** and a **latent dimension of 1**, meaning the key “fire vs normal” information can be represented by a single scalar in latent space.
+
+## Model 2 – Hybrid-VAE (STFT-CNN-GRU-VAE)
+
+The second model takes the successful parts of the GGM-VAE and asks:
+
+> Can we do better by replacing hand-crafted first differences with a **learned frequency-domain view**?
+
+<Figure src="/images/bushfire/Hybrid-VAE Pipeline.PNG" alt="Hybrid-VAE anomaly pipeline" maxWidth="720px" />
+
+**Frequency front end**
+
+- I compute **Short-Time Fourier Transforms (STFTs)** on eCO₂ and TVOC, producing small spectrograms.  
+- Spectra are log-scaled and stacked into a 2D time–frequency image per window.  
+- In early analysis, burn vs normal spectrograms showed clear differences, especially in low-frequency content.
+
+**CNN + GRU hybrid**
+
+- A compact **2D CNN** processes the spectrogram, learning local time–frequency patterns (bursts, recovery shapes, etc.).  
+- A **GRU** processes the raw time series in parallel.  
+- The two branches are **fused in the latent space** before the VAE heads.  
+- Training uses a combined loss that encourages good reconstructions in both domains.
+
+This gives the Hybrid-VAE more expressive power but also **many more hyperparameters**, and as you’d expect:
+
+- FLOPs and parameter count increase dramatically.  
+- The model becomes much harder to squeeze into an IoT node.
+
+In the final tuned version, the Hybrid-VAE is still better than the simple threshold baseline, but **not as strong as the GGM-VAE** on F1 and FPR. It also ends up collapsing its STFT windows in a way that suggests the added complexity is not being fully exploited on this dataset.
+
+## Results – accuracy vs complexity
+
+Summarising the three approaches:
+
+- **Baseline:** simple eCO₂ threshold  
+- **GGM-VAE:** time-domain GRU-VAE with a mixture prior  
+- **Hybrid-VAE:** STFT-CNN-GRU-VAE
+
+At a threshold setting where all 8 fires are detected:
+
+- **Experiment-level hit rate**  
+  - All three methods: **100%** (all ignitions detected at least once)
+
+- **Average first detection time**  
+  - Threshold: ~**474 s**  
+  - GGM-VAE: ~**236 s**  
+  - Hybrid-VAE: ~**230 s**
+
+- **Window-level FPR**  
+  - Threshold: ~**0.25%**  
+  - Hybrid-VAE: ~**0.076%**  
+  - GGM-VAE: ~**0.038%**
+
+- **F1-score**  
+  - Threshold: ~**0.15**  
+  - Hybrid-VAE: ~**0.35**  
+  - GGM-VAE: ~**0.57**
+
+These F1-scores **look low on paper**, but that’s entirely due to the **event-based metric and extreme class imbalance**: there are only 8 possible true positives but tens of thousands of possible false positives. Even a very small FPR therefore creates a lot of false positives and drags F1 down. Under the same operating points, a simple **accuracy metric would be around 0.99** for all models, which is why I prefer to highlight F1, FPR and detection latency instead.
+
+Both deep models detect fires roughly **four minutes after ignition**, more than **200 seconds faster** than the baseline. The Hybrid-VAE is slightly quicker than the GGM-VAE, but the GGM-VAE:
+
+- Achieves **higher F1**  
+- Has about **half the false positive rate**  
+- Is **much cheaper** in FLOPs and parameters
+
+When I sweep the threshold, the GGM-VAE also shows a better **latency–F1 trade-off** than the Hybrid-VAE, meaning it’s the more flexible model for deployment tuning.
+
+## Hardware implementation – getting it onto a node
+
+The final step is to ask: can we run these on real hardware?
+
+The target is an **ANU IoT sensor node**:
+
+- **MCU & radio.** STM32WLE5-class RAK LoRa module (RAK3172) with LoRaWAN AU915, Class A, OTAA.  
+- **Sensors.** SGP30 (eCO₂, TVOC) and BME680 (temperature, humidity, pressure).  
+- **Constraints.** About **200 KB** of writable ROM; once libraries, drivers and LoRa stack are included, only **≈30 KB** remains for the model.
+
+<Figure src="/images/bushfire/Hardware Diagram.PNG" alt="Hardware Diagram" maxWidth="720px" />
+
+I exported trained PyTorch weights to C++, added timing printouts, and measured:
+
+- **ROM usage** – total flash footprint including model  
+- **Inference time** – latency per window at 1 Hz sampling  
+- **Power** – using a bench supply and multimeter to see if the model meaningfully changes draw
+
+Key findings:
+
+- The **Hybrid-VAE is simply too big**. Even with symmetric int8 quantisation (32-bit floats → 8-bit ints), its parameters don’t fit in the remaining flash.  
+- The **GGM-VAE fits comfortably**, with the full application image around 174 KB.  
+- Inference time for a 15 s window sits around **130–170 ms**, well within the 1 Hz sampling budget.  
+- Power draw is dominated by the sensors and radio; adding the GGM-VAE does **not** significantly increase consumption compared with the threshold baseline.
+
+In other words:
+
+> On this hardware, you can have **deep learning on the node** – but you have to pick your battles. The compact GGM-VAE works; the larger Hybrid-VAE is a prototype for the next generation of nodes.
+
+## Pulling it back to the research questions
+
+Coming back to where we started:
+
+1. **What unsupervised deep learning algorithms can we develop for early bushfire detection on IoT nodes?**  
+   - Both the **GGM-VAE** and **Hybrid-VAE** improve local performance over a threshold baseline.  
+   - The GGM-VAE is the strongest overall, with the best F1-score and lowest false positive rate.
+
+2. **Can these algorithms be implemented effectively on sensor hardware?**  
+   - The **GGM-VAE runs on a constrained STM32WLE5 LoRa node**, hitting timing and memory limits with comparable power to the threshold method.  
+   - The Hybrid-VAE highlights where the pain points are: flash and complexity, not just FLOPs.
+
+The project gives a **practical accuracy–complexity trade-off** for early bushfire detection and a **reproducible path from training to firmware**. It also sets up the next step: combining nodes spatially, and exploring lighter frequency-domain models that preserve the gains of the Hybrid-VAE while fitting on real hardware.
