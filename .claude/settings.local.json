@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -r \"TODO\\\\|FIXME\\\\|XXX\\\\|HACK\\\\|BUG\" /c/Users/JappPC/Documents/Portfolio/Portfolio/*.ts /c/Users/JappPC/Documents/Portfolio/Portfolio/*.js)",
+      "Bash(grep -r \"{ src:\" /c/Users/JappPC/Documents/Portfolio/Portfolio/src/content/projects/*.mdx)",
+      "Bash(grep -n \"delevloped\\\\|Raer\" /c/Users/JappPC/Documents/Portfolio/Portfolio/src/content/projects/*.mdx)",
+      "Bash(grep -n \"solar-car-aero\\\\|bulkheads-interfacing\\\\|fourbar-egress\\\\|solar-hinging\\\\|light-covers\" /c/Users/JappPC/Documents/Portfolio/Portfolio/src/content/projects/*.mdx)",
+      "Bash(grep -n \"solar-car-aerodynamics\" /c/Users/JappPC/Documents/Portfolio/Portfolio/src/content/projects/*.mdx)",
+      "Bash(npm run:*)",
+      "Bash(node -e \"require\\(''sharp''\\); console.log\\(''sharp ok''\\)\")",
+      "Bash(grep -A2 \"^images:\" src/content/projects/*.mdx)",
+      "Bash(node scripts/gen-thumbs.mjs)",
+      "Bash(find c:UsersJappPCDocumentsPortfolioPortfoliopublic -type f -name *.pdf -o -name *.xml -o -name *.webmanifest)"
+    ]
+  }
+}

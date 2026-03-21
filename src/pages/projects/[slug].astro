@@ -1,6 +1,12 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { createHash } from "crypto";
+
+function thumbSrc(src: string): string {
+  const hash = createHash("md5").update(src).digest("hex").slice(0, 12);
+  return `/thumbs/${hash}.webp`;
+}
 
 export async function getStaticPaths() {
   const projects = (await getCollection(
@@ -41,7 +47,7 @@ const p = project.data;
                 data-open={`dlg-${i}`}
               >
                 <img
-                  src={img.src}
+                  src={thumbSrc(img.src)}
                   alt={img.alt ?? p.title}
                   class="h-full w-full object-cover"
                   loading="lazy"
@@ -106,13 +112,13 @@ const p = project.data;
       (p.repo || p.link) && (
         <p class="mt-6 text-sm">
           {p.repo && (
-            <a class="underline" href={p.repo} target="_blank" rel="noopener">
+            <a class="underline" href={p.repo} target="_blank" rel="noopener noreferrer">
               Repository
             </a>
           )}
           {p.repo && p.link ? " · " : ""}
           {p.link && (
-            <a class="underline" href={p.link} target="_blank" rel="noopener">
+            <a class="underline" href={p.link} target="_blank" rel="noopener noreferrer">
               Live/demo
             </a>
           )}

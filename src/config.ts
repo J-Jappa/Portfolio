@@ -7,7 +7,7 @@ export const SITE = {
   author: "Jasper Japp",
   title: "Jasper Japp's Portfolio",
   desc: "Jasper Japp's Engineering Portfolio",
-  profile: "/avatar.jpg",        // ensure this file exists in /public
+  profile: "/avatar.png",        // ensure this file exists in /public
 
   // UI behaviour
   lightAndDarkMode: true,
@@ -39,17 +39,10 @@ export const SITE = {
   scheduledPostMargin: 0,
 
 
-} as const;
+};
 export const NAV_LINKS = [
   { title: 'Projects', path: '/' },
   { title: 'About', path: '/about' },
   { title: 'Experience', path: '/experience' },
 ];
 
-import { defineConfig } from "astro/config";
-import sitemap from "@astrojs/sitemap";
-
-export default defineConfig({
-  site: "https://jasperjapp.com",
-  integrations: [sitemap()],
-});

@@ -1,6 +1,14 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
+import { createHash } from "crypto";
+
+// Maps an original image src to its pre-generated thumbnail path.
+// Matches the hash logic in scripts/gen-thumbs.mjs.
+function thumbSrc(src: string): string {
+  const hash = createHash("md5").update(src).digest("hex").slice(0, 12);
+  return `/thumbs/${hash}.webp`;
+}
 
 const projects = (await getCollection(
   "projects"
@@ -57,7 +65,7 @@ const sorted = [...projects].sort((a, b) => {
                 .map((img: { src: string; alt?: string }) => (
                   <div class="aspect-[21/9] overflow-hidden rounded-lg">
                     <img
-                      src={img.src}
+                      src={thumbSrc(img.src)}
                       alt={img.alt ?? p.data.title}
                       class="h-full w-full object-cover transition
                              group-hover:brightness-105 group-hover:saturate-110"

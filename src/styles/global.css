@@ -97,6 +97,13 @@ html[data-theme="dark"] {
 @media (prefers-reduced-motion: reduce) {
   .u-ink { transition: none; }
 }
+img {
+  image-rendering: auto;
+  image-rendering: high-quality;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
 /* Source: https://piccalil.li/blog/a-more-modern-css-reset/ */
 /* Anything that has been anchored to should have extra scroll margin */
 :target {
