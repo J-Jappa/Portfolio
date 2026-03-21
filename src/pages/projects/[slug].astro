@@ -25,7 +25,13 @@ const p = project.data;
 
 <Layout title={p.title} description={p.summary} ogImage={p.hero ?? undefined}>
   <article class="max-w-none">
-    <a href="/" class="text-sm underline opacity-70">← All projects</a>
+    <a
+      href="/"
+      class="inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm
+             opacity-65 transition-all hover:opacity-100 hover:border-accent/60 hover:text-accent"
+    >
+      ← All projects
+    </a>
 
     <header class="mt-3 mb-6">
       <h1 class="text-2xl font-semibold">{p.title}</h1>
@@ -56,14 +62,26 @@ const p = project.data;
               </button>
               <dialog
                 id={`dlg-${i}`}
-                class="rounded-xl p-0 backdrop:bg-black/60"
+                data-lightbox
+                class="p-0 border-0 bg-transparent"
               >
-                <img src={img.src} alt={img.alt ?? p.title} />
-                <form method="dialog">
-                  <button class="absolute top-2 right-2 rounded-md border bg-white/80 px-3 py-1">
-                    Close
-                  </button>
-                </form>
+                <div class="m-4 sm:m-8">
+                  <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
+                    <img
+                      src={img.src}
+                      alt={img.alt ?? p.title}
+                      class="block w-auto h-auto
+                             max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
+                             max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
+                      decoding="async"
+                    />
+                    <form method="dialog">
+                      <button class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1">
+                        Close
+                      </button>
+                    </form>
+                  </div>
+                </div>
               </dialog>
             </>
           ))}

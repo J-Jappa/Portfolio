@@ -123,15 +123,7 @@ const structuredData = {
       set:html={JSON.stringify(structuredData)}
     />
 
-    <!-- RSS auto-discovery -->
-    <link
-      rel="alternate"
-      type="application/rss+xml"
-      title={SITE.title}
-      href={new URL("rss.xml", Astro.site)}
-    />
-
-    {
+{
       PUBLIC_GOOGLE_SITE_VERIFICATION && (
         <meta
           name="google-site-verification"
@@ -242,7 +234,7 @@ const structuredData = {
   <body>
     <Header />
     <main id="main-content">
-      <div class="mx-auto max-w-app px-4 sm:px-4 lg:px-10 pb-16 sm:pb-24 pb-[max(4rem,env(safe-area-inset-bottom))]">
+      <div class="mx-auto max-w-app px-4 pt-8 pb-10 sm:pb-14">
         <slot />
       </div>
     </main>

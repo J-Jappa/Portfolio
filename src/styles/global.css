@@ -97,6 +97,20 @@ html[data-theme="dark"] {
 @media (prefers-reduced-motion: reduce) {
   .u-ink { transition: none; }
 }
+/* Scroll entrance animation */
+[data-animate] {
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+[data-animate].is-visible {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] { opacity: 1; transform: none; transition: none; }
+}
+
 img {
   image-rendering: auto;
   image-rendering: high-quality;

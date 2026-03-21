@@ -10,7 +10,9 @@
       "Bash(node -e \"require\\(''sharp''\\); console.log\\(''sharp ok''\\)\")",
       "Bash(grep -A2 \"^images:\" src/content/projects/*.mdx)",
       "Bash(node scripts/gen-thumbs.mjs)",
-      "Bash(find c:UsersJappPCDocumentsPortfolioPortfoliopublic -type f -name *.pdf -o -name *.xml -o -name *.webmanifest)"
+      "Bash(find c:UsersJappPCDocumentsPortfolioPortfoliopublic -type f -name *.pdf -o -name *.xml -o -name *.webmanifest)",
+      "Bash(find c:UsersJappPCDocumentsPortfolioPortfolio -name astro.config.* -o -name rss.xml* -o -name sitemap*)",
+      "Bash(grep -A 20 \"^outcomes:\" src/content/projects/*.mdx)"
     ]
   }
 }

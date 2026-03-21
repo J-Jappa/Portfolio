@@ -38,9 +38,10 @@ const isActive = (href: string) => {
       <a
         href="/"
         title="always be optimising"
-        class="py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:my-auto sm:text-2xl sm:leading-none"
+        class="py-1 whitespace-nowrap sm:my-auto"
       >
-        {SITE.title}
+        <span class="text-xl leading-8 font-semibold sm:text-2xl sm:leading-none">{SITE.title}</span>
+        <span class="hidden sm:block text-xs opacity-45 mt-0.5 font-normal italic">always be optimising</span>
       </a>
 
       <nav
@@ -76,6 +77,9 @@ const isActive = (href: string) => {
           </li>
           <li class="col-span-2">
             <a href="/experience" class:list={{ "active-nav": isActive("/experience") }}>Experience</a>
+          </li>
+          <li class="col-span-2">
+            <a href="/contact" class:list={{ "active-nav": isActive("/contact") }}>Contact</a>
           </li>
 
           <li class="col-span-2 flex items-center justify-center sm:col-span-1">

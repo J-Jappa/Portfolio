@@ -1,0 +1,38 @@
+---
+import Layout from "../layouts/Layout.astro";
+import { SITE } from "@/config";
+---
+
+<Layout title="Contact" description="Get in touch with Jasper Japp">
+  <article class="prose max-w-none dark:prose-invert">
+    <h1>Contact</h1>
+    <p>
+      I'm always happy to talk engineering. Whether it's a role, a project,
+      or just a question about solar cars or bushfire detection, drop me a line.
+    </p>
+
+    <ul>
+      <li>
+        <strong>Email:</strong>
+        <a id="email-link" href="#">Loading…</a>
+      </li>
+      <li>
+        <strong>LinkedIn:</strong>
+        <a href={SITE.linkedinUrl} target="_blank" rel="noopener noreferrer">
+          linkedin.com/in/jasper-japp
+        </a>
+      </li>
+    </ul>
+  </article>
+</Layout>
+
+<script>
+  // Email is stored as char codes so it never appears as plain text in the HTML.
+  const codes = [106,97,115,112,101,114,106,97,112,112,64,103,109,97,105,108,46,99,111,109];
+  const email = codes.map(c => String.fromCharCode(c)).join("");
+  const link = document.getElementById("email-link") as HTMLAnchorElement;
+  if (link) {
+    link.href = "mailto:" + email;
+    link.textContent = email;
+  }
+</script>

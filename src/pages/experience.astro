@@ -10,7 +10,7 @@ const education = {
 
 const roles = [
   {
-    title: "Electrical Engineer Intern — BP",
+    title: "Electrical Engineer Intern at BP",
     period: "Nov 2023 – Feb 2024",
     bullets: [
       "Built an Excel-based modelling tool to compare HV transmission lines vs hydrogen pipelines (standards, SIL, reactive compensation).",
@@ -22,7 +22,7 @@ const roles = [
     tags: ["Power Systems", "HV Modelling", "NPV/Costing", "DLR", "ETAP"],
   },
   {
-    title: "Team Member — Structures, ANU Solar Racing",
+    title: "Structures Team Member, ANU Solar Racing",
     period: "Mar 2022 – Present",
     bullets: [
       "Aero & structures for BWSC vehicles (2023 & 2025).",
@@ -33,7 +33,7 @@ const roles = [
     tags: ["Aero", "Composites", "CFD", "Python", "SolidWorks"],
   },
   {
-    title: "Researcher — Individual Honours Project",
+    title: "Researcher, Individual Honours Project",
     period: "Feb 2025 – Present",
     bullets: [
       "Designed a GRU-based Gaussian-mixture variational autoencoder for early wildfire anomaly detection from eCO₂/VOC sensor streams.",
@@ -83,9 +83,12 @@ const cvHref = "/JasperJapp_CV.pdf"; // ensure this file is in /public
   </div>
 
   <section class="mt-10 rounded-2xl border p-5">
-    <h2 class="text-lg font-semibold">Education</h2>
+    <div class="flex items-center gap-3 flex-wrap">
+      <h2 class="text-lg font-semibold">Education</h2>
+      <span class="text-xs font-medium text-accent border border-accent/40 rounded-full px-2 py-0.5">First Class Honours</span>
+    </div>
     <p class="mt-1">{education.uni}</p>
     <p class="opacity-80">{education.details}</p>
-    <p class="text-sm opacity-70">{education.period}</p>
+    <p class="text-sm opacity-70">GPA 6.6/7.0 · WAM 81</p>
   </section>
 </Layout>
