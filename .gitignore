@@ -17,6 +17,10 @@ pnpm-debug.log*
 .env
 .env.production
 
+# SSH server host key — never commit this
+ssh-server/host_key
+ssh-server/host_key.pub
+
 # macOS-specific files
 .DS_Store
 

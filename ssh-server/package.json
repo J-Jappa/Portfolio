@@ -1,0 +1,13 @@
+{
+  "name": "jasperjapp-ssh",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs",
+    "keygen": "ssh-keygen -t ed25519 -f ./host_key -N \"\" -C \"jasperjapp-ssh\""
+  },
+  "dependencies": {
+    "ssh2": "^1.16.0"
+  }
+}

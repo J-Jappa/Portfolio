@@ -12,7 +12,9 @@
       "Bash(node scripts/gen-thumbs.mjs)",
       "Bash(find c:UsersJappPCDocumentsPortfolioPortfoliopublic -type f -name *.pdf -o -name *.xml -o -name *.webmanifest)",
       "Bash(find c:UsersJappPCDocumentsPortfolioPortfolio -name astro.config.* -o -name rss.xml* -o -name sitemap*)",
-      "Bash(grep -A 20 \"^outcomes:\" src/content/projects/*.mdx)"
+      "Bash(grep -A 20 \"^outcomes:\" src/content/projects/*.mdx)",
+      "Bash(timeout 180 npx astro check)",
+      "Bash(timeout 200 npx astro check)"
     ]
   }
 }

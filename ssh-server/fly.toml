@@ -1,0 +1,14 @@
+app = "jasperjapp-ssh"
+primary_region = "syd"
+
+# Visitors connect with: ssh guest@ssh.jasperjapp.com
+# DNS: add an A record for ssh.jasperjapp.com -> Fly IPv4 (fly ips list)
+
+[build]
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 22
+
+  [[services.ports]]
+    port = 22
