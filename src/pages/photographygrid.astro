@@ -1,0 +1,746 @@
+---
+import HiddenLayout from "@/layouts/HiddenLayout.astro";
+import { getImage } from "astro:assets";
+import exifr from "exifr";
+import { resolve } from "node:path";
+
+// ── Discover photos (same as the globe view) ────────────────────────────────
+const modules = import.meta.glob<{ default: ImageMetadata }>(
+  "../assets/photography/**/*.{jpg,jpeg,png,webp,avif,tiff,JPG,JPEG,PNG,WEBP,AVIF,TIFF}",
+  { eager: true }
+);
+
+function parseRoll(folder: string) {
+  const label = folder.replace(/^\d{4}(?:-\d{2}){0,2}\s+/, "");
+  const [location, film] = label.split("·").map(s => s.trim());
+  return { location: location || undefined, film: film || undefined };
+}
+const cityOf = (loc: string) => loc.split(",")[0].trim();
+const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
+
+type Tile = {
+  thumb: string;
+  full: string;
+  alt: string;
+  loc: string;
+  film: string;
+  date: string;
+  ratio: number;
+  folder: string;
+  file: string;
+};
+const tiles: Tile[] = [];
+
+for (const [path, mod] of Object.entries(modules)) {
+  const meta = mod.default;
+  if (!meta || typeof meta.width !== "number") continue;
+  const parts = path.split("/");
+  const file = parts.pop() ?? "";
+  const folder = parts.pop() ?? "";
+  const { location, film } = parseRoll(folder);
+  if (!location) continue;
+
+  const caption = [location, film].filter(Boolean).join(" · ");
+  const full = (await getImage({ src: meta, width: 2000 })).src;
+  const thumb = (await getImage({ src: meta, width: 640 })).src;
+
+  let date = "";
+  try {
+    const abs = resolve(process.cwd(), "src/pages", path);
+    const ex = await exifr.parse(abs, ["DateTimeOriginal", "CreateDate", "DateTime"]);
+    const raw = ex?.DateTimeOriginal || ex?.CreateDate || ex?.DateTime;
+    if (raw) {
+      const dt = raw instanceof Date ? raw : new Date(raw);
+      const y = dt.getFullYear();
+      if (!isNaN(dt.getTime()) && y >= 1990 && y <= 2027) {
+        date = `${String(dt.getDate()).padStart(2, "0")} ${MON[dt.getMonth()]} ${y}`;
+      }
+    }
+  } catch {
+    /* no readable date */
+  }
+
+  tiles.push({
+    thumb,
+    full,
+    alt: caption || "Photograph",
+    loc: location,
+    film: film ?? "",
+    date,
+    ratio: meta.width / meta.height,
+    folder,
+    file,
+  });
+}
+
+// Newest roll first, then by filename.
+tiles.sort((a, b) => b.folder.localeCompare(a.folder) || a.file.localeCompare(b.file));
+
+const esc = (s: string) => s.replace(/</g, "\\u003c");
+const galleryJSON = esc(
+  JSON.stringify(
+    tiles.map(t => ({ full: t.full, alt: t.alt, loc: t.loc, film: t.film, date: t.date }))
+  )
+);
+const total = tiles.length;
+const pad = (n: number) => String(n).padStart(3, "0");
+---
+
+<HiddenLayout
+  title="Photography · Contact Sheet"
+  description="A retro contact sheet of where my film photos were taken."
+>
+  <script is:inline>
+    if (location.search.indexOf("nav") > -1) {
+      document.documentElement.classList.add("booted");
+      history.replaceState(null, "", location.pathname);
+    }
+  </script>
+
+  <svg class="gg-defs" aria-hidden="true" width="0" height="0">
+    <filter id="gg-chroma" x="-5%" y="-5%" width="110%" height="110%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="1 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 1 0" result="r" />
+      <feOffset in="r" dx="1.6" dy="0" result="ro" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 0 0 0  0 0 0 1 0" result="g" />
+      <feColorMatrix in="SourceGraphic" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 1 0 0  0 0 0 1 0" result="b" />
+      <feOffset in="b" dx="-1.6" dy="0" result="bo" />
+      <feBlend in="ro" in2="g" mode="screen" result="rg" />
+      <feBlend in="rg" in2="bo" mode="screen" />
+    </filter>
+  </svg>
+
+  <main class="gg-root">
+    <header class="gg-head">
+      <a href="/" class="gg-btn" aria-label="Exit">◄ EXIT</a>
+      <a href="/photographyglobe/?nav" class="gg-btn gg-switch" data-astro-reload aria-label="Switch to globe view">◱ GLOBE VIEW</a>
+      <div class="gg-readout">CONTACT SHEET · {pad(total)} FRAMES</div>
+      <div class="gg-title"><em>Project:</em><br />Photography</div>
+    </header>
+
+    <section class="gg-grid">
+      {
+        tiles.map((t, i) => (
+          <button
+            class="gg-cell"
+            data-index={i}
+            style={`aspect-ratio:${t.ratio.toFixed(3)}`}
+            aria-label={t.loc}
+          >
+            <img src={t.thumb} alt={t.alt} loading="lazy" decoding="async" />
+            <span class="gg-cell-tag">
+              <span class="gg-cell-no">{pad(i + 1)}</span>
+              <span class="gg-cell-loc">{cityOf(t.loc)}</span>
+            </span>
+          </button>
+        ))
+      }
+    </section>
+  </main>
+
+  <div class="g-boot" aria-hidden="true">
+    <div class="g-boot-lines">
+      <span>&gt; PROJECT: PHOTOGRAPHY · v2.6</span>
+      <span>&gt; MOUNTING ARCHIVE ........ OK</span>
+      <span>&gt; INDEXING FRAMES ......... {pad(total)}</span>
+      <span>&gt; CRT CALIBRATION ........ OK</span>
+      <span>&gt; RENDER CONTACT SHEET .... OK</span>
+      <span class="g-boot-ok">&gt; SYSTEM ONLINE<span class="g-boot-cur">_</span></span>
+    </div>
+    <div class="g-boot-progress"><i></i></div>
+  </div>
+  <div class="g-crt" aria-hidden="true"></div>
+  <div class="g-power" aria-hidden="true"></div>
+
+  <dialog id="map-lb" class="map-lb">
+    <figure class="map-lb-figure">
+      <div class="map-lb-titlebar">
+        <span class="map-lb-wtitle">▣ ARCHIVE VIEWER</span>
+        <button type="button" class="map-lb-close" aria-label="Close">✕</button>
+      </div>
+      <div class="map-lb-body">
+        <button type="button" class="map-lb-nav map-lb-prev" aria-label="Previous">‹</button>
+        <img id="map-lb-img" src="" alt="" />
+        <button type="button" class="map-lb-nav map-lb-next" aria-label="Next">›</button>
+        <aside class="map-lb-panel">
+          <div class="map-lb-row">
+            <span class="map-lb-k">LOCATION</span>
+            <span id="map-lb-loc" class="map-lb-v map-lb-v-loc"></span>
+          </div>
+          <div class="map-lb-row">
+            <span class="map-lb-k">FILM STOCK</span>
+            <span id="map-lb-film" class="map-lb-v"></span>
+          </div>
+          <div class="map-lb-row" id="map-lb-date-row">
+            <span class="map-lb-k">DATE</span>
+            <span id="map-lb-date" class="map-lb-v"></span>
+          </div>
+          <div class="map-lb-row">
+            <span class="map-lb-k">FRAME</span>
+            <span id="map-lb-count" class="map-lb-v"></span>
+          </div>
+          <div class="map-lb-row">
+            <span class="map-lb-k">RGB LEVELS</span>
+            <canvas id="map-lb-histo" class="map-lb-histo" width="182" height="96" aria-hidden="true"></canvas>
+          </div>
+        </aside>
+      </div>
+    </figure>
+  </dialog>
+</HiddenLayout>
+
+<script is:inline set:html={`window.__photoGallery = ${galleryJSON};`} />
+
+<script>
+  type Photo = { full: string; alt: string; loc: string; film: string; date: string };
+
+  function initGrid() {
+    const gallery =
+      (window as unknown as { __photoGallery?: Photo[] }).__photoGallery ?? [];
+    const dlg = document.getElementById("map-lb") as HTMLDialogElement | null;
+    const img = document.getElementById("map-lb-img") as HTMLImageElement | null;
+    const locEl = document.getElementById("map-lb-loc");
+    const countEl = document.getElementById("map-lb-count");
+    const filmEl = document.getElementById("map-lb-film");
+    const dateEl = document.getElementById("map-lb-date");
+    const dateRow = document.getElementById("map-lb-date-row");
+    const histoCanvas = document.getElementById("map-lb-histo") as HTMLCanvasElement | null;
+    if (!dlg || !img) return;
+
+    const prevBtn = dlg.querySelector<HTMLButtonElement>(".map-lb-prev");
+    const nextBtn = dlg.querySelector<HTMLButtonElement>(".map-lb-next");
+    const figure = dlg.querySelector<HTMLElement>(".map-lb-figure");
+
+    // RGB histograms of the current photo.
+    const histoCtx = histoCanvas?.getContext("2d") ?? null;
+    const sampler = document.createElement("canvas");
+    sampler.width = 96;
+    sampler.height = 64;
+    const sampleCtx = sampler.getContext("2d", { willReadFrequently: true });
+    function drawHistogram() {
+      if (!histoCanvas || !histoCtx || !sampleCtx || !img || !img.naturalWidth) return;
+      sampleCtx.drawImage(img, 0, 0, sampler.width, sampler.height);
+      let data: Uint8ClampedArray;
+      try {
+        data = sampleCtx.getImageData(0, 0, sampler.width, sampler.height).data;
+      } catch {
+        return;
+      }
+      const BINS = 48;
+      const r = new Array(BINS).fill(0);
+      const g = new Array(BINS).fill(0);
+      const b = new Array(BINS).fill(0);
+      for (let i = 0; i < data.length; i += 4) {
+        r[(data[i] * BINS) >> 8]++;
+        g[(data[i + 1] * BINS) >> 8]++;
+        b[(data[i + 2] * BINS) >> 8]++;
+      }
+      const max = Math.max(1, ...r, ...g, ...b);
+      const W2 = histoCanvas.width;
+      const H2 = histoCanvas.height;
+      histoCtx.clearRect(0, 0, W2, H2);
+      const band = H2 / 3;
+      const bw = W2 / BINS;
+      const chans: [string, number[]][] = [
+        ["255,52,52", r],
+        ["57,255,136", g],
+        ["135,205,255", b],
+      ];
+      chans.forEach(([col, hist], ci) => {
+        const base = band * (ci + 1) - 1;
+        histoCtx.fillStyle = `rgba(${col},0.85)`;
+        histoCtx.shadowColor = `rgba(${col},0.5)`;
+        histoCtx.shadowBlur = 3;
+        for (let k = 0; k < BINS; k++) {
+          const h = (hist[k] / max) * (band - 3);
+          histoCtx.fillRect(k * bw, base - h, Math.max(1, bw - 1), h);
+        }
+        histoCtx.shadowBlur = 0;
+      });
+    }
+    img.addEventListener("load", drawHistogram);
+
+    let idx = 0;
+    function show() {
+      const p = gallery[idx];
+      if (!p || !img) return;
+      img.src = p.full;
+      img.alt = p.alt;
+      img.classList.remove("is-decrypt");
+      void img.offsetWidth;
+      img.classList.add("is-decrypt");
+      if (img.complete && img.naturalWidth) drawHistogram();
+      if (locEl) locEl.textContent = p.loc;
+      if (countEl) countEl.textContent = `${idx + 1} / ${gallery.length}`;
+      if (filmEl) filmEl.textContent = p.film || "—";
+      if (dateEl) dateEl.textContent = p.date || "—";
+      if (dateRow) dateRow.style.display = p.date ? "" : "none";
+    }
+    function open(i: number, ox?: number, oy?: number) {
+      idx = Math.min(Math.max(0, i), gallery.length - 1);
+      show();
+      if (!dlg!.open && typeof dlg!.showModal === "function") dlg!.showModal();
+      if (figure && typeof ox === "number" && typeof oy === "number") {
+        const dx = ox - window.innerWidth / 2;
+        const dy = oy - window.innerHeight / 2;
+        figure.animate(
+          [
+            { transform: `translate(${dx}px, ${dy}px) scale(0.12)`, opacity: 0 },
+            { transform: "translate(0,0) scale(1.05)", opacity: 1, offset: 0.75 },
+            { transform: "translate(0,0) scale(1)", opacity: 1 },
+          ],
+          { duration: 440, easing: "cubic-bezier(0.16, 1, 0.3, 1)" }
+        );
+      }
+    }
+    const next = () => { idx = (idx + 1) % gallery.length; show(); };
+    const prev = () => { idx = (idx - 1 + gallery.length) % gallery.length; show(); };
+
+    document.querySelectorAll<HTMLButtonElement>(".gg-cell").forEach(cell => {
+      cell.addEventListener("click", () => {
+        const i = Number(cell.getAttribute("data-index"));
+        const r = cell.getBoundingClientRect();
+        open(i, r.left + r.width / 2, r.top + r.height / 2);
+      });
+    });
+
+    nextBtn?.addEventListener("click", next);
+    prevBtn?.addEventListener("click", prev);
+    dlg.querySelector(".map-lb-close")?.addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("keydown", e => {
+      if (e.key === "ArrowRight") next();
+      else if (e.key === "ArrowLeft") prev();
+    });
+  }
+
+  initGrid();
+  document.addEventListener("astro:after-swap", initGrid);
+</script>
+
+<style>
+  :global(html),
+  :global(body) {
+    overflow-x: hidden;
+  }
+  :global(html.booted) .g-boot,
+  :global(html.booted) .g-power {
+    display: none !important;
+  }
+
+  .gg-defs {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .gg-root {
+    min-height: 100svh;
+    background:
+      radial-gradient(140% 100% at 50% -10%, rgba(57, 255, 136, 0.05), transparent 55%),
+      #04070d;
+    color: #4dff9b;
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.4rem) 4rem;
+  }
+
+  .gg-head {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+    flex-wrap: wrap;
+    min-height: 3.4rem;
+    margin-bottom: clamp(1.2rem, 3vw, 2rem);
+  }
+  .gg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border: 1px solid rgba(57, 255, 136, 0.6);
+    background: rgba(5, 10, 8, 0.6);
+    color: #4dff9b;
+    text-decoration: none;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
+    box-shadow: 0 0 10px rgba(57, 255, 136, 0.15);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .gg-btn:hover {
+    background: rgba(57, 255, 136, 0.14);
+    color: #eafff2;
+  }
+  .gg-switch {
+    border-color: rgba(255, 140, 32, 0.6);
+    color: #ff8c20;
+    text-shadow: 0 0 8px rgba(255, 140, 32, 0.5);
+    box-shadow: 0 0 10px rgba(255, 140, 32, 0.15);
+  }
+  .gg-switch:hover {
+    background: rgba(255, 140, 32, 0.16);
+    color: #ffd7a8;
+  }
+  .gg-readout {
+    align-self: center;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    color: rgba(57, 255, 136, 0.7);
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.35);
+  }
+  .gg-title {
+    margin-left: auto;
+    text-align: right;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: 700;
+    font-size: clamp(1.5rem, 4.2vw, 2.6rem);
+    line-height: 0.96;
+    text-transform: uppercase;
+    color: #4dff9b;
+    text-shadow: 0 0 10px rgba(57, 255, 136, 0.7), 0 0 30px rgba(57, 255, 136, 0.4);
+    transform: scaleX(0.79);
+    transform-origin: right;
+    pointer-events: none;
+  }
+  .gg-title em {
+    font-style: italic;
+  }
+
+  /* Masonry contact sheet */
+  .gg-grid {
+    column-count: 2;
+    column-gap: 12px;
+    max-width: 92rem;
+    margin: 0 auto;
+  }
+  @media (min-width: 640px) { .gg-grid { column-count: 3; } }
+  @media (min-width: 1100px) { .gg-grid { column-count: 4; } }
+
+  .gg-cell {
+    position: relative;
+    display: block;
+    width: 100%;
+    margin: 0 0 12px;
+    padding: 0;
+    border: 1px solid rgba(255, 140, 32, 0.4);
+    background: #05070e;
+    cursor: pointer;
+    overflow: hidden;
+    break-inside: avoid;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .gg-cell:hover {
+    border-color: #ff8c20;
+    box-shadow: 0 0 18px rgba(255, 140, 32, 0.45);
+  }
+  .gg-cell img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .gg-cell-tag {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    padding: 14px 8px 5px;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .gg-cell:hover .gg-cell-tag {
+    opacity: 1;
+  }
+  .gg-cell-no {
+    font-family: ui-monospace, monospace;
+    font-size: 0.62rem;
+    color: #ff8c20;
+    text-shadow: 0 0 6px rgba(255, 140, 32, 0.6);
+  }
+  .gg-cell-loc {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    color: #4dff9b;
+    text-shadow: 0 0 7px rgba(57, 255, 136, 0.7);
+    transform: scaleX(0.82);
+    transform-origin: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  @media (hover: none) {
+    .gg-cell-tag { opacity: 1; }
+  }
+
+  /* ── CRT overlay + boot + power (shared look with the globe view) ── */
+  .g-crt {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.34) 0 1px, transparent 1px 2px),
+      radial-gradient(55% 45% at 24% 14%, rgba(255, 255, 255, 0.045), transparent 60%),
+      radial-gradient(120% 118% at 50% 46%, transparent 46%, rgba(0, 0, 0, 0.62) 100%);
+    box-shadow: inset 0 0 130px 34px rgba(0, 0, 0, 0.5);
+    animation: g-flicker 0.15s steps(3) infinite;
+  }
+  @keyframes g-flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.96; }
+    100% { opacity: 1; }
+  }
+  .g-power {
+    position: fixed;
+    inset: 0;
+    z-index: 52;
+    pointer-events: none;
+    background: #eafff2;
+    transform-origin: center;
+    animation: g-power 0.55s ease-out forwards;
+  }
+  @keyframes g-power {
+    0%, 42% { transform: scaleY(0.004); opacity: 1; }
+    72% { transform: scaleY(1); opacity: 0.5; background: rgba(57, 255, 136, 0.22); }
+    100% { transform: scaleY(1); opacity: 0; visibility: hidden; }
+  }
+  .g-boot {
+    position: fixed;
+    inset: 0;
+    z-index: 49;
+    background: #02040a;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: 16px;
+    padding-left: clamp(1.2rem, 12vw, 8rem);
+    animation: g-boot-fade 2.6s ease forwards;
+  }
+  .g-boot-lines {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: clamp(0.75rem, 2vw, 1.05rem);
+    line-height: 1.9;
+    letter-spacing: 0.04em;
+    color: #39ff88;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.75), 0 0 20px rgba(57, 255, 136, 0.4);
+    white-space: pre;
+  }
+  .g-boot-lines span {
+    display: block;
+    clip-path: inset(0 100% 0 0);
+    animation: g-boot-type 0.4s steps(22, end) forwards;
+  }
+  .g-boot-lines span:nth-child(1) { animation-delay: 0.1s; }
+  .g-boot-lines span:nth-child(2) { animation-delay: 0.32s; }
+  .g-boot-lines span:nth-child(3) { animation-delay: 0.54s; }
+  .g-boot-lines span:nth-child(4) { animation-delay: 0.76s; }
+  .g-boot-lines span:nth-child(5) { animation-delay: 0.98s; }
+  .g-boot-lines span:nth-child(6) { animation-delay: 1.2s; }
+  .g-boot-ok { color: #eafff2; }
+  .g-boot-cur { animation: g-boot-blink 0.7s steps(1) infinite; }
+  .g-boot-progress {
+    width: min(60vw, 360px);
+    height: 11px;
+    padding: 2px;
+    border: 1px solid rgba(57, 255, 136, 0.6);
+    box-shadow: 0 0 8px rgba(57, 255, 136, 0.3);
+  }
+  .g-boot-progress i {
+    display: block;
+    height: 100%;
+    width: 0;
+    background: repeating-linear-gradient(90deg, #39ff88 0 7px, transparent 7px 10px);
+    animation: g-boot-fill 1.6s steps(18, end) forwards;
+    animation-delay: 0.2s;
+  }
+  @keyframes g-boot-type { to { clip-path: inset(0 0 0 0); } }
+  @keyframes g-boot-fill { to { width: 100%; } }
+  @keyframes g-boot-blink { 50% { opacity: 0; } }
+  @keyframes g-boot-fade {
+    0%, 76% { opacity: 1; visibility: visible; }
+    100% { opacity: 0; visibility: hidden; }
+  }
+
+  /* ── Terminal photo viewer (shared look with the globe view) ── */
+  .map-lb {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    overflow: hidden;
+  }
+  .map-lb[open] { display: grid; place-items: center; }
+  .map-lb::backdrop {
+    background:
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0 1px, transparent 1px 2px),
+      rgba(2, 3, 8, 0.94);
+    backdrop-filter: blur(2px);
+  }
+  .map-lb-figure {
+    position: relative;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    background: #05070e;
+    border: 2px solid #ff8c20;
+    box-shadow: 0 0 28px rgba(255, 140, 32, 0.3), 0 12px 40px rgba(0, 0, 0, 0.5);
+    max-width: 96vw;
+    max-height: 90vh;
+  }
+  .map-lb-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 6px 5px 12px;
+    background: linear-gradient(rgba(255, 140, 32, 0.18), rgba(255, 140, 32, 0.06));
+    border-bottom: 2px solid #ff8c20;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.64rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #ff8c20;
+    text-shadow: 0 0 8px rgba(255, 140, 32, 0.5);
+  }
+  .map-lb-body { display: flex; flex-direction: row; align-items: stretch; min-height: 0; }
+  #map-lb-img {
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: min(70vw, 940px);
+    max-height: 78vh;
+    object-fit: contain;
+  }
+  #map-lb-img.is-decrypt { animation: g-decrypt 0.55s linear; }
+  @keyframes g-decrypt {
+    0% { clip-path: inset(0 0 100% 0); filter: brightness(2.6) blur(3px) saturate(0.3) hue-rotate(80deg); }
+    55% { clip-path: inset(0 0 0 0); filter: brightness(1.5) blur(1px); }
+    100% { clip-path: inset(0); filter: none; }
+  }
+  .map-lb-panel {
+    position: relative;
+    flex: none;
+    width: 214px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 18px 16px;
+    border-left: 2px solid rgba(255, 140, 32, 0.5);
+    background: rgba(3, 5, 10, 0.55);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    overflow-y: auto;
+    scrollbar-width: none;
+  }
+  .map-lb-panel::-webkit-scrollbar { display: none; }
+  .map-lb-panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0 1px, transparent 1px 2px);
+  }
+  .map-lb-row { display: flex; flex-direction: column; gap: 3px; }
+  .map-lb-k {
+    font-size: 0.54rem;
+    letter-spacing: 0.22em;
+    color: #ff8c20;
+    text-shadow: 0 0 6px rgba(255, 140, 32, 0.4);
+  }
+  .map-lb-v {
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #39ff88;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.4);
+    word-break: break-word;
+  }
+  .map-lb-v-loc {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #4dff9b;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
+    display: inline-block;
+    transform: scaleX(0.79);
+    transform-origin: left;
+  }
+  .map-lb-histo {
+    display: block;
+    width: 100%;
+    height: 60px;
+    image-rendering: pixelated;
+    border: 1px solid rgba(255, 140, 32, 0.3);
+    background: rgba(0, 0, 0, 0.45);
+  }
+  .map-lb-wtitle { pointer-events: none; }
+  .map-lb-close {
+    width: 1.7rem;
+    height: 1.45rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(255, 140, 32, 0.6);
+    background: rgba(5, 8, 14, 0.6);
+    color: #ff8c20;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .map-lb-close:hover { background: #ff8c20; color: #05070e; }
+  .map-lb-nav {
+    flex: none;
+    width: 2.3rem;
+    align-self: stretch;
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: rgba(5, 8, 14, 0.5);
+    color: #ff8c20;
+    font-size: 1.7rem;
+    line-height: 1;
+    cursor: pointer;
+    text-shadow: 0 0 10px rgba(255, 140, 32, 0.7);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .map-lb-nav:hover { background: rgba(255, 140, 32, 0.16); color: #ffd7a8; }
+  .map-lb-prev { border-right: 1px solid rgba(255, 140, 32, 0.35); }
+  .map-lb-next { border-left: 1px solid rgba(255, 140, 32, 0.35); }
+  @media (max-width: 700px) {
+    .map-lb-figure { max-height: 92vh; }
+    .map-lb-body { flex-wrap: wrap; }
+    #map-lb-img { max-width: 82vw; max-height: 52vh; order: 1; }
+    .map-lb-prev { order: 0; }
+    .map-lb-next { order: 2; }
+    .map-lb-panel {
+      order: 3;
+      width: 100%;
+      border-left: 0;
+      border-top: 2px solid rgba(255, 140, 32, 0.5);
+      flex-direction: row;
+      flex-wrap: wrap;
+      gap: 12px 22px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .g-boot { animation: g-boot-fade 0.6s ease forwards; }
+    .g-boot-lines span { animation: none; clip-path: none; }
+    .g-boot-progress i { animation: none; width: 100%; }
+    .g-crt { animation: none; }
+    .g-power { display: none; }
+    #map-lb-img.is-decrypt { animation: none; }
+  }
+</style>

@@ -1,0 +1,46 @@
+---
+// Minimal, chrome-free base for the hidden/expressive pages (writings, photography).
+// No Header/Footer, no analytics — these pages own their entire look.
+// `hidden` (default true) keeps them out of search engines; the sitemap filter
+// in astro.config.ts also excludes them. Flip both to launch.
+import "@/styles/global.css";
+import { ClientRouter } from "astro:transitions";
+import { SITE } from "@/config";
+
+export interface Props {
+  title?: string;
+  description?: string;
+  hidden?: boolean;
+}
+
+const {
+  title = SITE.title,
+  description = SITE.desc,
+  hidden = true,
+} = Astro.props;
+
+const canonicalURL = new URL(Astro.url.pathname, Astro.url);
+---
+
+<!doctype html>
+<html lang={SITE.lang ?? "en"}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalURL} />
+    {hidden && <meta name="robots" content="noindex, nofollow" />}
+
+    <link rel="icon" type="image/svg+xml" href="/icons/favicon.svg" />
+    <link rel="icon" href="/icons/favicon.ico" sizes="any" />
+
+    <!-- Pages inject their own fonts / extra head here -->
+    <slot name="head" />
+
+    <ClientRouter />
+  </head>
+  <body class="min-h-svh">
+    <slot />
+  </body>
+</html>

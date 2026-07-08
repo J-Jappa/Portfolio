@@ -1,0 +1,191 @@
+---
+import HiddenLayout from "@/layouts/HiddenLayout.astro";
+import { getCollection } from "astro:content";
+
+const posts = (await getCollection("writings", ({ data }) => !data.draft)).sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+);
+
+const readingTime = (body: string) =>
+  Math.max(1, Math.round(body.trim().split(/\s+/).length / 200));
+
+const fmt = (d: string) =>
+  new Date(d).toLocaleDateString("en-AU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+---
+
+<HiddenLayout
+  title="Writings — Jasper Japp"
+  description="Essays and notes on building, making, and thinking things through."
+>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <main class="wr">
+    <div class="wr-wrap">
+      <a href="/" class="wr-back">← Jasper Japp</a>
+
+      <header class="wr-masthead">
+        <h1 class="wr-title">Writings</h1>
+        <p class="wr-lede">
+          Essays and notes — thinking out loud about building, making, and the
+          slow parts in between.
+        </p>
+      </header>
+
+      <div class="wr-rule" role="presentation"></div>
+
+      <ul class="wr-list">
+        {
+          posts.map(post => (
+            <li class="wr-item">
+              <a href={`/writings/${post.slug}/`} class="wr-link">
+                <p class="wr-meta">
+                  {fmt(post.data.date)} <span class="wr-dot">·</span>{" "}
+                  {readingTime(post.body)} min read
+                </p>
+                <h2 class="wr-head">{post.data.title}</h2>
+                {post.data.subtitle && (
+                  <p class="wr-sub">{post.data.subtitle}</p>
+                )}
+                {post.data.excerpt && (
+                  <p class="wr-excerpt">{post.data.excerpt}</p>
+                )}
+                <span class="wr-more">Read →</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+
+      {
+        posts.length === 0 && (
+          <p class="wr-empty">Nothing published yet. Soon.</p>
+        )
+      }
+    </div>
+  </main>
+</HiddenLayout>
+
+<style>
+  .wr {
+    min-height: 100svh;
+    width: 100%;
+    background: #f4efe4;
+    color: #22201b;
+    font-family: "Newsreader", ui-serif, Georgia, Cambria, "Times New Roman",
+      serif;
+    padding: clamp(2rem, 6vw, 5rem) 1.25rem 6rem;
+  }
+  .wr-wrap {
+    max-width: 38rem;
+    margin: 0 auto;
+  }
+  .wr-back {
+    display: inline-block;
+    font-size: 0.9rem;
+    letter-spacing: 0.02em;
+    color: #8a7f66;
+    text-decoration: none;
+    margin-bottom: clamp(2rem, 6vw, 4rem);
+    transition: color 0.2s ease;
+  }
+  .wr-back:hover {
+    color: #b1470f;
+  }
+  .wr-title {
+    font-size: clamp(2.75rem, 9vw, 4.5rem);
+    font-weight: 500;
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .wr-lede {
+    font-style: italic;
+    font-size: clamp(1.1rem, 3.5vw, 1.4rem);
+    line-height: 1.5;
+    color: #5a5344;
+    margin: 1rem 0 0;
+    max-width: 30rem;
+  }
+  .wr-rule {
+    height: 1px;
+    background: #d8cfb8;
+    margin: clamp(2rem, 6vw, 3.5rem) 0;
+  }
+  .wr-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: clamp(2.5rem, 7vw, 4rem);
+  }
+  .wr-link {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+  }
+  .wr-meta {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9a8f75;
+    margin: 0 0 0.5rem;
+  }
+  .wr-dot {
+    opacity: 0.6;
+  }
+  .wr-head {
+    font-size: clamp(1.9rem, 5.5vw, 2.6rem);
+    font-weight: 500;
+    line-height: 1.05;
+    letter-spacing: -0.015em;
+    margin: 0;
+    transition: color 0.2s ease;
+  }
+  .wr-link:hover .wr-head {
+    color: #b1470f;
+  }
+  .wr-sub {
+    font-style: italic;
+    font-size: 1.15rem;
+    color: #6a6250;
+    margin: 0.5rem 0 0;
+  }
+  .wr-excerpt {
+    font-size: 1.05rem;
+    line-height: 1.6;
+    color: #4a4536;
+    margin: 0.75rem 0 0;
+  }
+  .wr-more {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: #b1470f;
+    margin-top: 0.9rem;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .wr-link:hover .wr-more {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .wr-empty {
+    font-style: italic;
+    color: #6a6250;
+  }
+</style>

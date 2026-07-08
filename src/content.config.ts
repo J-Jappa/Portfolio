@@ -30,4 +30,15 @@ const projects = defineCollection({
   })
 });
 
-export const collections = { projects };
+const writings = defineCollection({
+  schema: z.object({
+    title: z.string(),
+    subtitle: z.string().optional(),
+    date: z.string(), // ISO date, e.g. "2025-05-18"
+    excerpt: z.string().optional(), // short teaser for the index
+    tags: z.array(z.string()).default([]),
+    draft: z.boolean().default(false), // hide from the index without deleting
+  }),
+});
+
+export const collections = { projects, writings };

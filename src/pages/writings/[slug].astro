@@ -1,0 +1,202 @@
+---
+import HiddenLayout from "@/layouts/HiddenLayout.astro";
+import { getCollection, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  const posts = (await getCollection(
+    "writings"
+  )) as CollectionEntry<"writings">[];
+  return posts.map(p => ({ params: { slug: p.slug }, props: { post: p } }));
+}
+
+const { post } = Astro.props as { post: CollectionEntry<"writings"> };
+const { Content } = await post.render();
+const d = post.data;
+
+const minutes = Math.max(
+  1,
+  Math.round(post.body.trim().split(/\s+/).length / 200)
+);
+const fmt = (s: string) =>
+  new Date(s).toLocaleDateString("en-AU", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+---
+
+<HiddenLayout
+  title={`${d.title} — Jasper Japp`}
+  description={d.excerpt ?? d.subtitle ?? d.title}
+>
+  <Fragment slot="head">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap"
+      rel="stylesheet"
+    />
+  </Fragment>
+
+  <main class="wr">
+    <article class="wr-wrap">
+      <a href="/writings/" class="wr-back">← Writings</a>
+
+      <header class="wr-header">
+        <p class="wr-meta">{fmt(d.date)} <span class="wr-dot">·</span> {minutes} min read</p>
+        <h1 class="wr-title">{d.title}</h1>
+        {d.subtitle && <p class="wr-subtitle">{d.subtitle}</p>}
+      </header>
+
+      <div class="wr-body">
+        <Content />
+      </div>
+
+      {
+        d.tags?.length ? (
+          <p class="wr-tags">{d.tags.map(t => `#${t}`).join("  ")}</p>
+        ) : null
+      }
+
+      <a href="/writings/" class="wr-back wr-back-foot">← Back to all writings</a>
+    </article>
+  </main>
+</HiddenLayout>
+
+<style>
+  .wr {
+    min-height: 100svh;
+    width: 100%;
+    background: #f4efe4;
+    color: #22201b;
+    font-family: "Newsreader", ui-serif, Georgia, Cambria, "Times New Roman",
+      serif;
+    padding: clamp(2rem, 6vw, 5rem) 1.25rem 6rem;
+  }
+  .wr-wrap {
+    max-width: 36rem;
+    margin: 0 auto;
+  }
+  .wr-back {
+    display: inline-block;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: #8a7f66;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+  .wr-back:hover {
+    color: #b1470f;
+  }
+  .wr-header {
+    margin: clamp(2rem, 6vw, 3.5rem) 0 clamp(1.75rem, 5vw, 2.5rem);
+  }
+  .wr-meta {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #9a8f75;
+    margin: 0 0 0.9rem;
+  }
+  .wr-dot {
+    opacity: 0.6;
+  }
+  .wr-title {
+    font-size: clamp(2.3rem, 7vw, 3.4rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0;
+  }
+  .wr-subtitle {
+    font-style: italic;
+    font-size: clamp(1.2rem, 4vw, 1.5rem);
+    line-height: 1.4;
+    color: #6a6250;
+    margin: 0.9rem 0 0;
+  }
+
+  /* Body typography — targets the rendered markdown via :global */
+  .wr-body :global(p),
+  .wr-body :global(ul),
+  .wr-body :global(ol),
+  .wr-body :global(blockquote) {
+    font-size: 1.2rem;
+    line-height: 1.75;
+    margin: 1.35em 0;
+    color: #2b2820;
+  }
+  .wr-body :global(p:first-of-type)::first-letter {
+    float: left;
+    font-size: 3.6em;
+    line-height: 0.72;
+    font-weight: 600;
+    padding: 0.05em 0.1em 0 0;
+    color: #b1470f;
+  }
+  .wr-body :global(h2) {
+    font-size: clamp(1.5rem, 4.5vw, 1.9rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 2.2em 0 0.4em;
+    line-height: 1.15;
+  }
+  .wr-body :global(h3) {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 1.8em 0 0.3em;
+  }
+  .wr-body :global(a) {
+    color: #b1470f;
+    text-underline-offset: 3px;
+  }
+  .wr-body :global(strong) {
+    font-weight: 600;
+  }
+  .wr-body :global(em) {
+    font-style: italic;
+  }
+  .wr-body :global(blockquote) {
+    border-left: 2px solid #cbbfa2;
+    padding-left: 1.1rem;
+    font-style: italic;
+    color: #55503f;
+  }
+  .wr-body :global(hr) {
+    border: none;
+    text-align: center;
+    margin: 2.5em 0;
+  }
+  .wr-body :global(hr)::before {
+    content: "* * *";
+    letter-spacing: 0.5em;
+    color: #b0a689;
+  }
+  .wr-body :global(ul),
+  .wr-body :global(ol) {
+    padding-left: 1.3rem;
+  }
+  .wr-body :global(li) {
+    margin: 0.4em 0;
+  }
+  .wr-body :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.9em;
+    background: #e9e2d0;
+    padding: 0.1em 0.35em;
+    border-radius: 4px;
+  }
+
+  .wr-tags {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+    color: #9a8f75;
+    margin: 3rem 0 0;
+  }
+  .wr-back-foot {
+    margin-top: 3rem;
+  }
+</style>

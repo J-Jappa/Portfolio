@@ -19,7 +19,14 @@ export default defineConfig({
   site: "https://jasperjapp.com",
   integrations: [
     sitemap({
-      filter: page => SITE.showArchives || !page.endsWith("/archives"),
+      // Keep the hidden/unlaunched pages out of the sitemap. Remove their paths
+      // here (and the `noindex` in HiddenLayout) when you're ready to launch.
+      filter: page => {
+        const hidden = ["/writings", "/photography"];
+        const { pathname } = new URL(page);
+        if (hidden.some(h => pathname.startsWith(h))) return false;
+        return SITE.showArchives || !page.endsWith("/archives");
+      },
     }),
     mdx()
   ],
