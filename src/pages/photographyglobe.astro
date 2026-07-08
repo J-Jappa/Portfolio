@@ -5,6 +5,8 @@ import { LOCATION_COORDS } from "@/data/locations";
 import landRaw from "@/data/ne-land.geo.json";
 import { matchCamera } from "@/data/cameras";
 import CameraArchive from "@/components/CameraArchive.astro";
+import BrandLogo from "@/components/BrandLogo.astro";
+import Chevron from "@/components/Chevron.astro";
 import exifr from "exifr";
 import { resolve } from "node:path";
 
@@ -203,6 +205,9 @@ for (let i = carousel.length - 1; i > 0; i--) {
   [carousel[i], carousel[j]] = [carousel[j], carousel[i]];
 }
 
+// A few thumbnails for the contact-sheet button's mini-mosaic preview.
+const sheetThumbs = carousel.slice(0, 9).map(c => c.thumb);
+
 const esc = (s: string) => s.replace(/</g, "\\u003c");
 const landJSON = esc(JSON.stringify(land));
 const markersJSON = esc(JSON.stringify(markers));
@@ -241,11 +246,37 @@ const galleryJSON = esc(
   <main class="g-root" id="g-stage">
     <canvas id="g-canvas" class="g-canvas"></canvas>
     <div id="g-overlay" class="g-overlay" aria-label="Photo locations"></div>
-    <div class="g-nav">
-      <a href="/" class="g-back" aria-label="Exit">◄ EXIT</a>
-      <a href="/photographygrid/?nav" class="g-gridbtn" data-astro-reload aria-label="Switch to contact sheet">▦ CONTACT SHEET</a>
-      <button type="button" class="g-gridbtn g-cambtn" data-open-cameras aria-label="View cameras">◉ CAMERAS</button>
-    </div>
+    <nav class="g-nav" aria-label="Views">
+      <BrandLogo />
+      <a href="/" class="g-tile g-tile-exit" aria-label="Exit to home">
+        <span class="g-tile-art" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M30 10 L14 24 L30 38" /><line x1="14" y1="24" x2="38" y2="24" /></svg>
+        </span>
+        <span class="g-tile-label">EXIT</span>
+      </a>
+      <a
+        href="/photographygrid/?nav"
+        class="g-tile g-tile-sheet"
+        data-astro-reload
+        aria-label="Open the contact sheet"
+      >
+        <span class="g-tile-art g-sheet-art" aria-hidden="true">
+          {sheetThumbs.map(t => <img src={t} alt="" loading="lazy" decoding="async" draggable={false} />)}
+        </span>
+        <span class="g-tile-label">CONTACT SHEET</span>
+      </a>
+      <button type="button" class="g-tile g-tile-cam" data-open-cameras aria-label="Browse the cameras">
+        <span class="g-tile-art" aria-hidden="true">
+          <svg viewBox="0 0 56 44" class="g-cam-svg">
+            <path d="M4 14 h10 l4 -6 h20 l4 6 h10 v24 h-48 z" />
+            <circle cx="28" cy="26" r="9" />
+            <circle cx="28" cy="26" r="4" />
+            <line x1="44" y1="18" x2="50" y2="18" />
+          </svg>
+        </span>
+        <span class="g-tile-label">CAMERAS</span>
+      </button>
+    </nav>
     <div class="g-coord" id="g-coord" aria-hidden="true"></div>
     <div class="g-title"><em>Project:</em><br />Photography</div>
     <span class="g-cor tl" aria-hidden="true"></span>
@@ -260,7 +291,7 @@ const galleryJSON = esc(
         [...carousel, ...carousel].map(c => (
           <button class="g-cell" data-mi={c.mi} data-pi={c.pi} aria-label={c.city}>
             <span class="g-cell-label">{c.city}</span>
-            <img src={c.thumb} alt={c.alt} loading="lazy" decoding="async" />
+            <img src={c.thumb} alt={c.alt} loading="lazy" decoding="async" draggable={false} />
           </button>
         ))
       }
@@ -268,6 +299,7 @@ const galleryJSON = esc(
   </nav>
 
   <div class="g-boot" aria-hidden="true">
+    <Chevron variant="boot" />
     <div class="g-boot-lines">
       <span>&gt; PROJECT: PHOTOGRAPHY · v2.6</span>
       <span>&gt; INIT UPLINK ............ OK</span>
@@ -291,7 +323,13 @@ const galleryJSON = esc(
       </div>
       <div class="map-lb-body">
         <button type="button" class="map-lb-nav map-lb-prev" aria-label="Previous">‹</button>
-        <img id="map-lb-img" src="" alt="" />
+        <div class="map-lb-imgwrap">
+          <img id="map-lb-img" src="" alt="" />
+          <div class="map-lb-spin" id="map-lb-spin" aria-hidden="true">
+            <Chevron variant="spinner" />
+            <span class="lb-spin-txt">STAND&nbsp;BY</span>
+          </div>
+        </div>
         <button type="button" class="map-lb-nav map-lb-next" aria-label="Next">›</button>
         <aside class="map-lb-panel">
           <div class="map-lb-row">
@@ -382,6 +420,7 @@ const galleryJSON = esc(
     const camEl = document.getElementById("map-lb-cam");
     const camRow = document.getElementById("map-lb-cam-row");
     const modelCanvas = document.getElementById("map-lb-model") as HTMLCanvasElement | null;
+    const spinEl = document.getElementById("map-lb-spin");
     if (!stage || !canvas || !overlay || !dlg || !img) return;
 
     const wf = modelCanvas ? mountWireframe(modelCanvas) : null;
@@ -434,7 +473,21 @@ const galleryJSON = esc(
         histoCtx.shadowBlur = 0;
       });
     }
-    img.addEventListener("load", drawHistogram);
+    // Show a loader while a fresh image decodes, so a slow load doesn't look
+    // like the previous photo is still up. Reveal + histogram once it's ready.
+    function onImgLoad() {
+      if (!img) return;
+      img.classList.remove("is-loading");
+      spinEl?.classList.remove("is-on");
+      void img.offsetWidth; // restart the decrypt reveal on the new image
+      img.classList.add("is-decrypt");
+      drawHistogram();
+    }
+    img.addEventListener("load", onImgLoad);
+    img.addEventListener("error", () => {
+      img?.classList.remove("is-loading");
+      spinEl?.classList.remove("is-on");
+    });
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -447,9 +500,11 @@ const galleryJSON = esc(
     const BLUE = "135,205,255";
     const rgba = (c: string, a: number) => `rgba(${c},${a})`;
 
-    const CAROUSEL_H = 224; // keep the globe clear of the bottom carousel
+    const CAROUSEL_H =
+      document.getElementById("g-carousel")?.offsetHeight || 172; // clear the bottom carousel
     let spin = -0.2,
       tilt = 0.36;
+    let spinGain = reduced ? 0 : 1; // eased auto-spin factor (soft pause)
     let W = 0,
       H = 0,
       cx = 0,
@@ -570,12 +625,12 @@ const galleryJSON = esc(
     function show() {
       const p = photos[idx];
       if (!p || !img) return;
+      img.classList.remove("is-decrypt");
+      img.classList.add("is-loading");
+      spinEl?.classList.add("is-on");
       img.src = p.full;
       img.alt = p.alt;
-      img.classList.remove("is-decrypt");
-      void img.offsetWidth; // restart the decrypt animation
-      img.classList.add("is-decrypt");
-      if (img.complete && img.naturalWidth) drawHistogram();
+      if (img.complete && img.naturalWidth) onImgLoad();
       if (locEl) locEl.textContent = p.loc || title;
       if (countEl) countEl.textContent = `${idx + 1} / ${photos.length}`;
       if (filmEl) filmEl.textContent = p.film || "—";
@@ -672,7 +727,7 @@ const galleryJSON = esc(
         let off = 0;
         let factor = reduced ? 0 : 1; // eased auto-scroll gain (0 = paused)
         let target = reduced ? 0 : 1;
-        let drag = false, moved = 0, startX = 0, startOff = 0;
+        let drag = false, pressing = false, moved = 0, startX = 0, startOff = 0, pid = -1;
         let vel = 0, lastX = 0, lastT = 0, momentum = 0, raf = 0, last = performance.now();
 
         const remeasure = () => { half = track.scrollWidth / 2; };
@@ -680,32 +735,43 @@ const galleryJSON = esc(
         rail.addEventListener("mouseenter", () => hover(true));
         rail.addEventListener("mouseleave", () => hover(false));
 
+        // Defer the drag until the pointer actually moves past a threshold — so
+        // a plain tap still fires the cell's click. (Capturing the pointer on
+        // pointerdown swallows the click, which broke opening a frame.)
         const down = (e: PointerEvent) => {
-          drag = true; moved = 0; target = 0; momentum = 0;
+          pressing = true; drag = false; moved = 0; momentum = 0;
           startX = e.clientX; startOff = off;
           vel = 0; lastX = e.clientX; lastT = performance.now();
-          cSuppressClick = false;
-          rail.setPointerCapture?.(e.pointerId);
-          rail.classList.add("is-grab");
+          pid = e.pointerId;
         };
         const move = (e: PointerEvent) => {
-          if (!drag) return;
-          e.stopPropagation();
+          if (!pressing) return;
           const dx = e.clientX - startX;
           moved = Math.max(moved, Math.abs(dx));
+          if (!drag) {
+            if (moved <= 6) return; // still a potential tap
+            drag = true;
+            target = 0;
+            rail.setPointerCapture?.(pid);
+            rail.classList.add("is-grab");
+          }
+          e.stopPropagation();
           off = startOff - dx;
           const now = performance.now(), d = (now - lastT) / 1000;
           if (d > 0) vel = (e.clientX - lastX) / d;
           lastX = e.clientX; lastT = now;
         };
         const up = (e: PointerEvent) => {
-          if (!drag) return;
-          e.stopPropagation();
-          drag = false;
-          rail.classList.remove("is-grab");
-          cSuppressClick = moved > 6;
-          momentum = -vel; // keep drifting in the flick direction
-          target = reduced ? 0 : rail.matches(":hover") ? 0 : 1;
+          if (!pressing) return;
+          pressing = false;
+          cSuppressClick = drag; // only swallow the click if we actually dragged
+          if (drag) {
+            e.stopPropagation();
+            drag = false;
+            rail.classList.remove("is-grab");
+            momentum = -vel; // keep drifting in the flick direction
+            target = reduced ? 0 : rail.matches(":hover") ? 0 : 1;
+          }
         };
         rail.addEventListener("pointerdown", down);
         rail.addEventListener("pointermove", move);
@@ -1101,7 +1167,11 @@ const galleryJSON = esc(
       const dt = Math.min(0.05, (now - lastT) / 1000);
       lastT = now;
       const t = now / 1000;
-      if (!paused && !reduced) spin += dt * 0.12;
+      // Ease the auto-spin to a stop when paused (hover/drag/dialog) instead of
+      // snapping, and ease it back when released.
+      const spinTarget = paused || reduced ? 0 : 1;
+      spinGain += (spinTarget - spinGain) * Math.min(1, dt * 5);
+      spin += dt * 0.12 * spinGain;
 
       ctx!.clearRect(0, 0, W, H);
       ctx!.fillStyle = "#03040a";
@@ -1157,45 +1227,97 @@ const galleryJSON = esc(
   :global(html.booted) .g-power {
     display: none !important;
   }
+  /* Left rail: larger, symbolic preview tiles running down the edge. */
   .g-nav {
     position: absolute;
     z-index: 6;
-    top: 1rem;
-    left: 1.1rem;
+    top: 0.9rem;
+    left: 0.9rem;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.55rem;
+    gap: 13px;
   }
-  .g-gridbtn {
-    display: inline-flex;
+  .g-tile {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.32rem 0.75rem;
-    border: 1px solid rgba(255, 140, 32, 0.6);
-    background: rgba(10, 7, 3, 0.62);
+    gap: 6px;
+    width: 80px;
+    padding: 9px 7px 7px;
+    border: 1px solid rgba(255, 140, 32, 0.55);
+    background: rgba(8, 6, 3, 0.62);
     color: #ff8c20;
     text-decoration: none;
+    cursor: pointer;
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.72rem;
-    letter-spacing: 0.12em;
-    text-shadow: 0 0 8px rgba(255, 140, 32, 0.5);
-    box-shadow: 0 0 10px rgba(255, 140, 32, 0.15);
-    transition: background 0.2s ease, color 0.2s ease;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 140, 32, 0.05);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+      background 0.18s ease;
   }
-  .g-gridbtn:hover {
-    background: rgba(255, 140, 32, 0.16);
-    color: #ffd7a8;
+  .g-tile:hover {
+    transform: translateX(4px);
+    border-color: #ff8c20;
+    background: rgba(20, 12, 4, 0.72);
+    box-shadow: 0 0 20px rgba(255, 140, 32, 0.35);
   }
-  .g-cambtn {
-    border-color: rgba(57, 255, 136, 0.6);
+  .g-tile-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.16em;
+    text-shadow: 0 0 7px rgba(255, 140, 32, 0.5);
+    white-space: nowrap;
+  }
+  .g-tile-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 46px;
+  }
+  .g-tile-art svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(255, 140, 32, 0.4));
+  }
+  /* Contact-sheet tile: a 3×3 mini mosaic of real frames */
+  .g-sheet-art {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-auto-rows: 1fr;
+    gap: 2px;
+  }
+  .g-sheet-art img {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border: 1px solid rgba(255, 140, 32, 0.3);
+    -webkit-user-drag: none;
+  }
+  /* Exit + Cameras tiles share the green archive/globe theme */
+  .g-tile-exit,
+  .g-tile-cam {
+    border-color: rgba(57, 255, 136, 0.5);
     color: #4dff9b;
-    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
-    box-shadow: 0 0 10px rgba(57, 255, 136, 0.15);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(57, 255, 136, 0.05);
   }
-  .g-cambtn:hover {
-    background: rgba(57, 255, 136, 0.16);
-    color: #d7ffe8;
+  .g-tile-exit:hover,
+  .g-tile-cam:hover {
+    border-color: #4dff9b;
+    background: rgba(6, 20, 12, 0.72);
+    box-shadow: 0 0 20px rgba(57, 255, 136, 0.35);
   }
+  .g-tile-exit:hover { transform: translateX(-4px); }
+  .g-tile-exit .g-tile-label,
+  .g-tile-cam .g-tile-label { text-shadow: 0 0 7px rgba(57, 255, 136, 0.5); }
+  .g-tile-exit .g-tile-art svg,
+  .g-tile-cam .g-tile-art svg { filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.45)); }
+  .g-tile-exit .g-tile-art { width: 46px; height: 40px; }
   .g-canvas {
     position: absolute;
     inset: 0;
@@ -1224,11 +1346,15 @@ const galleryJSON = esc(
     inset: 0;
     z-index: 50;
     pointer-events: none;
+    /* 1px line in a 3px period (was 1px/2px). A 50%-coverage 1px pattern
+       renders as a heavy dark wash under fractional display scaling / browser
+       zoom because each hairline anti-aliases across ~1.5 device px; the wider
+       gap keeps the scanlines reading as fine lines on any screen. */
     background:
       repeating-linear-gradient(
         to bottom,
-        rgba(0, 0, 0, 0.34) 0 1px,
-        transparent 1px 2px
+        rgba(0, 0, 0, 0.3) 0 1px,
+        transparent 1px 3px
       ),
       radial-gradient(55% 45% at 24% 14%, rgba(255, 255, 255, 0.045), transparent 60%),
       radial-gradient(120% 118% at 50% 46%, transparent 46%, rgba(0, 0, 0, 0.66) 100%);
@@ -1307,6 +1433,7 @@ const galleryJSON = esc(
     animation: g-boot-fill 1.7s steps(18, end) forwards;
     animation-delay: 0.2s;
   }
+  .g-boot :global(.chev-boot) { margin-bottom: 4px; }
   @keyframes g-boot-type { to { clip-path: inset(0 0 0 0); } }
   @keyframes g-boot-fill { to { width: 100%; } }
   @keyframes g-boot-blink { 50% { opacity: 0; } }
@@ -1338,26 +1465,6 @@ const galleryJSON = esc(
     outline: 1px dashed var(--green);
     outline-offset: 2px;
   }
-  .g-back {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.32rem 0.75rem;
-    border: 1px solid rgba(57, 255, 136, 0.6);
-    background: rgba(5, 10, 8, 0.6);
-    color: #4dff9b;
-    text-decoration: none;
-    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    font-size: 0.8rem;
-    letter-spacing: 0.14em;
-    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
-    box-shadow: 0 0 10px rgba(57, 255, 136, 0.18);
-    transition: background 0.2s ease, color 0.2s ease;
-  }
-  .g-back:hover {
-    background: rgba(57, 255, 136, 0.14);
-    color: #eafff2;
-  }
   .g-title {
     position: absolute;
     z-index: 3;
@@ -1379,10 +1486,19 @@ const galleryJSON = esc(
   .g-title em {
     font-style: italic;
   }
+  @media (max-width: 720px) {
+    .g-nav { gap: 9px; top: 0.6rem; left: 0.55rem; }
+    .g-tile { width: 60px; padding: 6px 5px 5px; gap: 4px; }
+    .g-tile-art { width: 46px; height: 34px; }
+    .g-tile-exit .g-tile-art { width: 34px; height: 30px; }
+    .g-tile-label { font-size: 0.42rem; letter-spacing: 0.1em; }
+    .g-title { font-size: clamp(1.05rem, 5.6vw, 1.7rem); }
+    .g-coord { font-size: 0.58rem; }
+  }
   .g-coord {
     position: absolute;
     z-index: 3;
-    top: 3.4rem;
+    bottom: 184px;
     left: 1.1rem;
     padding: 0.3rem 0.6rem;
     border: 1px solid rgba(57, 255, 136, 0.5);
@@ -1470,7 +1586,7 @@ const galleryJSON = esc(
   }
   .map-lb::backdrop {
     background:
-      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0 1px, transparent 1px 2px),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.34) 0 1px, transparent 1px 3px),
       rgba(2, 3, 8, 0.94);
     backdrop-filter: blur(2px);
   }
@@ -1505,6 +1621,14 @@ const galleryJSON = esc(
     align-items: stretch;
     min-height: 0;
   }
+  .map-lb-imgwrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    min-width: 0;
+  }
   #map-lb-img {
     display: block;
     width: auto;
@@ -1512,6 +1636,30 @@ const galleryJSON = esc(
     max-width: min(70vw, 940px);
     max-height: 78vh;
     object-fit: contain;
+  }
+  #map-lb-img.is-loading {
+    opacity: 0.3;
+    filter: brightness(0.7) saturate(0.55);
+  }
+  .map-lb-spin {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .map-lb-spin.is-on { opacity: 1; }
+  .lb-spin-txt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    color: #ffb968;
+    text-shadow: 0 0 9px rgba(255, 140, 32, 0.6);
   }
   #map-lb-img.is-decrypt {
     animation: g-decrypt 0.55s linear;
@@ -1589,11 +1737,25 @@ const galleryJSON = esc(
     transform-origin: left;
   }
   @media (max-width: 700px) {
-    .map-lb-figure { max-height: 92vh; }
+    .map-lb-figure { max-height: 94vh; }
     .map-lb-body { flex-wrap: wrap; }
-    #map-lb-img { max-width: 82vw; max-height: 52vh; order: 1; }
-    .map-lb-prev { order: 0; }
-    .map-lb-next { order: 2; }
+    .map-lb-imgwrap { order: 0; width: 100%; }
+    #map-lb-img { max-width: 100%; max-height: 56vh; margin: 0 auto; }
+    /* Both arrows drop below the image, side by side. */
+    .map-lb-nav {
+      order: 1;
+      width: 50%;
+      align-self: auto;
+      height: 2.9rem;
+      font-size: 1.5rem;
+    }
+    .map-lb-prev { order: 1; border-right: 0; }
+    .map-lb-next {
+      order: 2;
+      border-left: 1px solid rgba(255, 140, 32, 0.35);
+      border-top: 1px solid rgba(255, 140, 32, 0.35);
+    }
+    .map-lb-prev { border-top: 1px solid rgba(255, 140, 32, 0.35); }
     .map-lb-panel {
       order: 3;
       width: 100%;
@@ -1673,7 +1835,7 @@ const galleryJSON = esc(
     right: 0;
     bottom: 0;
     z-index: 5;
-    height: 224px;
+    height: 172px;
     overflow: hidden;
     background: linear-gradient(transparent, rgba(3, 5, 12, 0.94));
     border-top: 2px solid rgba(255, 140, 32, 0.6);
@@ -1691,28 +1853,31 @@ const galleryJSON = esc(
     display: flex;
     align-items: center;
     width: max-content;
-    padding: 9px 0;
+    padding: 8px 0;
     will-change: transform;
   }
   .g-cell {
     flex: none;
-    width: 300px;
-    margin-right: 12px;
+    width: 232px;
+    margin-right: 10px;
     padding: 0;
     border: 0;
     background: none;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 5px;
     text-align: left;
   }
   .g-cell img {
-    width: 300px;
-    height: 168px;
+    width: 232px;
+    height: 130px;
     object-fit: cover;
     border: 1px solid rgba(255, 140, 32, 0.35);
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    /* don't let the browser start a native image drag inside the carousel */
+    user-select: none;
+    -webkit-user-drag: none;
   }
   .g-cell:hover img {
     border-color: #ff8c20;
@@ -1721,7 +1886,7 @@ const galleryJSON = esc(
   .g-cell-label {
     font-family: "Times New Roman", Times, serif;
     font-weight: 700;
-    font-size: 0.98rem;
+    font-size: 0.84rem;
     letter-spacing: 0;
     text-transform: uppercase;
     color: #4dff9b;
@@ -1732,5 +1897,11 @@ const galleryJSON = esc(
     padding: 0 2px;
     transform: scaleX(0.79);
     transform-origin: left;
+  }
+  @media (max-width: 720px) {
+    .g-carousel { height: 138px; }
+    .g-cell { width: 168px; margin-right: 8px; }
+    .g-cell img { width: 168px; height: 94px; }
+    .g-cell-label { font-size: 0.72rem; }
   }
 </style>

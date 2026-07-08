@@ -48,7 +48,17 @@
       "Bash(curl -s http://localhost:4322/photographyglobe/)",
       "Bash(grep -oE '\\\\.g-gridbtn\\\\{[^}]{0,160}')",
       "Bash(grep -oE '<div class=\"g-nav\">.{0,220}')",
-      "Bash(awk '{ *)"
+      "Bash(awk '{ *)",
+      "Bash(node -e \"const s=require\\('sharp'\\); console.log\\('sharp', s.versions?.sharp || 'ok'\\)\")",
+      "Bash(node -e \"require.resolve\\('png-to-ico'\\); console.log\\('png-to-ico present'\\)\")",
+      "Bash(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\745a761d-b633-4f31-8ab9-ee1a384507c4\\\\scratchpad\\\\gen-icons.mjs\")",
+      "Bash(node -e \"const s=require\\('sharp'\\); \\(async\\(\\)=>{for\\(const f of ['icon-32.png','apple-touch-icon.png','maskable-icon-512.png']\\){const m=await s\\('public/icons/'+f\\).metadata\\(\\);console.log\\(f, m.width+'x'+m.height\\);} }\\)\\(\\)\")",
+      "Bash(cp \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\745a761d-b633-4f31-8ab9-ee1a384507c4\\\\scratchpad\\\\gen-icons.mjs\" ./_gen-icons.mjs)",
+      "Bash(node ./_gen-icons.mjs)",
+      "Bash(rm -f ./_gen-icons.mjs)",
+      "Bash(node -e \"const s=require\\('sharp'\\); \\(async\\(\\)=>{for\\(const f of ['icon-16.png','icon-32.png','icon-192.png','apple-touch-icon.png','maskable-icon-512.png']\\){const m=await s\\('public/icons/'+f\\).metadata\\(\\);console.log\\(f, m.width+'x'+m.height, m.channels+'ch'\\);} }\\)\\(\\)\")",
+      "Bash(node -e \"const s=require\\('sharp'\\); \\(async\\(\\)=>{const m=await s\\('public/icons/icon-32.png'\\).stats\\(\\); console.log\\('icon-32 hasAlpha:', \\(await s\\('public/icons/icon-32.png'\\).metadata\\(\\)\\).hasAlpha\\); const a=await s\\('public/icons/apple-touch-icon.png'\\).metadata\\(\\); console.log\\('apple-touch', a.width+'x'+a.height, 'alpha', a.hasAlpha\\);}\\)\\(\\)\")",
+      "Bash(python -c ' *)"
     ]
   }
 }

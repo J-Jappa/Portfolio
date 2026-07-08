@@ -93,8 +93,8 @@ function panomicronOxygen(): Wireframe {
   cyl(b, 0.1, 0.16, 10, [1.08, 0.44, 0], "y"); // right knob
   return {
     name: "Panomicron Oxygen",
-    spec: "Panoramic · placeholder",
-    desc: "Wide-format panoramic body. Placeholder entry — replace the spec, description and wireframe for this one in src/data/cameras.ts with the real camera details.",
+    spec: "24×65 panoramic · 35mm",
+    desc: "Open-source, 3D-printed 24×65mm panoramic 35mm camera designed by Oscar Oweson (GPL-3.0, panomicron.com) — a fixed-lens, non-rotating design in the spirit of the Xpan. This build is SLS nylon (PA12) with a mechanical Copal #0 leaf shutter and a 50mm f/2.8 Bronica ETR lens on an M65 helicoid, giving roughly a 28mm-equivalent wide view across the frame. Fully DIY, scale-focus.",
     verts: b.V,
     edges: b.E,
   };

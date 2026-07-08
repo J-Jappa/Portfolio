@@ -1,0 +1,22 @@
+---
+// Small corner brand mark for the photography pages. Links home.
+import Chevron from "./Chevron.astro";
+---
+
+<a class="brand" href="/" aria-label="Home">
+  <Chevron variant="logo" />
+</a>
+
+<style>
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 0.15rem;
+    filter: drop-shadow(0 0 6px rgba(120, 255, 180, 0.35));
+    transition: filter 0.2s ease, transform 0.2s ease;
+  }
+  .brand:hover {
+    filter: drop-shadow(0 0 11px rgba(120, 255, 180, 0.65));
+    transform: translateY(-1px);
+  }
+</style>

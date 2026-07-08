@@ -1,0 +1,104 @@
+---
+// The RGB-chevron mark (same geometry as the site logo / scope loader).
+// Self-contained: all sizing + animation lives here so the styles actually
+// reach these elements (a parent's scoped CSS does NOT apply to a child
+// component's markup in Astro).
+//
+//   variant="logo"    static mark (corner logo)
+//   variant="boot"    draws itself in once (boot screen)
+//   variant="spinner" loops build + pulse (photo loader)
+interface Props {
+  variant?: "logo" | "boot" | "spinner";
+  class?: string;
+}
+const { variant = "logo", class: cls = "" } = Astro.props;
+
+const stripes = [
+  { p: "170,24 44,80 170,136 170,146 44,90 170,34", c: "#e23b2f" },
+  { p: "170,34 44,90 170,146 170,156 44,100 170,44", c: "#46a63a" },
+  { p: "170,44 44,100 170,156 170,166 44,110 170,54", c: "#2f80d6" },
+  { p: "170,54 44,110 170,166 170,176 44,120 170,64", c: "#2c6f6f" },
+  { p: "170,64 44,120 170,176 170,186 44,130 170,74", c: "#3a6b39" },
+  { p: "170,74 44,130 170,186 170,196 44,140 170,84", c: "#7c4a3d" },
+];
+const wires = [
+  "170,24 44,80 170,136", "170,34 44,90 170,146", "170,44 44,100 170,156",
+  "170,54 44,110 170,166", "170,64 44,120 170,176", "170,74 44,130 170,186",
+  "170,84 44,140 170,196",
+];
+const showWire = variant !== "logo";
+---
+
+<svg class={`chev chev-${variant} ${cls}`} viewBox="38 18 138 184" fill="none" aria-hidden="true">
+  {stripes.map((s, i) => (
+    <polygon class="chev-stripe" style={`--i:${i}`} points={s.p} fill={s.c} />
+  ))}
+  {
+    showWire &&
+      wires.map((p, i) => <polyline class="chev-wire" style={`--i:${i}`} points={p} />)
+  }
+</svg>
+
+<style>
+  .chev { display: block; }
+  .chev-logo { height: 26px; width: auto; }
+  .chev-boot { width: 36px; height: auto; }
+  .chev-spinner { width: 44px; height: auto; }
+
+  .chev-wire {
+    fill: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    stroke-dasharray: 340;
+  }
+
+  /* boot: green, draws itself in once then holds */
+  .chev-boot .chev-wire {
+    stroke: #7dffb4;
+    stroke-dashoffset: 340;
+    filter: drop-shadow(0 0 3px rgba(57, 255, 136, 0.6));
+    animation: chev-bdraw 1.1s ease forwards;
+    animation-delay: calc(var(--i) * 0.05s);
+  }
+  .chev-boot .chev-stripe {
+    opacity: 0;
+    animation: chev-bfade 0.9s ease forwards;
+    animation-delay: calc(0.4s + var(--i) * 0.06s);
+  }
+
+  /* spinner: amber, loops build + pulse */
+  .chev-spinner .chev-wire {
+    stroke: #ff8c20;
+    filter: drop-shadow(0 0 3px rgba(255, 140, 32, 0.6));
+    animation: chev-sdraw 2.4s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.06s);
+  }
+  .chev-spinner .chev-stripe {
+    animation: chev-spulse 2.4s ease-in-out infinite;
+    animation-delay: calc(var(--i) * -0.05s);
+  }
+
+  @keyframes chev-bdraw { to { stroke-dashoffset: 0; } }
+  @keyframes chev-bfade { from { opacity: 0; } to { opacity: 0.92; } }
+  @keyframes chev-sdraw {
+    0% { stroke-dashoffset: 340; opacity: 0; }
+    20% { opacity: 0.9; }
+    45% { stroke-dashoffset: 0; opacity: 0.9; }
+    80% { stroke-dashoffset: 0; opacity: 0.5; }
+    92% { opacity: 0; }
+    100% { stroke-dashoffset: 340; opacity: 0; }
+  }
+  @keyframes chev-spulse {
+    0%, 14% { opacity: 0.12; }
+    40% { opacity: 1; }
+    60% { opacity: 0.5; }
+    80% { opacity: 1; }
+    100% { opacity: 0.12; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chev-wire { animation: none; stroke-dashoffset: 0; }
+    .chev-stripe { animation: none; opacity: 0.92; }
+  }
+</style>

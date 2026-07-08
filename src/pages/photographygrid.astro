@@ -5,6 +5,8 @@ import exifr from "exifr";
 import { resolve } from "node:path";
 import { matchCamera } from "@/data/cameras";
 import CameraArchive from "@/components/CameraArchive.astro";
+import BrandLogo from "@/components/BrandLogo.astro";
+import Chevron from "@/components/Chevron.astro";
 
 // ── Discover photos (same as the globe view) ────────────────────────────────
 const modules = import.meta.glob<{ default: ImageMetadata }>(
@@ -129,6 +131,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
 
   <main class="gg-root">
     <header class="gg-head">
+      <BrandLogo />
       <a href="/" class="gg-btn" aria-label="Exit">◄ EXIT</a>
       <a href="/photographyglobe/?nav" class="gg-btn gg-switch" data-astro-reload aria-label="Switch to globe view">◱ GLOBE VIEW</a>
       <button type="button" class="gg-btn gg-cambtn" data-open-cameras aria-label="View cameras">◉ CAMERAS</button>
@@ -157,6 +160,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
   </main>
 
   <div class="g-boot" aria-hidden="true">
+    <Chevron variant="boot" />
     <div class="g-boot-lines">
       <span>&gt; PROJECT: PHOTOGRAPHY · v2.6</span>
       <span>&gt; MOUNTING ARCHIVE ........ OK</span>
@@ -178,7 +182,13 @@ const pad = (n: number) => String(n).padStart(3, "0");
       </div>
       <div class="map-lb-body">
         <button type="button" class="map-lb-nav map-lb-prev" aria-label="Previous">‹</button>
-        <img id="map-lb-img" src="" alt="" />
+        <div class="map-lb-imgwrap">
+          <img id="map-lb-img" src="" alt="" />
+          <div class="map-lb-spin" id="map-lb-spin" aria-hidden="true">
+            <Chevron variant="spinner" />
+            <span class="lb-spin-txt">STAND&nbsp;BY</span>
+          </div>
+        </div>
         <button type="button" class="map-lb-nav map-lb-next" aria-label="Next">›</button>
         <aside class="map-lb-panel">
           <div class="map-lb-row">
@@ -236,6 +246,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
     const camEl = document.getElementById("map-lb-cam");
     const camRow = document.getElementById("map-lb-cam-row");
     const modelCanvas = document.getElementById("map-lb-model") as HTMLCanvasElement | null;
+    const spinEl = document.getElementById("map-lb-spin");
     if (!dlg || !img) return;
 
     const wf = modelCanvas ? mountWireframe(modelCanvas) : null;
@@ -292,18 +303,32 @@ const pad = (n: number) => String(n).padStart(3, "0");
         histoCtx.shadowBlur = 0;
       });
     }
-    img.addEventListener("load", drawHistogram);
+    // Show a loader while a fresh image decodes, so a slow load doesn't look
+    // like the previous photo is still up.
+    function onImgLoad() {
+      if (!img) return;
+      img.classList.remove("is-loading");
+      spinEl?.classList.remove("is-on");
+      void img.offsetWidth;
+      img.classList.add("is-decrypt");
+      drawHistogram();
+    }
+    img.addEventListener("load", onImgLoad);
+    img.addEventListener("error", () => {
+      img?.classList.remove("is-loading");
+      spinEl?.classList.remove("is-on");
+    });
 
     let idx = 0;
     function show() {
       const p = gallery[idx];
       if (!p || !img) return;
+      img.classList.remove("is-decrypt");
+      img.classList.add("is-loading");
+      spinEl?.classList.add("is-on");
       img.src = p.full;
       img.alt = p.alt;
-      img.classList.remove("is-decrypt");
-      void img.offsetWidth;
-      img.classList.add("is-decrypt");
-      if (img.complete && img.naturalWidth) drawHistogram();
+      if (img.complete && img.naturalWidth) onImgLoad();
       if (locEl) locEl.textContent = p.loc;
       if (countEl) countEl.textContent = `${idx + 1} / ${gallery.length}`;
       if (filmEl) filmEl.textContent = p.film || "—";
@@ -350,6 +375,29 @@ const pad = (n: number) => String(n).padStart(3, "0");
       if (e.key === "ArrowRight") next();
       else if (e.key === "ArrowLeft") prev();
     });
+
+    fanIn();
+  }
+
+  // Stagger the tiles' entrance by their distance from the top-left corner, so
+  // the sheet fans open diagonally. On a real load we wait for the boot screen
+  // to clear; on a view-switch (?nav → html.booted) it starts almost at once.
+  function fanIn() {
+    const grid = document.querySelector<HTMLElement>(".gg-grid");
+    if (!grid) return;
+    const cells = Array.from(grid.querySelectorAll<HTMLElement>(".gg-cell"));
+    if (!cells.length) return;
+    const gr = grid.getBoundingClientRect();
+    let maxSum = 1;
+    const sums = cells.map(c => {
+      const r = c.getBoundingClientRect();
+      const s = r.left - gr.left + (r.top - gr.top);
+      if (s > maxSum) maxSum = s;
+      return s;
+    });
+    const base = document.documentElement.classList.contains("booted") ? 0.06 : 1.85;
+    cells.forEach((c, i) => c.style.setProperty("--fan", `${(base + (sums[i] / maxSum) * 0.7).toFixed(3)}s`));
+    grid.classList.add("is-fan");
   }
 
   initGrid();
@@ -476,6 +524,19 @@ const pad = (n: number) => String(n).padStart(3, "0");
     border-color: #ff8c20;
     box-shadow: 0 0 18px rgba(255, 140, 32, 0.45);
   }
+  /* Entrance: frames fan out from the top-left. Per-tile delay (--fan) is set
+     in JS from each tile's distance to the top-left corner. */
+  .gg-grid.is-fan .gg-cell {
+    animation: gg-fan 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: var(--fan, 0s);
+  }
+  @keyframes gg-fan {
+    from { opacity: 0; transform: translate(-14px, -18px) scale(0.92) rotate(-1.5deg); }
+    to { opacity: 1; transform: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .gg-grid.is-fan .gg-cell { animation: none; opacity: 1; }
+  }
   .gg-cell img {
     display: block;
     width: 100%;
@@ -527,8 +588,10 @@ const pad = (n: number) => String(n).padStart(3, "0");
     inset: 0;
     z-index: 50;
     pointer-events: none;
+    /* 1px line in a 3px period so the scanlines stay fine on any display
+       scaling / zoom instead of anti-aliasing into a heavy dark wash. */
     background:
-      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.34) 0 1px, transparent 1px 2px),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px),
       radial-gradient(55% 45% at 24% 14%, rgba(255, 255, 255, 0.045), transparent 60%),
       radial-gradient(120% 118% at 50% 46%, transparent 46%, rgba(0, 0, 0, 0.62) 100%);
     box-shadow: inset 0 0 130px 34px rgba(0, 0, 0, 0.5);
@@ -603,6 +666,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
     animation: g-boot-fill 1.6s steps(18, end) forwards;
     animation-delay: 0.2s;
   }
+  .g-boot :global(.chev-boot) { margin-bottom: 4px; }
   @keyframes g-boot-type { to { clip-path: inset(0 0 0 0); } }
   @keyframes g-boot-fill { to { width: 100%; } }
   @keyframes g-boot-blink { 50% { opacity: 0; } }
@@ -628,7 +692,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
   .map-lb[open] { display: grid; place-items: center; }
   .map-lb::backdrop {
     background:
-      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0 1px, transparent 1px 2px),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.34) 0 1px, transparent 1px 3px),
       rgba(2, 3, 8, 0.94);
     backdrop-filter: blur(2px);
   }
@@ -658,6 +722,14 @@ const pad = (n: number) => String(n).padStart(3, "0");
     text-shadow: 0 0 8px rgba(255, 140, 32, 0.5);
   }
   .map-lb-body { display: flex; flex-direction: row; align-items: stretch; min-height: 0; }
+  .map-lb-imgwrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    min-width: 0;
+  }
   #map-lb-img {
     display: block;
     width: auto;
@@ -665,6 +737,27 @@ const pad = (n: number) => String(n).padStart(3, "0");
     max-width: min(70vw, 940px);
     max-height: 78vh;
     object-fit: contain;
+  }
+  #map-lb-img.is-loading { opacity: 0.3; filter: brightness(0.7) saturate(0.55); }
+  .map-lb-spin {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+  .map-lb-spin.is-on { opacity: 1; }
+  .lb-spin-txt {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.6rem;
+    letter-spacing: 0.42em;
+    color: #ffb968;
+    text-shadow: 0 0 9px rgba(255, 140, 32, 0.6);
   }
   #map-lb-img.is-decrypt { animation: g-decrypt 0.55s linear; }
   @keyframes g-decrypt {
@@ -773,11 +866,21 @@ const pad = (n: number) => String(n).padStart(3, "0");
   .map-lb-prev { border-right: 1px solid rgba(255, 140, 32, 0.35); }
   .map-lb-next { border-left: 1px solid rgba(255, 140, 32, 0.35); }
   @media (max-width: 700px) {
-    .map-lb-figure { max-height: 92vh; }
+    .map-lb-figure { max-height: 94vh; }
     .map-lb-body { flex-wrap: wrap; }
-    #map-lb-img { max-width: 82vw; max-height: 52vh; order: 1; }
-    .map-lb-prev { order: 0; }
-    .map-lb-next { order: 2; }
+    .map-lb-imgwrap { order: 0; width: 100%; }
+    #map-lb-img { max-width: 100%; max-height: 56vh; margin: 0 auto; }
+    /* Both arrows drop below the image, side by side. */
+    .map-lb-nav {
+      order: 1;
+      width: 50%;
+      align-self: auto;
+      height: 2.9rem;
+      font-size: 1.5rem;
+      border-top: 1px solid rgba(255, 140, 32, 0.35);
+    }
+    .map-lb-prev { order: 1; border-right: 0; }
+    .map-lb-next { order: 2; border-left: 1px solid rgba(255, 140, 32, 0.35); }
     .map-lb-panel {
       order: 3;
       width: 100%;

@@ -1,17 +1,23 @@
 // Renders a slowly rotating wireframe model onto a <canvas>, in the same
 // green CRT palette as the photography lightboxes. Orthographic-ish projection
 // with a gentle perspective and depth-faded edges so the far side reads dimmer.
+//
+// Pass { interactive: true } to let the user drag the canvas to orbit the
+// model (yaw + pitch); it resumes auto-spin on release.
 
 export type Wire = { verts: number[][]; edges: number[][] };
+export type WireOpts = { interactive?: boolean };
 
 type Norm = { verts: number[][]; edges: number[][] };
 
-export function mountWireframe(canvas: HTMLCanvasElement) {
+export function mountWireframe(canvas: HTMLCanvasElement, opts: WireOpts = {}) {
   const ctx = canvas.getContext("2d");
   let norm: Norm | null = null;
   let spin = 0.6;
+  let pitch = 0; // user-added tilt, on top of the base view angle
   let raf = 0;
   let running = false;
+  let dragging = false;
   const reduced =
     typeof window !== "undefined" &&
     window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
@@ -41,18 +47,33 @@ export function mountWireframe(canvas: HTMLCanvasElement) {
       edges: m.edges,
     };
     spin = 0.6;
+    pitch = 0;
     if (reduced) draw();
     else start();
   }
 
+  // Match the backing store to the element's displayed size so the model never
+  // stretches, whatever the canvas is laid out at.
+  function fit() {
+    const cw = canvas.clientWidth, ch = canvas.clientHeight;
+    if (!cw || !ch) return;
+    const dpr = Math.min(2, (typeof window !== "undefined" && window.devicePixelRatio) || 1);
+    const w = Math.round(cw * dpr), h = Math.round(ch * dpr);
+    if (canvas.width !== w || canvas.height !== h) {
+      canvas.width = w;
+      canvas.height = h;
+    }
+  }
+
   function draw() {
     if (!ctx) return;
+    fit();
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
     if (!norm) return;
     const R = Math.min(W, H) * 0.34;
     const ox = W / 2, oy = H / 2;
-    const tilt = -0.4;
+    const tilt = -0.4 + pitch;
     const cosT = Math.cos(tilt), sinT = Math.sin(tilt);
     const cosS = Math.cos(spin), sinS = Math.sin(spin);
 
@@ -85,7 +106,7 @@ export function mountWireframe(canvas: HTMLCanvasElement) {
 
   function frame() {
     if (!running) return;
-    spin += 0.012;
+    if (!dragging) spin += 0.012; // auto-spin pauses while the user drags
     draw();
     raf = requestAnimationFrame(frame);
   }
@@ -98,6 +119,36 @@ export function mountWireframe(canvas: HTMLCanvasElement) {
     running = false;
     if (raf) cancelAnimationFrame(raf);
     raf = 0;
+  }
+
+  // ── drag to look around ──
+  if (opts.interactive) {
+    canvas.style.cursor = "grab";
+    canvas.style.touchAction = "none";
+    let lastX = 0, lastY = 0;
+    const down = (e: PointerEvent) => {
+      dragging = true;
+      lastX = e.clientX; lastY = e.clientY;
+      canvas.setPointerCapture?.(e.pointerId);
+      canvas.style.cursor = "grabbing";
+      e.preventDefault();
+    };
+    const move = (e: PointerEvent) => {
+      if (!dragging) return;
+      spin += (e.clientX - lastX) * 0.011;
+      pitch = Math.max(-1.15, Math.min(1.15, pitch + (e.clientY - lastY) * 0.009));
+      lastX = e.clientX; lastY = e.clientY;
+      if (!running) draw(); // redraw immediately when auto-spin is off
+    };
+    const up = () => {
+      if (!dragging) return;
+      dragging = false;
+      canvas.style.cursor = "grab";
+    };
+    canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("pointermove", move);
+    canvas.addEventListener("pointerup", up);
+    canvas.addEventListener("pointercancel", up);
   }
 
   return { setModel, start, stop };

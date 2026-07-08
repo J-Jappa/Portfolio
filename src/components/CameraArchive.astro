@@ -30,8 +30,12 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
         }
       </nav>
       <div class="cam-stage">
-        <canvas id="cam-canvas" class="cam-canvas" width="380" height="300" aria-hidden="true"></canvas>
-        <div class="cam-scan" aria-hidden="true"></div>
+        <div class="cam-viewport">
+          <div class="cam-grid" aria-hidden="true"></div>
+          <canvas id="cam-canvas" class="cam-canvas" width="460" height="380" aria-hidden="true"></canvas>
+          <div class="cam-scan" aria-hidden="true"></div>
+          <span class="cam-hint" aria-hidden="true">◑ DRAG TO ROTATE</span>
+        </div>
         <div class="cam-info">
           <div class="cam-count">CAM <span id="cam-idx">1</span> / {cams.length}</div>
           <h2 id="cam-name" class="cam-name"></h2>
@@ -57,7 +61,7 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     const idxEl = document.getElementById("cam-idx");
     const cams = Object.values(CAMERA_MODELS);
     const tabs = Array.from(dlg.querySelectorAll<HTMLButtonElement>(".cam-tab"));
-    const wf = mountWireframe(canvas);
+    const wf = mountWireframe(canvas, { interactive: true });
     let cur = -1;
 
     function select(i: number) {
@@ -74,9 +78,9 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     tabs.forEach((t, i) => t.addEventListener("click", () => select(i)));
 
     function open() {
+      if (!dlg!.open && typeof dlg!.showModal === "function") dlg!.showModal();
       cur = -1;
       select(0);
-      if (!dlg!.open && typeof dlg!.showModal === "function") dlg!.showModal();
     }
     document.querySelectorAll<HTMLElement>("[data-open-cameras]").forEach(b =>
       b.addEventListener("click", e => {
@@ -103,7 +107,7 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     padding: 0;
     border: 0;
     background: transparent;
-    max-width: min(92vw, 820px);
+    max-width: min(94vw, 1000px);
     width: 100%;
     color: #cfeee0;
   }
@@ -146,8 +150,8 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
 
   .cam-body {
     display: grid;
-    grid-template-columns: 190px 1fr;
-    min-height: 340px;
+    grid-template-columns: 210px 1fr;
+    min-height: 460px;
   }
   .cam-rail {
     display: flex;
@@ -195,21 +199,56 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     display: flex;
     flex-direction: column;
   }
+  .cam-viewport {
+    position: relative;
+    height: 380px;
+    overflow: hidden;
+    background:
+      radial-gradient(120% 90% at 50% 34%, rgba(57, 255, 136, 0.08), transparent 70%),
+      rgba(0, 5, 4, 0.72);
+  }
+  /* Tron-style floor grid receding into the distance, behind the model. */
+  .cam-grid {
+    position: absolute;
+    left: 50%;
+    bottom: -8%;
+    width: 230%;
+    height: 70%;
+    transform: translateX(-50%) perspective(300px) rotateX(64deg);
+    transform-origin: bottom center;
+    background-image:
+      linear-gradient(rgba(57, 255, 136, 0.34) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(57, 255, 136, 0.28) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    opacity: 0.55;
+    -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+    mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+  }
   .cam-canvas {
+    position: absolute;
+    inset: 0;
     display: block;
     width: 100%;
-    height: 260px;
-    background:
-      radial-gradient(120% 90% at 50% 40%, rgba(57, 255, 136, 0.08), transparent 70%),
-      rgba(0, 5, 4, 0.6);
+    height: 100%;
+    cursor: grab;
   }
   .cam-scan {
     position: absolute;
-    inset: 0 0 auto 0;
-    height: 260px;
+    inset: 0;
     pointer-events: none;
     background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px);
     mix-blend-mode: multiply;
+  }
+  .cam-hint {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    pointer-events: none;
+    font-size: 0.54rem;
+    letter-spacing: 0.2em;
+    color: rgba(125, 255, 180, 0.6);
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.4);
   }
   .cam-info {
     padding: 12px 18px 18px;
