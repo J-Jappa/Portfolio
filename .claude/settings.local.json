@@ -46,7 +46,9 @@
       "Bash(git mv *)",
       "Bash(mv src/pages/photographymap2.astro src/pages/photographyglobe.astro)",
       "Bash(curl -s http://localhost:4322/photographyglobe/)",
-      "Bash(grep -oE '\\\\.g-gridbtn\\\\{[^}]{0,160}')"
+      "Bash(grep -oE '\\\\.g-gridbtn\\\\{[^}]{0,160}')",
+      "Bash(grep -oE '<div class=\"g-nav\">.{0,220}')",
+      "Bash(awk '{ *)"
     ]
   }
 }

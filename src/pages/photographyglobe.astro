@@ -3,6 +3,8 @@ import HiddenLayout from "@/layouts/HiddenLayout.astro";
 import { getImage } from "astro:assets";
 import { LOCATION_COORDS } from "@/data/locations";
 import landRaw from "@/data/ne-land.geo.json";
+import { matchCamera } from "@/data/cameras";
+import CameraArchive from "@/components/CameraArchive.astro";
 import exifr from "exifr";
 import { resolve } from "node:path";
 
@@ -14,11 +16,22 @@ const modules = import.meta.glob<{ default: ImageMetadata }>(
 
 function parseRoll(folder: string) {
   const label = folder.replace(/^\d{4}(?:-\d{2}){0,2}\s+/, "");
-  const [location, film] = label.split("·").map(s => s.trim());
-  return { location: location || undefined, film: film || undefined };
+  const parts = label.split("·").map(s => s.trim()).filter(Boolean);
+  const location = parts.shift();
+  // The remaining 0–2 segments are film and/or camera, in either order and with
+  // film optional. Whichever segment resolves to a known camera is the camera;
+  // the other is the film stock.
+  let film: string | undefined;
+  let camera: string | undefined;
+  for (const p of parts) {
+    if (!camera && matchCamera(p)) camera = p;
+    else if (!film) film = p;
+    else if (!camera) camera = p;
+  }
+  return { location: location || undefined, film, camera };
 }
 
-type Photo = { full: string; thumb: string; alt: string; caption: string; loc: string; film: string; date: string };
+type Photo = { full: string; thumb: string; alt: string; caption: string; loc: string; film: string; date: string; cam: string; mdl: string };
 const byLocation = new Map<string, Photo[]>();
 const MON = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
 
@@ -28,8 +41,9 @@ for (const [path, mod] of Object.entries(modules)) {
   const parts = path.split("/");
   parts.pop();
   const folder = parts.pop() ?? "";
-  const { location, film } = parseRoll(folder);
+  const { location, film, camera } = parseRoll(folder);
   if (!location) continue;
+  const cm = matchCamera(camera);
   const caption = [location, film].filter(Boolean).join(" · ");
   const full = (await getImage({ src: meta, width: 2000 })).src;
   const thumb = (await getImage({ src: meta, width: 480 })).src;
@@ -52,7 +66,7 @@ for (const [path, mod] of Object.entries(modules)) {
   }
 
   if (!byLocation.has(location)) byLocation.set(location, []);
-  byLocation.get(location)!.push({ full, thumb, alt: caption || "Photograph", caption, loc: location, film: film ?? "", date });
+  byLocation.get(location)!.push({ full, thumb, alt: caption || "Photograph", caption, loc: location, film: film ?? "", date, cam: cm?.name ?? camera ?? "", mdl: cm?.name ?? "" });
 }
 
 const DEG = Math.PI / 180;
@@ -196,7 +210,7 @@ const galleryJSON = esc(
   JSON.stringify(
     galleryData.map(g => ({
       label: g.label,
-      photos: g.photos.map(p => ({ full: p.full, alt: p.alt, loc: p.loc, film: p.film, date: p.date })),
+      photos: g.photos.map(p => ({ full: p.full, alt: p.alt, loc: p.loc, film: p.film, date: p.date, cam: p.cam, mdl: p.mdl })),
     }))
   )
 );
@@ -230,6 +244,7 @@ const galleryJSON = esc(
     <div class="g-nav">
       <a href="/" class="g-back" aria-label="Exit">◄ EXIT</a>
       <a href="/photographygrid/?nav" class="g-gridbtn" data-astro-reload aria-label="Switch to contact sheet">▦ CONTACT SHEET</a>
+      <button type="button" class="g-gridbtn g-cambtn" data-open-cameras aria-label="View cameras">◉ CAMERAS</button>
     </div>
     <div class="g-coord" id="g-coord" aria-hidden="true"></div>
     <div class="g-title"><em>Project:</em><br />Photography</div>
@@ -305,16 +320,32 @@ const galleryJSON = esc(
               aria-hidden="true"
             ></canvas>
           </div>
+          <div class="map-lb-row map-lb-cam-row" id="map-lb-cam-row">
+            <span class="map-lb-k">CAMERA</span>
+            <span id="map-lb-cam" class="map-lb-v"></span>
+            <canvas
+              id="map-lb-model"
+              class="map-lb-model"
+              width="220"
+              height="150"
+              aria-hidden="true"
+            ></canvas>
+          </div>
         </aside>
       </div>
     </figure>
   </dialog>
+
+  <CameraArchive />
 </HiddenLayout>
 
 <script is:inline set:html={`window.__globeLand = ${landJSON};window.__globeMarkers = ${markersJSON};window.__mapGallery = ${galleryJSON};`} />
 
 <script>
-  type Photo = { full: string; alt: string; loc: string; film: string; date: string };
+  import { mountWireframe } from "@/lib/wireframe";
+  import { CAMERA_MODELS } from "@/data/cameras";
+
+  type Photo = { full: string; alt: string; loc: string; film: string; date: string; cam: string; mdl: string };
   type GLoc = { label: string; photos: Photo[] };
   type Marker = { lon: number; lat: number; kind: "dot" | "cluster"; count: number; n: number; label: string };
 
@@ -348,7 +379,13 @@ const galleryJSON = esc(
     const dateEl = document.getElementById("map-lb-date");
     const dateRow = document.getElementById("map-lb-date-row");
     const histoCanvas = document.getElementById("map-lb-histo") as HTMLCanvasElement | null;
+    const camEl = document.getElementById("map-lb-cam");
+    const camRow = document.getElementById("map-lb-cam-row");
+    const modelCanvas = document.getElementById("map-lb-model") as HTMLCanvasElement | null;
     if (!stage || !canvas || !overlay || !dlg || !img) return;
+
+    const wf = modelCanvas ? mountWireframe(modelCanvas) : null;
+    dlg.addEventListener("close", () => wf?.stop());
 
     // RGB intensity histograms of the current photo.
     const histoCtx = histoCanvas?.getContext("2d") ?? null;
@@ -544,6 +581,10 @@ const galleryJSON = esc(
       if (filmEl) filmEl.textContent = p.film || "—";
       if (dateEl) dateEl.textContent = p.date || "—";
       if (dateRow) dateRow.style.display = p.date ? "" : "none";
+      const model = p.mdl ? CAMERA_MODELS[p.mdl] : null;
+      if (camEl) camEl.textContent = p.cam || "—";
+      if (camRow) camRow.style.display = p.cam || model ? "" : "none";
+      wf?.setModel(model ?? null);
     }
     function openGallery(i: number, ox?: number, oy?: number, start = 0) {
       const g = gallery[i];
@@ -609,15 +650,90 @@ const galleryJSON = esc(
       else if (e.key === "ArrowLeft") prev();
     });
 
-    // Bottom carousel → open the gallery at that frame.
+    // ── Bottom carousel: eased auto-scroll, grab-to-drag, tap a frame to open ──
+    let cSuppressClick = false;
     document.querySelectorAll<HTMLButtonElement>(".g-cell").forEach(cell => {
       cell.addEventListener("click", () => {
+        if (cSuppressClick) { cSuppressClick = false; return; }
         const mi = Number(cell.getAttribute("data-mi"));
         const pi = Number(cell.getAttribute("data-pi"));
         const r = cell.getBoundingClientRect();
         openGallery(mi, r.left + r.width / 2, r.top + r.height / 2, pi);
       });
     });
+
+    let carouselStop = () => {};
+    {
+      const track = document.querySelector<HTMLElement>(".g-track");
+      const rail = document.getElementById("g-carousel");
+      if (track && rail) {
+        const AUTO = 70; // px/s baseline drift
+        let half = track.scrollWidth / 2;
+        let off = 0;
+        let factor = reduced ? 0 : 1; // eased auto-scroll gain (0 = paused)
+        let target = reduced ? 0 : 1;
+        let drag = false, moved = 0, startX = 0, startOff = 0;
+        let vel = 0, lastX = 0, lastT = 0, momentum = 0, raf = 0, last = performance.now();
+
+        const remeasure = () => { half = track.scrollWidth / 2; };
+        const hover = (on: boolean) => { if (!drag && !reduced) target = on ? 0 : 1; };
+        rail.addEventListener("mouseenter", () => hover(true));
+        rail.addEventListener("mouseleave", () => hover(false));
+
+        const down = (e: PointerEvent) => {
+          drag = true; moved = 0; target = 0; momentum = 0;
+          startX = e.clientX; startOff = off;
+          vel = 0; lastX = e.clientX; lastT = performance.now();
+          cSuppressClick = false;
+          rail.setPointerCapture?.(e.pointerId);
+          rail.classList.add("is-grab");
+        };
+        const move = (e: PointerEvent) => {
+          if (!drag) return;
+          e.stopPropagation();
+          const dx = e.clientX - startX;
+          moved = Math.max(moved, Math.abs(dx));
+          off = startOff - dx;
+          const now = performance.now(), d = (now - lastT) / 1000;
+          if (d > 0) vel = (e.clientX - lastX) / d;
+          lastX = e.clientX; lastT = now;
+        };
+        const up = (e: PointerEvent) => {
+          if (!drag) return;
+          e.stopPropagation();
+          drag = false;
+          rail.classList.remove("is-grab");
+          cSuppressClick = moved > 6;
+          momentum = -vel; // keep drifting in the flick direction
+          target = reduced ? 0 : rail.matches(":hover") ? 0 : 1;
+        };
+        rail.addEventListener("pointerdown", down);
+        rail.addEventListener("pointermove", move);
+        rail.addEventListener("pointerup", up);
+        rail.addEventListener("pointercancel", up);
+        window.addEventListener("resize", remeasure);
+
+        const tick = (t: number) => {
+          const dt = Math.min(0.05, (t - last) / 1000);
+          last = t;
+          factor += (target - factor) * Math.min(1, dt * 5); // ~0.2s ease in/out
+          if (!drag) {
+            off += (AUTO * factor + momentum) * dt;
+            momentum *= Math.pow(0.02, dt);
+            if (Math.abs(momentum) < 2) momentum = 0;
+          }
+          if (half > 0) off = ((off % half) + half) % half;
+          track.style.transform = `translateX(${-off}px)`;
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+
+        carouselStop = () => {
+          cancelAnimationFrame(raf);
+          window.removeEventListener("resize", remeasure);
+        };
+      }
+    }
 
     // ── pointer: tap a location to open, drag to rotate ──
     const HIT_R = 22, DRAG_THRESH = 5;
@@ -703,6 +819,7 @@ const galleryJSON = esc(
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("resize", onResize);
+      carouselStop();
     };
 
     // ── draw pieces ──
@@ -1068,6 +1185,16 @@ const galleryJSON = esc(
   .g-gridbtn:hover {
     background: rgba(255, 140, 32, 0.16);
     color: #ffd7a8;
+  }
+  .g-cambtn {
+    border-color: rgba(57, 255, 136, 0.6);
+    color: #4dff9b;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
+    box-shadow: 0 0 10px rgba(57, 255, 136, 0.15);
+  }
+  .g-cambtn:hover {
+    background: rgba(57, 255, 136, 0.16);
+    color: #d7ffe8;
   }
   .g-canvas {
     position: absolute;
@@ -1525,8 +1652,21 @@ const galleryJSON = esc(
     border: 1px solid rgba(255, 140, 32, 0.3);
     background: rgba(0, 0, 0, 0.45);
   }
+  .map-lb-model {
+    display: block;
+    width: 100%;
+    height: 130px;
+    margin-top: 4px;
+    border: 1px solid rgba(57, 255, 136, 0.35);
+    background: rgba(0, 6, 4, 0.5);
+    box-shadow: inset 0 0 22px rgba(57, 255, 136, 0.08);
+  }
+  .map-lb-cam-row .map-lb-v {
+    color: #7dffb4;
+    text-shadow: 0 0 7px rgba(57, 255, 136, 0.45);
+  }
 
-  /* ── Bottom carousel: Evangelion-style labels, slow marquee ── */
+  /* ── Bottom carousel: Evangelion-style labels, drag or auto-drift ── */
   .g-carousel {
     position: fixed;
     left: 0;
@@ -1540,16 +1680,19 @@ const galleryJSON = esc(
     box-shadow:
       0 -6px 26px rgba(255, 140, 32, 0.16),
       inset 0 3px 0 rgba(255, 140, 32, 0.2);
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
   }
+  .g-carousel.is-grab { cursor: grabbing; }
+  .g-carousel.is-grab .g-cell,
+  .g-carousel.is-grab .g-cell img { cursor: grabbing; }
   .g-track {
     display: flex;
     align-items: center;
     width: max-content;
     padding: 9px 0;
-    animation: g-marquee 200s linear infinite;
-  }
-  .g-carousel:hover .g-track {
-    animation-play-state: paused;
+    will-change: transform;
   }
   .g-cell {
     flex: none;
@@ -1589,12 +1732,5 @@ const galleryJSON = esc(
     padding: 0 2px;
     transform: scaleX(0.79);
     transform-origin: left;
-  }
-  @keyframes g-marquee {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .g-track { animation: none; }
   }
 </style>

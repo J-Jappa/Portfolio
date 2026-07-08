@@ -7,12 +7,30 @@ here automatically — no code to edit.
 
 ## Add a roll
 
-1. Create a folder named `<location> · <film>`
+1. Create a folder named `<location> · <film>` — or, to show the camera's 3D
+   wireframe in the photo popup, `<location> · <film> · <camera>`
    (the separator is a middle dot `·`, with spaces around it).
 2. Drop the scans inside — `.jpg`, `.png`, `.tiff`, `.webp`, or `.avif`.
 
 That's it. The page rebuilds the masonry, sizes each photo automatically from
 its dimensions, and shows `location · film` on hover.
+
+### Camera (optional third segment)
+
+Add the camera as a third `·` segment and its rotating wireframe appears in the
+lightbox (globe **and** contact sheet), under the RGB levels. Matching is
+forgiving about case/spacing/punctuation. Models currently available:
+
+- `Nikon FM`
+- `Panomicron Oxygen`
+- `Yashica-A`
+- `Pentax Espio 95s`
+
+e.g. `Sydney, NSW · Kodak Gold 200 · Nikon FM`. A camera that isn't in that list
+still shows as a text label — it just won't have a wireframe yet. The models are
+placeholders in [`src/data/cameras.ts`](../../data/cameras.ts); swap any builder
+for a real one (vertices + edge index pairs, lens facing +Z) to drop in proper
+CAD — an OBJ's `v`/`l` lines map straight onto that shape.
 
 ### Examples
 

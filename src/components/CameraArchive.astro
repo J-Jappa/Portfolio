@@ -1,0 +1,261 @@
+---
+// A modal "camera archive" browser: a vertical rail of cameras on the left to
+// select from, and a large rotating wireframe with name / spec / description on
+// the right. Opened by clicking any element carrying `data-open-cameras`.
+// Drop <CameraArchive /> into a page and add a trigger button somewhere.
+import { CAMERA_MODELS } from "@/data/cameras";
+
+const cams = Object.values(CAMERA_MODELS).map(c => ({
+  name: c.name,
+  spec: c.spec,
+  desc: c.desc,
+}));
+---
+
+<dialog id="cam-archive" class="cam-dlg" aria-label="Camera archive">
+  <div class="cam-win">
+    <div class="cam-bar">
+      <span class="cam-bar-t">▣ CAMERA ARCHIVE</span>
+      <button type="button" class="cam-x" aria-label="Close">✕</button>
+    </div>
+    <div class="cam-body">
+      <nav class="cam-rail" aria-label="Select a camera">
+        {
+          cams.map((c, i) => (
+            <button type="button" class="cam-tab" data-cam={i} aria-pressed={i === 0 ? "true" : "false"}>
+              <span class="cam-tab-name">{c.name}</span>
+              <span class="cam-tab-spec">{c.spec}</span>
+            </button>
+          ))
+        }
+      </nav>
+      <div class="cam-stage">
+        <canvas id="cam-canvas" class="cam-canvas" width="380" height="300" aria-hidden="true"></canvas>
+        <div class="cam-scan" aria-hidden="true"></div>
+        <div class="cam-info">
+          <div class="cam-count">CAM <span id="cam-idx">1</span> / {cams.length}</div>
+          <h2 id="cam-name" class="cam-name"></h2>
+          <div id="cam-spec" class="cam-spec"></div>
+          <p id="cam-desc" class="cam-desc"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
+
+<script>
+  import { mountWireframe } from "@/lib/wireframe";
+  import { CAMERA_MODELS } from "@/data/cameras";
+
+  function initCamArchive() {
+    const dlg = document.getElementById("cam-archive") as HTMLDialogElement | null;
+    const canvas = document.getElementById("cam-canvas") as HTMLCanvasElement | null;
+    if (!dlg || !canvas) return;
+    const nameEl = document.getElementById("cam-name");
+    const specEl = document.getElementById("cam-spec");
+    const descEl = document.getElementById("cam-desc");
+    const idxEl = document.getElementById("cam-idx");
+    const cams = Object.values(CAMERA_MODELS);
+    const tabs = Array.from(dlg.querySelectorAll<HTMLButtonElement>(".cam-tab"));
+    const wf = mountWireframe(canvas);
+    let cur = -1;
+
+    function select(i: number) {
+      if (i < 0 || i >= cams.length || i === cur) return;
+      cur = i;
+      const c = cams[i];
+      wf.setModel(c);
+      if (nameEl) nameEl.textContent = c.name;
+      if (specEl) specEl.textContent = c.spec;
+      if (descEl) descEl.textContent = c.desc;
+      if (idxEl) idxEl.textContent = String(i + 1);
+      tabs.forEach((t, j) => t.setAttribute("aria-pressed", j === i ? "true" : "false"));
+    }
+    tabs.forEach((t, i) => t.addEventListener("click", () => select(i)));
+
+    function open() {
+      cur = -1;
+      select(0);
+      if (!dlg!.open && typeof dlg!.showModal === "function") dlg!.showModal();
+    }
+    document.querySelectorAll<HTMLElement>("[data-open-cameras]").forEach(b =>
+      b.addEventListener("click", e => {
+        e.preventDefault();
+        open();
+      })
+    );
+    dlg.querySelector(".cam-x")?.addEventListener("click", () => dlg.close());
+    dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
+    dlg.addEventListener("close", () => wf.stop());
+    dlg.addEventListener("keydown", e => {
+      if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); select((cur + 1) % cams.length); }
+      else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); select((cur - 1 + cams.length) % cams.length); }
+    });
+  }
+
+  initCamArchive();
+  document.addEventListener("astro:after-swap", initCamArchive);
+</script>
+
+<style>
+  .cam-dlg {
+    margin: auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    max-width: min(92vw, 820px);
+    width: 100%;
+    color: #cfeee0;
+  }
+  .cam-dlg::backdrop {
+    background: rgba(1, 4, 3, 0.72);
+    backdrop-filter: blur(2px);
+  }
+  .cam-win {
+    border: 2px solid rgba(57, 255, 136, 0.55);
+    background: rgba(3, 8, 6, 0.94);
+    box-shadow: 0 0 44px rgba(57, 255, 136, 0.22), inset 0 0 34px rgba(57, 255, 136, 0.06);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .cam-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0.7rem;
+    border-bottom: 2px solid rgba(57, 255, 136, 0.4);
+    background: rgba(57, 255, 136, 0.08);
+  }
+  .cam-bar-t {
+    font-size: 0.7rem;
+    letter-spacing: 0.24em;
+    color: #7dffb4;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
+  }
+  .cam-x {
+    border: 1px solid rgba(57, 255, 136, 0.5);
+    background: transparent;
+    color: #7dffb4;
+    font-family: inherit;
+    font-size: 0.72rem;
+    line-height: 1;
+    padding: 0.2rem 0.4rem;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .cam-x:hover { background: rgba(57, 255, 136, 0.18); color: #daffe9; }
+
+  .cam-body {
+    display: grid;
+    grid-template-columns: 190px 1fr;
+    min-height: 340px;
+  }
+  .cam-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px;
+    border-right: 2px solid rgba(57, 255, 136, 0.28);
+    background: rgba(0, 6, 4, 0.5);
+  }
+  .cam-tab {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+    padding: 0.5rem 0.6rem;
+    border: 1px solid transparent;
+    border-left: 2px solid transparent;
+    background: transparent;
+    color: #9fd9c1;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .cam-tab:hover { background: rgba(57, 255, 136, 0.08); color: #daffe9; }
+  .cam-tab[aria-pressed="true"] {
+    background: rgba(57, 255, 136, 0.14);
+    border-color: rgba(57, 255, 136, 0.45);
+    border-left-color: #39ff88;
+    color: #eafff4;
+  }
+  .cam-tab-name {
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.4);
+  }
+  .cam-tab-spec {
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+
+  .cam-stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .cam-canvas {
+    display: block;
+    width: 100%;
+    height: 260px;
+    background:
+      radial-gradient(120% 90% at 50% 40%, rgba(57, 255, 136, 0.08), transparent 70%),
+      rgba(0, 5, 4, 0.6);
+  }
+  .cam-scan {
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 260px;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px);
+    mix-blend-mode: multiply;
+  }
+  .cam-info {
+    padding: 12px 18px 18px;
+    border-top: 1px solid rgba(57, 255, 136, 0.25);
+  }
+  .cam-count {
+    font-size: 0.56rem;
+    letter-spacing: 0.24em;
+    color: #ff8c20;
+    text-shadow: 0 0 6px rgba(255, 140, 32, 0.4);
+  }
+  .cam-name {
+    margin: 4px 0 2px;
+    font-family: "Times New Roman", Times, serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 1.35rem;
+    letter-spacing: 0.01em;
+    color: #7dffb4;
+    text-shadow: 0 0 10px rgba(57, 255, 136, 0.6);
+    transform: scaleX(0.86);
+    transform-origin: left;
+  }
+  .cam-spec {
+    font-size: 0.62rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #9fd9c1;
+    margin-bottom: 8px;
+  }
+  .cam-desc {
+    margin: 0;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: #cfeee0;
+    max-width: 46ch;
+  }
+
+  @media (max-width: 560px) {
+    .cam-body { grid-template-columns: 1fr; }
+    .cam-rail {
+      flex-direction: row;
+      flex-wrap: wrap;
+      border-right: 0;
+      border-bottom: 2px solid rgba(57, 255, 136, 0.28);
+    }
+    .cam-tab { flex: 1 1 44%; }
+  }
+</style>
