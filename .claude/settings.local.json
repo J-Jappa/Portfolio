@@ -58,7 +58,10 @@
       "Bash(rm -f ./_gen-icons.mjs)",
       "Bash(node -e \"const s=require\\('sharp'\\); \\(async\\(\\)=>{for\\(const f of ['icon-16.png','icon-32.png','icon-192.png','apple-touch-icon.png','maskable-icon-512.png']\\){const m=await s\\('public/icons/'+f\\).metadata\\(\\);console.log\\(f, m.width+'x'+m.height, m.channels+'ch'\\);} }\\)\\(\\)\")",
       "Bash(node -e \"const s=require\\('sharp'\\); \\(async\\(\\)=>{const m=await s\\('public/icons/icon-32.png'\\).stats\\(\\); console.log\\('icon-32 hasAlpha:', \\(await s\\('public/icons/icon-32.png'\\).metadata\\(\\)\\).hasAlpha\\); const a=await s\\('public/icons/apple-touch-icon.png'\\).metadata\\(\\); console.log\\('apple-touch', a.width+'x'+a.height, 'alpha', a.hasAlpha\\);}\\)\\(\\)\")",
-      "Bash(python -c ' *)"
+      "Bash(python -c ' *)",
+      "Bash(curl -s http://localhost:4322/)",
+      "Bash(grep -oE 'scope-link|/photographyglobe/\"[^>]*data-astro-reload|PHOTO//SCOPE')",
+      "Bash(curl -s http://localhost:4322/about/)"
     ]
   }
 }

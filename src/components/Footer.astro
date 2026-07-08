@@ -20,5 +20,55 @@ const year = new Date().getFullYear();
         )}
       </nav>
     </div>
+
+    <!-- Quiet terminal-styled link into the photography globe (its own aesthetic). -->
+    <div class="mt-4 flex justify-center sm:justify-end">
+      <a
+        href="/photographyglobe/"
+        data-astro-reload
+        class="scope-link"
+        aria-label="Photography — location scope"
+        title="Photography · location scope"
+      >
+        <img src="/logo.svg" alt="" class="scope-link-mark" width="10" height="18" />
+        <span>PHOTO//SCOPE</span>
+      </a>
+    </div>
   </div>
 </footer>
+
+<style>
+  .scope-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border: 1px solid rgba(57, 255, 136, 0.28);
+    border-radius: 4px;
+    background: rgba(5, 11, 8, 0.9);
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #4dff9b;
+    text-decoration: none;
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.4);
+    opacity: 0.5;
+    transition: opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease,
+      letter-spacing 0.25s ease;
+  }
+  .scope-link:hover,
+  .scope-link:focus-visible {
+    opacity: 1;
+    border-color: rgba(57, 255, 136, 0.7);
+    box-shadow: 0 0 16px rgba(57, 255, 136, 0.28), inset 0 0 12px rgba(57, 255, 136, 0.06);
+    letter-spacing: 0.26em;
+    outline: none;
+  }
+  .scope-link-mark {
+    display: block;
+    height: 15px;
+    width: auto;
+    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.35));
+  }
+</style>
