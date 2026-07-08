@@ -130,16 +130,45 @@ const pad = (n: number) => String(n).padStart(3, "0");
   </svg>
 
   <main class="gg-root">
-    <header class="gg-head">
+    <nav class="gg-rail" aria-label="Views">
       <BrandLogo />
-      <a href="/" class="gg-btn" aria-label="Exit">◄ EXIT</a>
-      <a href="/photographyglobe/?nav" class="gg-btn gg-switch" data-astro-reload aria-label="Switch to globe view">◱ GLOBE VIEW</a>
-      <button type="button" class="gg-btn gg-cambtn" data-open-cameras aria-label="View cameras">◉ CAMERAS</button>
-      <div class="gg-readout">CONTACT SHEET · {pad(total)} FRAMES</div>
-      <div class="gg-title"><em>Project:</em><br />Photography</div>
-    </header>
+      <a href="/" class="g-tile g-tile-exit" aria-label="Exit to home">
+        <span class="g-tile-art" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M30 10 L14 24 L30 38" /><line x1="14" y1="24" x2="38" y2="24" /></svg>
+        </span>
+        <span class="g-tile-label">EXIT</span>
+      </a>
+      <a
+        href="/photographyglobe/?nav"
+        class="g-tile g-tile-globe"
+        data-astro-reload
+        aria-label="Switch to globe view"
+      >
+        <span class="g-tile-art" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="18" />
+            <ellipse cx="24" cy="24" rx="18" ry="7" />
+            <ellipse cx="24" cy="24" rx="7" ry="18" />
+            <line x1="6" y1="24" x2="42" y2="24" />
+          </svg>
+        </span>
+        <span class="g-tile-label">GLOBE</span>
+      </a>
+      <button type="button" class="g-tile g-tile-cam" data-open-cameras aria-label="Browse the cameras">
+        <span class="g-tile-art g-cam-view" aria-hidden="true">
+          <canvas id="g-cam-preview" class="g-tile-canvas" width="132" height="98"></canvas>
+        </span>
+        <span class="g-tile-label">CAMERAS</span>
+      </button>
+    </nav>
 
-    <section class="gg-grid">
+    <div class="gg-main">
+      <header class="gg-head">
+        <div class="gg-readout">CONTACT SHEET · {pad(total)} FRAMES</div>
+        <div class="gg-title"><em>Project:</em><br />Photography</div>
+      </header>
+
+      <section class="gg-grid">
       {
         tiles.map((t, i) => (
           <button
@@ -156,7 +185,8 @@ const pad = (n: number) => String(n).padStart(3, "0");
           </button>
         ))
       }
-    </section>
+      </section>
+    </div>
   </main>
 
   <div class="g-boot" aria-hidden="true">
@@ -251,6 +281,13 @@ const pad = (n: number) => String(n).padStart(3, "0");
 
     const wf = modelCanvas ? mountWireframe(modelCanvas) : null;
     dlg.addEventListener("close", () => wf?.stop());
+
+    // Live camera wireframe in the CAMERAS nav tile (mini viewer).
+    const camPreviewCanvas = document.getElementById("g-cam-preview") as HTMLCanvasElement | null;
+    if (camPreviewCanvas) {
+      const cams = Object.values(CAMERA_MODELS);
+      mountWireframe(camPreviewCanvas).setModel(CAMERA_MODELS["Nikon FM"] ?? cams[0] ?? null);
+    }
 
     const prevBtn = dlg.querySelector<HTMLButtonElement>(".map-lb-prev");
     const nextBtn = dlg.querySelector<HTMLButtonElement>(".map-lb-next");
@@ -430,7 +467,22 @@ const pad = (n: number) => String(n).padStart(3, "0");
     color: #4dff9b;
     font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
     padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 3vw, 2.4rem) 4rem;
+    display: flex;
+    align-items: flex-start;
+    gap: clamp(0.8rem, 2vw, 1.6rem);
   }
+  /* Nav lives in a vertical rail down the left, matching the globe. */
+  .gg-rail {
+    flex: none;
+    position: sticky;
+    top: clamp(1rem, 3vw, 2rem);
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 13px;
+  }
+  .gg-main { flex: 1; min-width: 0; }
 
   .gg-head {
     position: relative;
@@ -441,37 +493,84 @@ const pad = (n: number) => String(n).padStart(3, "0");
     min-height: 3.4rem;
     margin-bottom: clamp(1.2rem, 3vw, 2rem);
   }
-  .gg-btn {
-    display: inline-flex;
+  /* View tiles — same look as the globe's left rail. */
+  .g-tile {
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 0.85rem;
-    border: 1px solid rgba(57, 255, 136, 0.6);
-    background: rgba(5, 10, 8, 0.6);
+    gap: 6px;
+    width: 80px;
+    padding: 9px 7px 7px;
+    border: 1px solid rgba(57, 255, 136, 0.5);
+    background: rgba(6, 12, 9, 0.62);
     color: #4dff9b;
     text-decoration: none;
-    font-family: inherit;
-    font-size: 0.78rem;
-    letter-spacing: 0.14em;
     cursor: pointer;
-    text-shadow: 0 0 8px rgba(57, 255, 136, 0.5);
-    box-shadow: 0 0 10px rgba(57, 255, 136, 0.15);
-    transition: background 0.2s ease, color 0.2s ease;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(57, 255, 136, 0.05);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease,
+      background 0.18s ease;
   }
-  .gg-btn:hover {
-    background: rgba(57, 255, 136, 0.14);
-    color: #eafff2;
+  .g-tile:hover {
+    transform: translateX(4px);
+    border-color: #4dff9b;
+    background: rgba(6, 20, 12, 0.72);
+    box-shadow: 0 0 20px rgba(57, 255, 136, 0.35);
   }
-  .gg-switch {
-    border-color: rgba(255, 140, 32, 0.6);
+  .g-tile-exit:hover { transform: translateX(-4px); }
+  .g-tile-label {
+    font-size: 0.5rem;
+    letter-spacing: 0.16em;
+    text-shadow: 0 0 7px rgba(57, 255, 136, 0.5);
+    white-space: nowrap;
+  }
+  .g-tile-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 62px;
+    height: 46px;
+  }
+  .g-tile-art svg {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.4;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.4));
+  }
+  .g-cam-view {
+    border: 1px solid rgba(57, 255, 136, 0.28);
+    background:
+      radial-gradient(120% 90% at 50% 38%, rgba(57, 255, 136, 0.09), transparent 70%),
+      rgba(0, 6, 4, 0.55);
+    box-shadow: inset 0 0 12px rgba(57, 255, 136, 0.08);
+  }
+  .g-tile-canvas { width: 100%; height: 100%; display: block; pointer-events: none; }
+  /* Exit is deliberately smaller/dimmer to deemphasise it. */
+  .g-tile-exit {
+    padding: 5px 6px 4px;
+    opacity: 0.78;
+  }
+  .g-tile-exit:hover { opacity: 1; }
+  .g-tile-exit .g-tile-art { width: 30px; height: 20px; }
+  .g-tile-exit .g-tile-label { font-size: 0.44rem; }
+  .g-tile-globe .g-tile-art { width: 44px; height: 44px; }
+  /* Globe tile is orange (it jumps to the amber globe view). */
+  .g-tile-globe {
+    border-color: rgba(255, 140, 32, 0.55);
     color: #ff8c20;
-    text-shadow: 0 0 8px rgba(255, 140, 32, 0.5);
-    box-shadow: 0 0 10px rgba(255, 140, 32, 0.15);
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.4), inset 0 0 12px rgba(255, 140, 32, 0.05);
   }
-  .gg-switch:hover {
-    background: rgba(255, 140, 32, 0.16);
-    color: #ffd7a8;
+  .g-tile-globe:hover {
+    border-color: #ff8c20;
+    background: rgba(20, 12, 4, 0.72);
+    box-shadow: 0 0 20px rgba(255, 140, 32, 0.35);
   }
+  .g-tile-globe .g-tile-label { text-shadow: 0 0 7px rgba(255, 140, 32, 0.5); }
+  .g-tile-globe .g-tile-art svg { filter: drop-shadow(0 0 4px rgba(255, 140, 32, 0.45)); }
   .gg-readout {
     align-self: center;
     font-size: 0.72rem;
@@ -588,19 +687,15 @@ const pad = (n: number) => String(n).padStart(3, "0");
     inset: 0;
     z-index: 50;
     pointer-events: none;
-    /* 1px line in a 3px period so the scanlines stay fine on any display
-       scaling / zoom instead of anti-aliasing into a heavy dark wash. */
+    /* Static scanline layer (no animation) so it paints crisply at device
+       resolution instead of being composited to a 1x texture and upscaled —
+       which fattened the lines on high-DPI / scaled displays. Flicker lives on
+       ::after (no fine texture). See the globe page for the full note. */
     background:
-      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0 1px, transparent 1px 3px),
+      repeating-linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0 1px, transparent 1px 3px),
       radial-gradient(55% 45% at 24% 14%, rgba(255, 255, 255, 0.045), transparent 60%),
       radial-gradient(120% 118% at 50% 46%, transparent 46%, rgba(0, 0, 0, 0.62) 100%);
     box-shadow: inset 0 0 130px 34px rgba(0, 0, 0, 0.5);
-    animation: g-flicker 0.15s steps(3) infinite;
-  }
-  @keyframes g-flicker {
-    0% { opacity: 1; }
-    50% { opacity: 0.96; }
-    100% { opacity: 1; }
   }
   .g-power {
     position: fixed;
@@ -866,6 +961,25 @@ const pad = (n: number) => String(n).padStart(3, "0");
   .map-lb-prev { border-right: 1px solid rgba(255, 140, 32, 0.35); }
   .map-lb-next { border-left: 1px solid rgba(255, 140, 32, 0.35); }
   @media (max-width: 700px) {
+    /* Rail becomes a compact top row of label pills (old-style buttons). */
+    .gg-root { flex-direction: column; gap: 0.7rem; }
+    .gg-rail {
+      position: static;
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      align-self: stretch;
+    }
+    .g-tile {
+      flex-direction: row;
+      width: auto;
+      gap: 0;
+      padding: 0.32rem 0.6rem;
+    }
+    .g-tile-art { display: none; }
+    .g-tile-label { font-size: 0.56rem; letter-spacing: 0.12em; }
+    .g-tile-exit { opacity: 0.85; padding: 0.3rem 0.5rem; }
     .map-lb-figure { max-height: 94vh; }
     .map-lb-body { flex-wrap: wrap; }
     .map-lb-imgwrap { order: 0; width: 100%; }
@@ -896,7 +1010,6 @@ const pad = (n: number) => String(n).padStart(3, "0");
     .g-boot { animation: g-boot-fade 0.6s ease forwards; }
     .g-boot-lines span { animation: none; clip-path: none; }
     .g-boot-progress i { animation: none; width: 100%; }
-    .g-crt { animation: none; }
     .g-power { display: none; }
     #map-lb-img.is-decrypt { animation: none; }
   }

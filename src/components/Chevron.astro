@@ -1,104 +1,123 @@
 ---
-// The RGB-chevron mark (same geometry as the site logo / scope loader).
-// Self-contained: all sizing + animation lives here so the styles actually
-// reach these elements (a parent's scoped CSS does NOT apply to a child
-// component's markup in Astro).
-//
-//   variant="logo"    static mark (corner logo)
-//   variant="boot"    draws itself in once (boot screen)
-//   variant="spinner" loops build + pulse (photo loader)
+// Two glyphs, one component:
+//   variant="logo"            → the new "1a" brand mark (static), used for the
+//                               corner logo + favicon-style placements.
+//   variant="boot"|"spinner"  → the ORIGINAL scope-loader glyph + animation,
+//                               kept verbatim (6 colour stripes that pulse, 7
+//                               amber leading-edge polylines that trace in, a
+//                               glyph-wide glow). Used for the loading states.
 interface Props {
   variant?: "logo" | "boot" | "spinner";
   class?: string;
 }
 const { variant = "logo", class: cls = "" } = Astro.props;
+const isLoader = variant !== "logo";
 
-const stripes = [
-  { p: "170,24 44,80 170,136 170,146 44,90 170,34", c: "#e23b2f" },
-  { p: "170,34 44,90 170,146 170,156 44,100 170,44", c: "#46a63a" },
-  { p: "170,44 44,100 170,156 170,166 44,110 170,54", c: "#2f80d6" },
-  { p: "170,54 44,110 170,166 170,176 44,120 170,64", c: "#2c6f6f" },
-  { p: "170,64 44,120 170,176 170,186 44,130 170,74", c: "#3a6b39" },
-  { p: "170,74 44,130 170,186 170,196 44,140 170,84", c: "#7c4a3d" },
+// New 1a brand mark.
+const logoBands = [
+  { p: "118,22 118,50 63,107 36,107", c: "#E9382E" },
+  { p: "118,50 118,71 83,107 63,107", c: "#6ABE45" },
+  { p: "118,71 118,88 103,107 83,107", c: "#49AFED" },
+  { p: "36,107 63,107 118,164 118,192", c: "#854B41" },
+  { p: "63,107 83,107 118,143 118,164", c: "#607258" },
+  { p: "83,107 103,107 118,126 118,143", c: "#417082" },
 ];
-const wires = [
-  "170,24 44,80 170,136", "170,34 44,90 170,146", "170,44 44,100 170,156",
-  "170,54 44,110 170,166", "170,64 44,120 170,176", "170,74 44,130 170,186",
-  "170,84 44,140 170,196",
+
+// Original scope-loader glyph — geometry, colours and stagger kept verbatim.
+const loaderStripes = [
+  { p: "170,24 44,80 170,136 170,146 44,90 170,34", c: "#e23b2f", d: -0.2 },
+  { p: "170,34 44,90 170,146 170,156 44,100 170,44", c: "#46a63a", d: -0.16 },
+  { p: "170,44 44,100 170,156 170,166 44,110 170,54", c: "#2f80d6", d: -0.12 },
+  { p: "170,54 44,110 170,166 170,176 44,120 170,64", c: "#2c6f6f", d: -0.08 },
+  { p: "170,64 44,120 170,176 170,186 44,130 170,74", c: "#3a6b39", d: -0.04 },
+  { p: "170,74 44,130 170,186 170,196 44,140 170,84", c: "#7c4a3d", d: 0 },
 ];
-const showWire = variant !== "logo";
+const loaderWires = [
+  { p: "170,24 44,80 170,136", d: -0.24 },
+  { p: "170,34 44,90 170,146", d: -0.2 },
+  { p: "170,44 44,100 170,156", d: -0.16 },
+  { p: "170,54 44,110 170,166", d: -0.12 },
+  { p: "170,64 44,120 170,176", d: -0.08 },
+  { p: "170,74 44,130 170,186", d: -0.04 },
+  { p: "170,84 44,140 170,196", d: 0 },
+];
 ---
 
-<svg class={`chev chev-${variant} ${cls}`} viewBox="38 18 138 184" fill="none" aria-hidden="true">
-  {stripes.map((s, i) => (
-    <polygon class="chev-stripe" style={`--i:${i}`} points={s.p} fill={s.c} />
-  ))}
-  {
-    showWire &&
-      wires.map((p, i) => <polyline class="chev-wire" style={`--i:${i}`} points={p} />)
-  }
-</svg>
+{
+  isLoader ? (
+    <svg class={`chev chev-${variant} ${cls}`} viewBox="38 18 138 184" fill="none" aria-hidden="true">
+      {loaderStripes.map(s => (
+        <polygon class="scope-stripe" style={`animation-delay:${s.d}s`} points={s.p} fill={s.c} />
+      ))}
+      {loaderWires.map(w => (
+        <polyline class="scope-wire" style={`animation-delay:${w.d}s`} points={w.p} />
+      ))}
+    </svg>
+  ) : (
+    <svg class={`chev chev-logo ${cls}`} viewBox="28 14 98 186" fill="none" aria-hidden="true">
+      {logoBands.map(b => (
+        <polygon points={b.p} fill={b.c} />
+      ))}
+    </svg>
+  )
+}
 
 <style>
   .chev { display: block; }
-  .chev-logo { height: 26px; width: auto; }
-  .chev-boot { width: 36px; height: auto; }
-  .chev-spinner { width: 44px; height: auto; }
+  .chev-logo { height: 46px; width: auto; }
+  .chev-boot { height: 62px; width: auto; }
+  .chev-spinner { height: 90px; width: auto; }
 
-  .chev-wire {
+  /* ── original scope-loader animation (verbatim) ── */
+  .chev-boot,
+  .chev-spinner {
+    animation: scope-glow 4.2s ease-in-out infinite;
+  }
+  .scope-stripe {
+    animation: scope-pulse 4.2s ease-in-out infinite;
+  }
+  .scope-wire {
     fill: none;
-    stroke-width: 2;
+    stroke: #f0a830;
+    stroke-width: 2.2;
     stroke-linejoin: round;
     stroke-linecap: round;
     stroke-dasharray: 340;
+    animation: scope-draw 4.2s ease-in-out infinite;
   }
-
-  /* boot: green, draws itself in once then holds */
-  .chev-boot .chev-wire {
-    stroke: #7dffb4;
-    stroke-dashoffset: 340;
-    filter: drop-shadow(0 0 3px rgba(57, 255, 136, 0.6));
-    animation: chev-bdraw 1.1s ease forwards;
-    animation-delay: calc(var(--i) * 0.05s);
-  }
-  .chev-boot .chev-stripe {
-    opacity: 0;
-    animation: chev-bfade 0.9s ease forwards;
-    animation-delay: calc(0.4s + var(--i) * 0.06s);
-  }
-
-  /* spinner: amber, loops build + pulse */
-  .chev-spinner .chev-wire {
-    stroke: #ff8c20;
-    filter: drop-shadow(0 0 3px rgba(255, 140, 32, 0.6));
-    animation: chev-sdraw 2.4s ease-in-out infinite;
-    animation-delay: calc(var(--i) * -0.06s);
-  }
-  .chev-spinner .chev-stripe {
-    animation: chev-spulse 2.4s ease-in-out infinite;
-    animation-delay: calc(var(--i) * -0.05s);
-  }
-
-  @keyframes chev-bdraw { to { stroke-dashoffset: 0; } }
-  @keyframes chev-bfade { from { opacity: 0; } to { opacity: 0.92; } }
-  @keyframes chev-sdraw {
+  @keyframes scope-draw {
     0% { stroke-dashoffset: 340; opacity: 0; }
-    20% { opacity: 0.9; }
-    45% { stroke-dashoffset: 0; opacity: 0.9; }
-    80% { stroke-dashoffset: 0; opacity: 0.5; }
+    6% { opacity: 0.9; }
+    22% { stroke-dashoffset: 0; opacity: 0.9; }
+    84% { stroke-dashoffset: 0; opacity: 0.5; }
     92% { opacity: 0; }
     100% { stroke-dashoffset: 340; opacity: 0; }
   }
-  @keyframes chev-spulse {
-    0%, 14% { opacity: 0.12; }
-    40% { opacity: 1; }
-    60% { opacity: 0.5; }
+  @keyframes scope-pulse {
+    0%, 16% { opacity: 0.06; }
+    32% { opacity: 1; }
+    44% { opacity: 0.42; }
+    56% { opacity: 1; }
+    68% { opacity: 0.48; }
     80% { opacity: 1; }
-    100% { opacity: 0.12; }
+    92% { opacity: 1; }
+    97% { opacity: 0.06; }
+    100% { opacity: 0.06; }
+  }
+  @keyframes scope-glow {
+    0%, 100% { filter: drop-shadow(0 0 2px transparent); }
+    50% { filter: drop-shadow(0 0 5px #f0a830); }
   }
 
+  @media (max-width: 720px) {
+    .chev-logo { height: 32px; }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .chev-wire { animation: none; stroke-dashoffset: 0; }
-    .chev-stripe { animation: none; opacity: 0.92; }
+    .chev-boot,
+    .chev-spinner,
+    .scope-stripe,
+    .scope-wire { animation: none; }
+    .scope-stripe { opacity: 1; }
+    .scope-wire { stroke-dashoffset: 0; opacity: 0.5; }
   }
 </style>

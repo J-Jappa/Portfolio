@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <g transform="translate(256 256) scale(2.35) translate(-107 -110)">
-    <polygon points="170,24 44,80 170,136 170,146 44,90 170,34" fill="#e23b2f"/>
-    <polygon points="170,34 44,90 170,146 170,156 44,100 170,44" fill="#46a63a"/>
-    <polygon points="170,44 44,100 170,156 170,166 44,110 170,54" fill="#2f80d6"/>
-    <polygon points="170,54 44,110 170,166 170,176 44,120 170,64" fill="#2c6f6f"/>
-    <polygon points="170,64 44,120 170,176 170,186 44,130 170,74" fill="#3a6b39"/>
-    <polygon points="170,74 44,130 170,186 170,196 44,140 170,84" fill="#7c4a3d"/>
+  <g transform="translate(256 256) scale(2.3) translate(-77 -107)">
+    <polygon points="118,22 118,50 63,107 36,107" fill="#E9382E"/>
+    <polygon points="118,50 118,71 83,107 63,107" fill="#6ABE45"/>
+    <polygon points="118,71 118,88 103,107 83,107" fill="#49AFED"/>
+    <polygon points="36,107 63,107 118,164 118,192" fill="#854B41"/>
+    <polygon points="63,107 83,107 118,143 118,164" fill="#607258"/>
+    <polygon points="83,107 103,107 118,126 118,143" fill="#417082"/>
   </g>
 </svg>
