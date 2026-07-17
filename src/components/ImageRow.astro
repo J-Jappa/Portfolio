@@ -31,12 +31,15 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
     <figure class="m-0">
       {lightbox ? (
         <>
+          {/* Opens the shared #site-lightbox in Layout.astro */}
           <button
             class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
                    transition-all hover:border-accent/50
                    hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
                    focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
-            data-open={`${uid}-dlg-${i}`}
+            data-lb-src={img.src}
+            data-lb-alt={img.alt ?? ""}
+            data-lb-caption={img.caption ?? ""}
             aria-label={img.alt ? `Open image: ${img.alt}` : `Open image ${i + 1}`}
           >
             <img
@@ -47,39 +50,6 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
               decoding="async"
             />
           </button>
-
-          <dialog
-            id={`${uid}-dlg-${i}`}
-            class="p-0 border-0 bg-transparent backdrop:bg-black/70"
-          >
-            <div class="m-4 sm:m-8">
-              <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
-                <img
-                  src={img.src}
-                  alt={img.alt ?? ""}
-                  class="block w-auto h-auto
-                         max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
-                         max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
-                  decoding="async"
-                  loading="eager"
-                />
-                {img.caption && (
-                  <p class="m-3 text-sm opacity-80">{img.caption}</p>
-                )}
-                <form method="dialog">
-                  <button
-                    class="absolute top-2 right-2 rounded-md border border-border
-                           bg-white/85 dark:bg-neutral-800/85 px-3 py-1 text-sm
-                           hover:border-accent/60
-                           focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
-                    aria-label="Close lightbox"
-                  >
-                    Close
-                  </button>
-                </form>
-              </div>
-            </div>
-          </dialog>
 
           {img.caption && (
             <figcaption class="row-caption mt-2 text-left">
@@ -106,32 +76,6 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
     </figure>
   ))}
 </div>
-
-{lightbox && (
-  <script is:inline define:vars={{ uid }}>
-    const root = document.getElementById(uid);
-    if (!root) return;
-
-    root.querySelectorAll('[data-open]').forEach((btn) => {
-      const id = btn.getAttribute('data-open');
-      if (!id) return;
-
-      const dlg = document.getElementById(id);
-
-      btn.addEventListener('click', () => {
-        if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
-      });
-
-      dlg && dlg.addEventListener('click', (e) => {
-        if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
-      });
-
-      dlg && dlg.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && typeof dlg.close === 'function') dlg.close();
-      });
-    });
-  </script>
-)}
 
 <!--
   Per-row FIG. numbering via CSS counters.

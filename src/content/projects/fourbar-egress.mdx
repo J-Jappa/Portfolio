@@ -1,6 +1,6 @@
 ---
 title: "Canopy Opening Mechanism for Driver Egress"
-summary: "Designed and built a four bar hinge that gives clean egress and keeps the opening clear of the shell."
+summary: "A four bar canopy hinge that clears the shell and gets every driver out within the 15 second egress rule."
 order: 3
 date: "2025-03-02"
 hero: "/images/solar/canopy OM/race open.jpg"
@@ -18,21 +18,24 @@ tags:
   - Human Factors
   - Solar Racing
 role: "Mechanisms"
+stat: "All drivers out inside the 15 second rule"
 outcomes:
-  - "Met egress timing and opening size requirements during checks."
-  - "Ensured good aerodynamic fitment."
-  - "Proved repeatable with good feel and no play after cycles."
-  - "Interfaced cleanly with latches and the bulkhead mounts."
+  - "Every driver out within the 15 second egress rule during checks."
+  - "Closed flush with the aerodynamic shell and interfaced cleanly with the latches and bulkhead mounts."
+  - "Stayed tight and predictable through cycle testing once nylon spacers cured the early binding and loosening."
 #repo: ""
 #link: ""
 ---
 
 import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
+import VideoPlayer from "@/components/VideoPlayer.astro";
+
+New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
 
 ## Requirements
 
-Fast egress, minimal intrusion into the airflow, and a motion path that does not foul with the shell. I set the throw and link lengths to clear the canopy and to land in a stable open position that is easy to handle in wind. The closed position needed to sit flush with the body shape from [Solar Car Aerodynamics](/projects/solar-car-aero/) and bolt into hard points on the [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/).
+Egress within the 15 second rule for every driver, minimal intrusion into the airflow, and a motion path that does not foul with the shell. I set the throw and link lengths to clear the canopy and to land in a stable open position that is easy to handle in wind. The closed position needed to sit flush with the body shape from [Solar Car Aerodynamics](/projects/solar-car-aero/) and bolt into hard points on the [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/).
 
 ## Development
 
@@ -64,18 +67,13 @@ The top mount was bonded with structural epoxy using an aluminium backing plate 
 
 ## Testing
 
-We cycle-tested the hinge and ran timed egress checks. Early tests showed either Nylock nuts loosening or the mechanism binding depending on pre-load. Nylon spacers between mounts and linkages fixed this. After that the mechanism stayed tight and predictable, with good fit to the aerodynamic shell and a clean interface to the latching system.
+We cycle-tested the hinge and ran timed egress checks; every driver got out within the 15 second limit. Early tests showed either Nylock nuts loosening or the mechanism binding depending on pre-load. Nylon spacers between mounts and linkages fixed this. After that the mechanism stayed tight and predictable, with good fit to the aerodynamic shell and a clean interface to the latching system.
 
-<video
-  controls
-  preload="metadata"
-  poster="/images/solar/bulkheads/poster.jpg"
-  class="w-full rounded-xl"
-  playsinline
->
-  <source src="/videos/canopy closing.mp4" type="video/mp4" />
-  Sorry, your browser does not support embedded video.
-</video>
+<VideoPlayer
+  src="/videos/canopy closing.mp4"
+  poster="/videos/canopy-closing-poster.jpg"
+  label="Canopy closing"
+/>
 
 ## Materials and notes
 

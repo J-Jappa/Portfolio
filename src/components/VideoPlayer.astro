@@ -1,0 +1,99 @@
+---
+// Poster-first video: the thumbnail shows immediately with a styled play
+// button; native controls only appear once playback starts.
+interface Props {
+  src: string;
+  poster?: string;
+  label?: string;
+  type?: string;
+}
+const { src, poster, label = "Video", type = "video/mp4" } = Astro.props;
+---
+
+<div
+  class="site-video not-prose group relative my-5 overflow-hidden rounded-xl border border-border"
+>
+  <video preload="metadata" poster={poster} playsinline class="block w-full">
+    <source src={src} type={type} />
+    Sorry, your browser does not support embedded video.
+  </video>
+  <button
+    type="button"
+    class="site-video-overlay"
+    aria-label={`Play video: ${label}`}
+  >
+    <span class="site-video-chip">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M8 5.5v13l11-6.5z"></path>
+      </svg>
+      {label}
+    </span>
+  </button>
+</div>
+
+<script>
+  function initVideos() {
+    document.querySelectorAll<HTMLElement>(".site-video").forEach(root => {
+      if (root.dataset.mounted) return;
+      root.dataset.mounted = "1";
+      const video = root.querySelector("video");
+      const overlay = root.querySelector<HTMLElement>(".site-video-overlay");
+      if (!video || !overlay) return;
+      overlay.addEventListener("click", () => {
+        overlay.style.display = "none";
+        video.controls = true;
+        video.play().catch(() => {});
+      });
+    });
+  }
+  initVideos();
+  document.addEventListener("astro:after-swap", initVideos);
+</script>
+
+<style>
+  .site-video-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    background: rgba(5, 7, 13, 0.12);
+    transition: background 0.2s ease;
+  }
+  .site-video-overlay:hover {
+    background: rgba(5, 7, 13, 0.28);
+  }
+  /* Same family as the site's mono chips and buttons; the solid panel
+     keeps the label readable over any poster frame. */
+  .site-video-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-background) 90%, transparent);
+    backdrop-filter: blur(4px);
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-foreground);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .site-video-overlay:hover .site-video-chip {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+  }
+  .site-video-chip svg {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--color-accent);
+  }
+</style>

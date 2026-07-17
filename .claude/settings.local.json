@@ -153,7 +153,16 @@
       "PowerShell(gh repo view --json visibility,nameWithOwner 2>$null)",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\chart-secret.mjs\")",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\scan-lock.mjs\")",
-      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\trio-check.mjs\")"
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\trio-check.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\dash-sweep.cjs\")",
+      "PowerShell(npm run build 2>&1 | Select-Object -Last 3; Select-String -Path \"dist\\\\index.html\" -Pattern \"15 second rule|60° tilt|20 g battery|Sized hard against\" -AllMatches | ForEach-Object { $_.Matches.Value } | Select-Object -Unique)",
+      "PowerShell(npm run build 2>&1 | Select-Object -Last 2; Select-String -Path \"dist\\\\index.html\" -Pattern \"15 second rule|60° tilt|20 g battery|Sized hard against the rules for\" -AllMatches | ForEach-Object { $_.Matches.Value } | Select-Object -Unique)",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\cards-shot.mjs\"; Get-NetTCPConnection -LocalPort 4322 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -Confirm:$false })",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\overhaul-check.mjs\")",
+      "PowerShell(Test-Path \"public\\\\images\\\\solar\\\\bulkheads\\\\poster.jpg\"; try { \\(Get-Command ffmpeg -ErrorAction Stop\\).Source } catch { \"no ffmpeg\" })",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\poster-grab.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\groups-check.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\video-shot.mjs\")"
     ]
   }
 }

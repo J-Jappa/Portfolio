@@ -254,6 +254,12 @@ const rest = sorted.slice(3);
                   {p.data.summary}
                 </p>
 
+                {p.data.stat ? (
+                  <p class="mt-2 font-mono text-xs tracking-wide text-accent-2">
+                    ↳ {p.data.stat}
+                  </p>
+                ) : null}
+
                 {p.data.tags?.length ? (
                   <div class="mt-2 text-xs text-foreground/50">
                     {p.data.tags.slice(0, 4).join(" · ")}

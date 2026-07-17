@@ -1,0 +1,160 @@
+---
+// One-slot comparison carousel: shows a set of same-subject images in the
+// footprint of a single figure, auto-advancing slowly with arrows, keyboard
+// and a mono counter. Built for flipping between design variants.
+type Img = { src: string; alt?: string; caption?: string };
+interface Props {
+  images: Img[];
+  /** Height classes for the frame */
+  class?: string;
+}
+const { images = [], class: className = "h-64 sm:h-80" } = Astro.props;
+---
+
+<div class="cmp not-prose zine-figure my-5" data-cmp>
+  <div
+    class="relative overflow-hidden rounded-xl border border-border"
+  >
+    <div class="cmp-track flex" data-track>
+      {
+        images.map((img, i) => (
+          <div class="cmp-cell w-full flex-none" data-caption={img.caption ?? ""}>
+            <img
+              src={img.src}
+              alt={img.alt ?? `Variant ${i + 1}`}
+              class:list={["w-full object-contain", className]}
+              loading={i === 0 ? "eager" : "lazy"}
+              decoding="async"
+              draggable={false}
+            />
+          </div>
+        ))
+      }
+    </div>
+    <button type="button" class="cmp-arrow cmp-prev" data-prev aria-label="Previous variant">‹</button>
+    <button type="button" class="cmp-arrow cmp-next" data-next aria-label="Next variant">›</button>
+    <span class="cmp-count" data-count>01 / {String(images.length).padStart(2, "0")}</span>
+  </div>
+  <figcaption class="cmp-cap mt-2 text-left" data-cap></figcaption>
+</div>
+
+<script>
+  function initCompares() {
+    document.querySelectorAll<HTMLElement>("[data-cmp]").forEach(root => {
+      if (root.dataset.mounted) return;
+      root.dataset.mounted = "1";
+      const track = root.querySelector<HTMLElement>("[data-track]");
+      const cells = Array.from(root.querySelectorAll<HTMLElement>(".cmp-cell"));
+      const count = root.querySelector<HTMLElement>("[data-count]");
+      const cap = root.querySelector<HTMLElement>("[data-cap]");
+      if (!track || cells.length === 0) return;
+      const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const n = cells.length;
+      let i = 0;
+      let timer = 0;
+
+      function show(k: number) {
+        i = ((k % n) + n) % n;
+        track!.style.transform = `translateX(${-i * 100}%)`;
+        if (count)
+          count.textContent = `${String(i + 1).padStart(2, "0")} / ${String(n).padStart(2, "0")}`;
+        if (cap) cap.textContent = cells[i].dataset.caption || "";
+      }
+      function restart() {
+        window.clearInterval(timer);
+        if (!reduced) timer = window.setInterval(() => show(i + 1), 3200);
+      }
+      root.querySelector("[data-prev]")?.addEventListener("click", () => {
+        show(i - 1);
+        restart();
+      });
+      root.querySelector("[data-next]")?.addEventListener("click", () => {
+        show(i + 1);
+        restart();
+      });
+      root.addEventListener("mouseenter", () => window.clearInterval(timer));
+      root.addEventListener("mouseleave", restart);
+      root.addEventListener("keydown", e => {
+        if (e.key === "ArrowLeft") { e.preventDefault(); show(i - 1); restart(); }
+        else if (e.key === "ArrowRight") { e.preventDefault(); show(i + 1); restart(); }
+      });
+      // Only advance while on screen
+      const io = new IntersectionObserver(entries => {
+        if (entries.some(e => e.isIntersecting)) restart();
+        else window.clearInterval(timer);
+      });
+      io.observe(root);
+      show(0);
+    });
+  }
+  initCompares();
+  document.addEventListener("astro:after-swap", initCompares);
+</script>
+
+<style>
+  /* The source screenshots have their own light background; a fixed light
+     panel keeps them seamless in both themes. */
+  .cmp-cell {
+    background: #eef1f4;
+  }
+  .cmp-track {
+    transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cmp-track {
+      transition: none;
+    }
+  }
+  .cmp-arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.1rem;
+    height: 2.1rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-background) 85%, transparent);
+    color: var(--color-foreground);
+    font-size: 1.25rem;
+    line-height: 1;
+    padding-bottom: 0.15rem;
+    cursor: pointer;
+    backdrop-filter: blur(2px);
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .cmp-arrow:hover {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+  }
+  .cmp-prev {
+    left: 0.6rem;
+  }
+  .cmp-next {
+    right: 0.6rem;
+  }
+  .cmp-count {
+    position: absolute;
+    right: 0.6rem;
+    bottom: 0.5rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 0.375rem;
+    border: 1px solid var(--color-border);
+    background: color-mix(in srgb, var(--color-background) 85%, transparent);
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
+  }
+  .cmp-cap {
+    min-height: 1.4em;
+    font-size: 0.8rem;
+    line-height: 1.5;
+    font-style: italic;
+    color: color-mix(in srgb, currentColor 65%, transparent);
+  }
+</style>

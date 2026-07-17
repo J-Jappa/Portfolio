@@ -30,6 +30,7 @@ import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
 import CarWireframe from "@/components/CarWireframe.astro";
 import AeroYawChart from "@/components/AeroYawChart.astro";
+import CompareCarousel from "@/components/CompareCarousel.astro";
 
 New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
 
@@ -77,61 +78,87 @@ The catamaran balanced drag, stability and packaging. The wider stance supported
 
 I ran more than 1,000 compute hours in ANSYS Fluent and generated about 1.5 TB of data. The SolidWorks model saw 64 major versions plus many small changes. I iterated domain setup, meshing, wheel treatments and yaw studies. To seed the 3D body, I screened 2D sections in JavaFoil for low Reynolds numbers and ground effect, then tailored a family of sections for the pods and centre body. Those were reshaped in CAD and validated in 3D CFD.
 
-<ImageRow
-  cols={2}
+<CompareCarousel
+  class="h-40 sm:h-56"
   images={[
     {
       src: "/images/solar/early dev/image (1).png",
-      alt: "Early aerodynamic development study 1",
+      alt: "Deck section trial with a near flat upper profile",
+      caption: "Deck section trial with a near flat upper profile.",
     },
     {
       src: "/images/solar/early dev/image (2).png",
-      alt: "Early aerodynamic development study 2",
+      alt: "Thinner deck section over the same planform",
+      caption: "Thinner deck section over the same planform.",
     },
     {
       src: "/images/solar/early dev/image (3).png",
-      alt: "Early aerodynamic development study 3",
+      alt: "More cambered deck section on the same planform",
+      caption: "More cambered deck section on the same planform.",
     },
     {
       src: "/images/solar/early dev/image (4).png",
-      alt: "Early aerodynamic development study 4",
-    },
-    {
-      src: "/images/solar/early dev/image (6).png",
-      alt: "Early aerodynamic development study 6",
-    },
-    {
-      src: "/images/solar/early dev/image (7).png",
-      alt: "Early aerodynamic development study 7",
-    },
-    {
-      src: "/images/solar/early dev/image (8).png",
-      alt: "Early aerodynamic development study 8",
-    },
-    {
-      src: "/images/solar/early dev/image (9).png",
-      alt: "Early aerodynamic development study 9",
-    },
-    {
-      src: "/images/solar/early dev/image (11).png",
-      alt: "Early aerodynamic development study 11",
-    },
-    {
-      src: "/images/solar/early dev/image (12).png",
-      alt: "Early aerodynamic development study 12",
-    },
-    {
-      src: "/images/solar/early dev/image (13).png",
-      alt: "Early aerodynamic development study 13",
-    },
-    {
-      src: "/images/solar/early dev/image (14).png",
-      alt: "Early aerodynamic development study 14",
+      alt: "Longer section trial with a finer nose",
+      caption: "Longer section trial with a finer nose.",
     },
   ]}
 />
 
-These show a mix of section trials, partial bodies and the progression toward the final profiles.
+<CompareCarousel
+  class="h-56 sm:h-80"
+  images={[
+    {
+      src: "/images/solar/early dev/image (6).png",
+      alt: "A pod and deck corner taken to 3D",
+      caption: "A pod and deck corner taken to 3D for validation.",
+    },
+    {
+      src: "/images/solar/early dev/image (7).png",
+      alt: "Pod and deck corner with a fuller leading edge",
+      caption: "Pod and deck corner with a fuller leading edge.",
+    },
+    {
+      src: "/images/solar/early dev/image (8).png",
+      alt: "Deck and pod blend variant with a finer trailing edge",
+      caption: "Deck and pod blend variant with a finer trailing edge.",
+    },
+  ]}
+/>
+
+<Figure
+  src="/images/solar/early dev/image (9).png"
+  alt="Blend trial between a pod and its fairing"
+  maxWidth="900px"
+  caption="Blend trial between a pod and its fairing."
+/>
+
+<CompareCarousel
+  class="h-56 sm:h-80"
+  images={[
+    {
+      src: "/images/solar/early dev/image (11).png",
+      alt: "Clean pod profile before packaging checks",
+      caption: "Clean pod profile before packaging checks.",
+    },
+    {
+      src: "/images/solar/early dev/image (12).png",
+      alt: "Pod profile checked against internal packaging sketches",
+      caption: "Pod profile checked against internal packaging sketches.",
+    },
+    {
+      src: "/images/solar/early dev/image (13).png",
+      alt: "Pod profile sized around internal packaging",
+      caption: "Pod profile sized around internal packaging, with hardware sketched in.",
+    },
+    {
+      src: "/images/solar/early dev/image (14).png",
+      alt: "A longer pod variant against the same packaging",
+      caption: "A longer pod variant against the same packaging.",
+    },
+  ]}
+/>
+
+Section trials, pod and deck corners, a fairing blend and packaging checks on the way to the final profiles. Step through each set with the arrows to compare.
 
 <ImageRow
   cols={2}
@@ -232,13 +259,13 @@ Core materials:
     },
     {
       src: "/images/solar/manufacturing/2.jpg",
-      alt: "Laying hatches first with soric core.",
-      caption: "Laying hatches first with soric core.",
+      alt: "Laying hatches first with Soric core",
+      caption: "Laying hatches first with Soric core.",
     },
     {
       src: "/images/solar/manufacturing/3.jpg",
-      alt: "first layers after debulk.",
-      caption: "first layers after debulk.",
+      alt: "First layers after debulk",
+      caption: "First layers after debulk.",
     },
     {
       src: "/images/solar/manufacturing/4.jpg",
@@ -252,8 +279,8 @@ Core materials:
     },
     {
       src: "/images/solar/manufacturing/6.jpg",
-      alt: "full car vacuum bag.",
-      caption: "full car vacuum bag.",
+      alt: "Full car vacuum bag",
+      caption: "Full car vacuum bag.",
     },
     {
       src: "/images/solar/manufacturing/7.jpg",
@@ -262,8 +289,8 @@ Core materials:
     },
     {
       src: "/images/solar/manufacturing/8.jpg",
-      alt: "First-time removing the parts from the top mould.",
-      caption: "First-time removing the parts from the top mould.",
+      alt: "First time removing the parts from the top mould",
+      caption: "First time removing the parts from the top mould.",
     },
     {
       src: "/images/solar/manufacturing/9.jpg",

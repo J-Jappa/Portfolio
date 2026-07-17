@@ -21,13 +21,13 @@ import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
 import PdfEmbed from "@/components/PdfEmbed.astro";
 
-As I’m sure we’re all too aware, bushfires are becoming more frequent and more severe, in Australia and around the world. To reduce their impact on people, wildlife and infrastructure, we need to **know about fires early**. Fire spreads quickly – minutes matter.
+As I’m sure we’re all too aware, bushfires are becoming more frequent and more severe, in Australia and around the world. To reduce their impact on people, wildlife and infrastructure, we need to **know about fires early**. Fire spreads quickly; minutes matter.
 
 Most current systems (satellites, cameras, fire towers) rely on **line of sight** and fires being large enough to see. By the time a plume is visible from orbit, the fire can already be huge.
 
 This project looks at a different layer in the early-warning stack: **environmental ground sensors**. These small Internet of Things (IoT) nodes measure things like estimated CO₂ and total volatile compounds (TVOC), key indicators of smoke. The idea is simple:
 
-> Train on what “normal air” looks like, then flag fires as anomalies – and do it **on the node**.
+> Train on what “normal air” looks like, then flag fires as anomalies, and do it **on the node**.
 
 I focus on the **edge node**: the sensor that takes the reading and makes the first decision about whether something is wrong. There’s been work on combining many nodes to reduce false alarms, but my scope is: _given a single node, how far can we push unsupervised deep learning for early detection, under tight hardware constraints?_
 
@@ -66,14 +66,14 @@ Because the labels are unreliable at the window level, the evaluation is defined
 
 Key metrics:
 
-- **Experiment-level hit rate** – how many of the 8 ignitions were detected at least once.
-- **False positive rate (FPR)** – fraction of background windows misclassified as fire.
-- **F1-score** – balances true positives and false positives, but in this setting it is heavily penalised by even small FPRs because there are so many more background windows than fire events.
-- **Latency to first hit** – time from ignition to first detection; this is where “minutes matter”.
+- **Experiment-level hit rate**: how many of the 8 ignitions were detected at least once.
+- **False positive rate (FPR)**: fraction of background windows misclassified as fire.
+- **F1-score**: balances true positives and false positives, but in this setting it is heavily penalised by even small FPRs because there are so many more background windows than fire events.
+- **Latency to first hit**: time from ignition to first detection; this is where “minutes matter”.
 
 Under this setup, a model can easily have an **overall accuracy around 0.99** (because almost every window is normal) while still getting a relatively **low F1-score**, simply because even a tiny FPR contributes a lot of false positives. So my F1-scores aren’t directly comparable to much of the literature, but they are **honest** about the imbalance and label uncertainty in this kind of data.
 
-## Model 1 – GGM-VAE (time-domain GRU VAE with mixture prior)
+## Model 1: GGM-VAE (time-domain GRU VAE with mixture prior)
 
 The first model is a **Gated Recurrent Unit (GRU) Gaussian Mixture Variational Autoencoder**, or GGM-VAE. It builds on LSTM-VAEs from the literature, swapping the LSTM for a GRU to reduce parameters and complexity.
 
@@ -94,7 +94,7 @@ The first model is a **Gated Recurrent Unit (GRU) Gaussian Mixture Variational A
 - A **VAE head** outputs parameters of a latent distribution and a **Gaussian mixture** prior, so the model can represent multi-modal “normal” behaviour.
 - A **GRU decoder** reconstructs the input window during training.
 
-The VAE doesn’t just compress – it **structures the latent space**. In a standard GRU-VAE we encourage all normal data to form a single Gaussian “blob” in latent space. The Gaussian mixture model relaxes that assumption and lets normal behaviour split into multiple clusters, for example:
+The VAE doesn’t just compress; it **structures the latent space**. In a standard GRU-VAE we encourage all normal data to form a single Gaussian “blob” in latent space. The Gaussian mixture model relaxes that assumption and lets normal behaviour split into multiple clusters, for example:
 
 - Day vs night
 - Different background regimes
@@ -112,7 +112,7 @@ This choice is important because it reflects the deployment reality: we don’t 
 
 Interestingly, on this dataset the optimal GGM-VAE **collapses to a single effective mode** and a **latent dimension of 1**, meaning the key “fire vs normal” information can be represented by a single scalar in latent space.
 
-## Model 2 – Hybrid-VAE (STFT-CNN-GRU-VAE)
+## Model 2: Hybrid-VAE (STFT-CNN-GRU-VAE)
 
 The second model takes the successful parts of the GGM-VAE and asks:
 
@@ -127,12 +127,12 @@ The second model takes the successful parts of the GGM-VAE and asks:
 **Frequency front end**
 
 - I compute **Short-Time Fourier Transforms (STFTs)** on eCO₂ and TVOC, producing small spectrograms.
-- Spectra are log-scaled and stacked into a 2D time–frequency image per window.
+- Spectra are log-scaled and stacked into a 2D time-frequency image per window.
 - In early analysis, burn vs normal spectrograms showed clear differences, especially in low-frequency content.
 
 **CNN + GRU hybrid**
 
-- A compact **2D CNN** processes the spectrogram, learning local time–frequency patterns (bursts, recovery shapes, etc.).
+- A compact **2D CNN** processes the spectrogram, learning local time-frequency patterns (bursts, recovery shapes, etc.).
 - A **GRU** processes the raw time series in parallel.
 - The two branches are **fused in the latent space** before the VAE heads.
 - Training uses a combined loss that encourages good reconstructions in both domains.
@@ -144,7 +144,7 @@ This gives the Hybrid-VAE more expressive power but also **many more hyperparame
 
 In the final tuned version, the Hybrid-VAE is still better than the simple threshold baseline, but **not as strong as the GGM-VAE** on F1 and FPR. It also ends up collapsing its STFT windows in a way that suggests the added complexity is not being fully exploited on this dataset.
 
-## Results – accuracy vs complexity
+## Results: accuracy vs complexity
 
 Summarising the three approaches:
 
@@ -180,9 +180,9 @@ Both deep models detect fires roughly **four minutes after ignition**, more than
 - Has about **half the false positive rate**
 - Is **much cheaper** in FLOPs and parameters
 
-When I sweep the threshold, the GGM-VAE also shows a better **latency–F1 trade-off** than the Hybrid-VAE, meaning it’s the more flexible model for deployment tuning.
+When I sweep the threshold, the GGM-VAE also shows a better **latency vs F1 trade-off** than the Hybrid-VAE, meaning it’s the more flexible model for deployment tuning.
 
-## Hardware implementation – getting it onto a node
+## Hardware implementation: getting it onto a node
 
 The final step is to ask: can we run these on real hardware?
 
@@ -200,20 +200,20 @@ The target is an **ANU IoT sensor node**:
 
 I exported trained PyTorch weights to C++, added timing printouts, and measured:
 
-- **ROM usage** – total flash footprint including model
-- **Inference time** – latency per window at 1 Hz sampling
-- **Power** – using a bench supply and multimeter to see if the model meaningfully changes draw
+- **ROM usage**: total flash footprint including model
+- **Inference time**: latency per window at 1 Hz sampling
+- **Power**: using a bench supply and multimeter to see if the model meaningfully changes draw
 
 Key findings:
 
 - The **Hybrid-VAE is simply too big**. Even with symmetric int8 quantisation (32-bit floats → 8-bit ints), its parameters don’t fit in the remaining flash.
 - The **GGM-VAE fits comfortably**, with the full application image around 174 KB.
-- Inference time for a 15 s window sits around **130–170 ms**, well within the 1 Hz sampling budget.
+- Inference time for a 15 s window sits around **130 to 170 ms**, well within the 1 Hz sampling budget.
 - Power draw is dominated by the sensors and radio; adding the GGM-VAE does **not** significantly increase consumption compared with the threshold baseline.
 
 In other words:
 
-> On this hardware, you can have **deep learning on the node** – but you have to pick your battles. The compact GGM-VAE works; the larger Hybrid-VAE is a prototype for the next generation of nodes.
+> On this hardware, you can have **deep learning on the node**, but you have to pick your battles. The compact GGM-VAE works; the larger Hybrid-VAE is a prototype for the next generation of nodes.
 
 ## Pulling it back to the research questions
 
@@ -227,7 +227,7 @@ Coming back to where we started:
    - The **GGM-VAE runs on a constrained STM32WLE5 LoRa node**, hitting timing and memory limits with comparable power to the threshold method.
    - The Hybrid-VAE highlights where the pain points are: flash and complexity, not just FLOPs.
 
-The project gives a **practical accuracy–complexity trade-off** for early bushfire detection and a **reproducible path from training to firmware**. It also sets up the next step: combining nodes spatially, and exploring lighter frequency-domain models that preserve the gains of the Hybrid-VAE while fitting on real hardware.
+The project gives a **practical accuracy-complexity trade-off** for early bushfire detection and a **reproducible path from training to firmware**. It also sets up the next step: combining nodes spatially, and exploring lighter frequency-domain models that preserve the gains of the Hybrid-VAE while fitting on real hardware.
 
 ## Read the full thesis
 

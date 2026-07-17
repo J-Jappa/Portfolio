@@ -25,7 +25,6 @@ const {
   lightbox = true,
 } = Astro.props as Props;
 
-const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
 const styleObj = { width, maxWidth, marginInline: "auto" };
 ---
 
@@ -37,13 +36,16 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
 <figure class="not-prose my-5 zine-figure" style={styleObj}>
   {lightbox ? (
     <>
+      {/* Opens the shared #site-lightbox in Layout.astro */}
       <button
         type="button"
         class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
                transition-all hover:border-accent/50
                hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
                focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
-        data-open={uid}
+        data-lb-src={src}
+        data-lb-alt={alt}
+        data-lb-caption={caption ?? ""}
         aria-label={alt ? `Open image: ${alt}` : "Open image"}
       >
         <img
@@ -54,42 +56,6 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
           class="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.01]"
         />
       </button>
-
-      {/* Lightbox dialog — keeps exact data-lightbox attribute for Layout.astro handler */}
-      <dialog
-        id={uid}
-        data-lightbox
-        class="p-0 border-0 bg-transparent"
-      >
-        <div class="m-4 sm:m-8">
-          <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
-            <img
-              src={src}
-              alt={alt}
-              class="block w-auto h-auto
-                     max-w-[calc(100vw-3rem)] sm:max-w-[calc(100vw-6rem)]
-                     max-h-[calc(100vh-3rem)] sm:max-h-[calc(100vh-6rem)]"
-              decoding="async"
-              loading="eager"
-            />
-            {caption && (
-              <p class="m-3 text-sm opacity-80 text-center">{caption}</p>
-            )}
-            <form method="dialog">
-              <button
-                type="submit"
-                class="absolute top-2 right-2 rounded-md border border-border
-                       bg-white/85 dark:bg-neutral-800/85 px-3 py-1 text-sm
-                       hover:border-accent/60
-                       focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
-                aria-label="Close lightbox"
-              >
-                Close
-              </button>
-            </form>
-          </div>
-        </div>
-      </dialog>
 
       {caption && (
         <figcaption class="zine-caption mt-2 text-left">
@@ -114,44 +80,6 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
     </>
   )}
 </figure>
-
-{lightbox && (
-  <script is:inline>
-    (() => {
-      const uid = "{uid}";
-
-      function wire() {
-        const btn = document.querySelector(`[data-open="${uid}"]`);
-        const dlg = document.getElementById(uid);
-        if (!btn || !dlg) return;
-
-        // prevent duplicate bindings after Astro client nav
-        if (dlg.dataset._lbBound === "1") return;
-        dlg.dataset._lbBound = "1";
-
-        const open = () => {
-          if (dlg && typeof dlg.showModal === "function") dlg.showModal();
-        };
-        const backdropClose = (e) => {
-          if (e.target === dlg && typeof dlg.close === "function") dlg.close();
-        };
-        const esc = (e) => {
-          if (e.key === "Escape" && typeof dlg.close === "function") dlg.close();
-        };
-
-        btn.addEventListener("click", open);
-        dlg.addEventListener("click", backdropClose);
-        dlg.addEventListener("keydown", esc);
-      }
-
-      // initial load
-      wire();
-      // rebind on Astro client navigations
-      document.addEventListener("astro:page-load", wire);
-      document.addEventListener("astro:after-swap", wire);
-    })();
-  </script>
-)}
 
 <!--
   CSS counter for FIG numbering.

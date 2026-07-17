@@ -130,60 +130,34 @@ const year = yearOf(p.date);
       </dl>
     </div>
 
-    {/* ── Image strip (thumbnail lightbox) ─────────────────────── */}
+    {/* ── Image strip (opens the shared site lightbox) ──────────── */}
     {
       /*
-        Keeps the EXACT thumbSrc md5 → /thumbs/*.webp mechanism.
-        data-open="dlg-{i}" preserved as-is; Layout.astro's global
-        delegated handler listens for this attribute.
+        Thumbnails keep the thumbSrc md5 → /thumbs/*.webp mechanism.
+        Full images open in Layout.astro's #site-lightbox via data-lb-src.
     */
     }
     {
       p.images?.length > 0 && (
         <div class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {p.images.map((img: { src: string; alt?: string }, i: number) => (
-            <>
-              <div class="group relative overflow-hidden rounded-xl border border-border transition-all hover:border-accent/50 hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]">
-                <button
-                  class="m-0 block aspect-video w-full overflow-hidden border-0 bg-transparent p-0"
-                  data-open={`dlg-${i}`}
-                  aria-label={`Open image ${i + 1}: ${img.alt ?? p.title}`}
-                >
-                  <img
-                    src={thumbSrc(img.src)}
-                    alt={img.alt ?? p.title}
-                    class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </button>
-              </div>
-
-              <dialog
-                id={`dlg-${i}`}
-                data-lightbox
-                class="border-0 bg-transparent p-0"
+            <div class="group relative overflow-hidden rounded-xl border border-border transition-all hover:border-accent/50 hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]">
+              <button
+                class="m-0 block aspect-video w-full overflow-hidden border-0 bg-transparent p-0"
+                data-lb-src={img.src}
+                data-lb-alt={img.alt ?? p.title}
+                data-lb-caption={img.alt ?? ""}
+                aria-label={`Open image ${i + 1}: ${img.alt ?? p.title}`}
               >
-                <div class="m-4 sm:m-8">
-                  <div class="relative overflow-hidden rounded-xl bg-white shadow-2xl dark:bg-neutral-900">
-                    <img
-                      src={img.src}
-                      alt={img.alt ?? p.title}
-                      class="block h-auto max-h-[calc(100vh-3rem)] w-auto max-w-[calc(100vw-3rem)] sm:max-h-[calc(100vh-6rem)] sm:max-w-[calc(100vw-6rem)]"
-                      decoding="async"
-                    />
-                    <form method="dialog">
-                      <button
-                        class="absolute top-2 right-2 rounded-md border border-border bg-white/85 px-3 py-1 text-sm hover:border-accent/60 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed dark:bg-neutral-800/85"
-                        aria-label="Close lightbox"
-                      >
-                        Close
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              </dialog>
-            </>
+                <img
+                  src={thumbSrc(img.src)}
+                  alt={img.alt ?? p.title}
+                  class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </button>
+            </div>
           ))}
         </div>
       )
