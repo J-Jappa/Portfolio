@@ -215,7 +215,7 @@ const galleryJSON = esc(
   JSON.stringify(
     galleryData.map(g => ({
       label: g.label,
-      photos: g.photos.map(p => ({ full: p.full, alt: p.alt, loc: p.loc, film: p.film, date: p.date, cam: p.cam, mdl: p.mdl })),
+      photos: g.photos.map(p => ({ full: p.full, thumb: p.thumb, alt: p.alt, loc: p.loc, film: p.film, date: p.date, cam: p.cam, mdl: p.mdl })),
     }))
   )
 );
@@ -363,6 +363,7 @@ const galleryJSON = esc(
               height="150"
               aria-hidden="true"
             ></canvas>
+            <span class="map-lb-model-hint" aria-hidden="true">◑ DRAG TO ROTATE</span>
           </div>
         </aside>
       </div>
@@ -378,7 +379,7 @@ const galleryJSON = esc(
   import { mountWireframe } from "@/lib/wireframe";
   import { CAMERA_MODELS } from "@/data/cameras";
 
-  type Photo = { full: string; alt: string; loc: string; film: string; date: string; cam: string; mdl: string };
+  type Photo = { full: string; thumb: string; alt: string; loc: string; film: string; date: string; cam: string; mdl: string };
   type GLoc = { label: string; photos: Photo[] };
   type Marker = { lon: number; lat: number; kind: "dot" | "cluster"; count: number; n: number; label: string };
 
@@ -418,7 +419,7 @@ const galleryJSON = esc(
     const spinEl = document.getElementById("map-lb-spin");
     if (!stage || !canvas || !overlay || !dlg || !img) return;
 
-    const wf = modelCanvas ? mountWireframe(modelCanvas) : null;
+    const wf = modelCanvas ? mountWireframe(modelCanvas, { interactive: true }) : null;
     dlg.addEventListener("close", () => wf?.stop());
 
     // Live camera wireframe in the CAMERAS nav tile (mini viewer).
@@ -682,6 +683,15 @@ const galleryJSON = esc(
     const next = () => { if (photos.length) { idx = (idx + 1) % photos.length; show(); } };
     const prev = () => { if (photos.length) { idx = (idx - 1 + photos.length) % photos.length; show(); } };
 
+    // Open a specific frame from elsewhere (the camera archive's reel). The
+    // viewer stacks on top of the archive dialog; closing it drops back.
+    const onOpenPhoto = (e: Event) => {
+      const d = (e as CustomEvent).detail as { mi?: number; pi?: number; x?: number; y?: number } | null;
+      if (!d || typeof d.mi !== "number") return;
+      openGallery(d.mi, d.x, d.y, d.pi ?? 0);
+    };
+    document.addEventListener("scope:open-photo", onOpenPhoto);
+
     // Keyboard access (mouse/touch is hit-tested on the canvas below).
     hit.forEach((el, i) => {
       el.addEventListener("keydown", e => {
@@ -779,6 +789,10 @@ const galleryJSON = esc(
           pressing = false;
           cSuppressClick = drag; // only swallow the click if we actually dragged
           if (drag) {
+            // The drag's own click fires synchronously after pointerup (and
+            // only if the gesture ended on a cell); clear the flag right
+            // after so a later genuine tap is never lost.
+            setTimeout(() => { cSuppressClick = false; }, 0);
             e.stopPropagation();
             drag = false;
             rail.classList.remove("is-grab");
@@ -898,6 +912,7 @@ const galleryJSON = esc(
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("resize", onResize);
+      document.removeEventListener("scope:open-photo", onOpenPhoto);
       carouselStop();
     };
 
@@ -1871,6 +1886,14 @@ const galleryJSON = esc(
   .map-lb-cam-row .map-lb-v {
     color: #7dffb4;
     text-shadow: 0 0 7px rgba(57, 255, 136, 0.45);
+  }
+  .map-lb-model-hint {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    color: rgba(125, 255, 180, 0.55);
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.35);
   }
 
   /* ── Bottom carousel: Evangelion-style labels, drag or auto-drift ── */

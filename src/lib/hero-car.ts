@@ -63,13 +63,31 @@ export function mountHeroCar(container: HTMLElement): () => void {
   container.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
+  const FOV = 38;
   const camera = new THREE.PerspectiveCamera(
-    38,
+    FOV,
     container.clientWidth / Math.max(1, container.clientHeight),
     0.01,
     100
   );
   camera.position.set(4.2, 2.4, 5.6);
+
+  // The default distance is tuned for the ~1.5 aspect of the desktop hero.
+  // On narrower canvases (phone-width embeds) the horizontal field shrinks
+  // and the car's nose/tail clip while it rotates, so dolly the camera out
+  // just enough to keep the same horizontal span in frame.
+  const BASE_DIST = camera.position.length();
+  const BASE_ASPECT = 1.5;
+  const halfWidthTan = (aspect: number) =>
+    Math.tan((FOV / 2) * (Math.PI / 180)) * aspect;
+  function frameDistance() {
+    const d =
+      camera.aspect >= BASE_ASPECT
+        ? BASE_DIST
+        : (BASE_DIST * halfWidthTan(BASE_ASPECT)) / halfWidthTan(camera.aspect);
+    camera.position.setLength(d);
+  }
+  frameDistance();
 
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = !reduced;
@@ -183,6 +201,7 @@ export function mountHeroCar(container: HTMLElement): () => void {
     const h = container.clientHeight;
     if (!w || !h) return;
     camera.aspect = w / h;
+    frameDistance();
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
     renderOnce();

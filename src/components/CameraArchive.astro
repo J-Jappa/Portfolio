@@ -42,6 +42,16 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
           <div id="cam-spec" class="cam-spec"></div>
           <p id="cam-desc" class="cam-desc"></p>
         </div>
+        <div class="cam-reel" id="cam-reel">
+          <div class="cam-reel-head">
+            <span class="cam-reel-t">FRAMES ON FILE // <span id="cam-reel-count">00</span></span>
+            <span class="cam-reel-hint" aria-hidden="true">◑ DRAG · CLICK TO VIEW</span>
+          </div>
+          <div class="cam-reel-rail" id="cam-reel-rail" aria-label="Frames taken with this camera">
+            <div class="cam-reel-track" id="cam-reel-track"></div>
+          </div>
+          <p class="cam-reel-empty">NO FRAMES ON FILE</p>
+        </div>
       </div>
     </div>
   </div>
@@ -50,6 +60,26 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
 <script>
   import { mountWireframe } from "@/lib/wireframe";
   import { CAMERA_MODELS } from "@/data/cameras";
+
+  type ReelPhoto = { mi: number; pi: number; thumb: string; city: string; mdl: string };
+
+  // Photos come from the page's gallery data island (photoscope). Pages that
+  // don't expose it (the contact sheet) simply get no reel.
+  function collectPhotos(): ReelPhoto[] {
+    const g = (
+      window as unknown as {
+        __mapGallery?: { photos: { thumb?: string; loc?: string; mdl?: string }[] }[];
+      }
+    ).__mapGallery;
+    if (!g) return [];
+    const out: ReelPhoto[] = [];
+    g.forEach((grp, mi) =>
+      grp.photos.forEach((p, pi) => {
+        if (p.thumb) out.push({ mi, pi, thumb: p.thumb, city: (p.loc ?? "").split(",")[0].trim(), mdl: p.mdl ?? "" });
+      })
+    );
+    return out;
+  }
 
   function initCamArchive() {
     const dlg = document.getElementById("cam-archive") as HTMLDialogElement | null;
@@ -64,6 +94,147 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     const wf = mountWireframe(canvas, { interactive: true });
     let cur = -1;
 
+    // ── Frame reel: same feel as the page's main carousel — eased auto-drift,
+    // grab-to-drag with momentum, seamless wrap at the halfway point. ──
+    const reel = document.getElementById("cam-reel");
+    const rail = document.getElementById("cam-reel-rail");
+    const trackEl = document.getElementById("cam-reel-track");
+    const reelCount = document.getElementById("cam-reel-count");
+    const allPhotos = collectPhotos();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const AUTO = 46; // px/s baseline drift
+    let reelSuppress = false;
+    let off = 0, factor = reduced ? 0 : 1, target = reduced ? 0 : 1;
+    let rDrag = false, rPress = false, rMoved = 0, rStartX = 0, rStartOff = 0, rPid = -1;
+    let rVel = 0, rLastX = 0, rLastT = 0, rMomentum = 0, rRaf = 0, rLast = 0;
+
+    function reelTick(t: number) {
+      if (!trackEl) return;
+      const dt = Math.min(0.05, (t - rLast) / 1000);
+      rLast = t;
+      factor += (target - factor) * Math.min(1, dt * 5);
+      if (!rDrag) {
+        off += (AUTO * factor + rMomentum) * dt;
+        rMomentum *= Math.pow(0.02, dt);
+        if (Math.abs(rMomentum) < 2) rMomentum = 0;
+      }
+      const half = trackEl.scrollWidth / 2;
+      if (half > 0) off = ((off % half) + half) % half;
+      trackEl.style.transform = `translateX(${-off}px)`;
+      rRaf = requestAnimationFrame(reelTick);
+    }
+    function reelStart() {
+      if (rRaf) return;
+      rLast = performance.now();
+      rRaf = requestAnimationFrame(reelTick);
+    }
+    function reelStop() {
+      cancelAnimationFrame(rRaf);
+      rRaf = 0;
+    }
+
+    if (rail && trackEl) {
+      rail.addEventListener("mouseenter", () => { if (!rDrag && !reduced) target = 0; });
+      rail.addEventListener("mouseleave", () => { if (!rDrag && !reduced) target = 1; });
+      // Defer the drag until the pointer moves past a threshold so a plain
+      // tap still fires the cell's click (same trick as the main carousel).
+      rail.addEventListener("pointerdown", (e: PointerEvent) => {
+        rPress = true; rDrag = false; rMoved = 0; rMomentum = 0;
+        rStartX = e.clientX; rStartOff = off;
+        rVel = 0; rLastX = e.clientX; rLastT = performance.now();
+        rPid = e.pointerId;
+      });
+      rail.addEventListener("pointermove", (e: PointerEvent) => {
+        if (!rPress) return;
+        const dx = e.clientX - rStartX;
+        rMoved = Math.max(rMoved, Math.abs(dx));
+        if (!rDrag) {
+          if (rMoved <= 6) return;
+          rDrag = true;
+          target = 0;
+          rail.setPointerCapture?.(rPid);
+          rail.classList.add("is-grab");
+        }
+        e.stopPropagation();
+        off = rStartOff - dx;
+        const now = performance.now(), d = (now - rLastT) / 1000;
+        if (d > 0) rVel = (e.clientX - rLastX) / d;
+        rLastX = e.clientX; rLastT = now;
+      });
+      const rUp = (e: PointerEvent) => {
+        if (!rPress) return;
+        rPress = false;
+        if (rDrag) {
+          // Swallow only the drag's own click, which fires synchronously
+          // after pointerup; clear the flag right after so a later genuine
+          // tap is never lost (a drag can end between cells, firing none).
+          reelSuppress = true;
+          setTimeout(() => { reelSuppress = false; }, 0);
+          e.stopPropagation();
+          rDrag = false;
+          rail.classList.remove("is-grab");
+          rMomentum = -rVel; // keep drifting in the flick direction
+          target = reduced ? 0 : rail.matches(":hover") ? 0 : 1;
+        }
+      };
+      rail.addEventListener("pointerup", rUp);
+      rail.addEventListener("pointercancel", rUp);
+    }
+
+    function buildReel(name: string) {
+      if (!reel || !rail || !trackEl) return;
+      if (!allPhotos.length) {
+        reel.style.display = "none";
+        return;
+      }
+      const frames = allPhotos.filter(p => p.mdl === name);
+      if (reelCount) reelCount.textContent = String(frames.length).padStart(2, "0");
+      reelStop();
+      trackEl.innerHTML = "";
+      off = 0;
+      rMomentum = 0;
+      trackEl.style.transform = "translateX(0)";
+      reel.classList.toggle("is-empty", frames.length === 0);
+      if (!frames.length) return;
+
+      const addCopy = () => {
+        for (const f of frames) {
+          const b = document.createElement("button");
+          b.type = "button";
+          b.className = "cam-reel-cell";
+          b.setAttribute("aria-label", `View frame from ${f.city}`);
+          const lab = document.createElement("span");
+          lab.className = "cam-reel-label";
+          lab.textContent = f.city;
+          const im = document.createElement("img");
+          im.src = f.thumb;
+          im.alt = "";
+          im.loading = "lazy";
+          im.decoding = "async";
+          im.draggable = false;
+          b.append(lab, im);
+          b.addEventListener("click", () => {
+            if (reelSuppress) { reelSuppress = false; return; }
+            const r = b.getBoundingClientRect();
+            document.dispatchEvent(
+              new CustomEvent("scope:open-photo", {
+                detail: { mi: f.mi, pi: f.pi, x: r.left + r.width / 2, y: r.top + r.height / 2 },
+              })
+            );
+          });
+          trackEl.appendChild(b);
+        }
+      };
+      // One copy to measure, then enough total copies that half the track
+      // spans the rail — the modulo wrap is then invisible.
+      addCopy();
+      const per = trackEl.scrollWidth;
+      const railW = rail.clientWidth || 760;
+      const m = Math.max(1, Math.ceil(railW / Math.max(1, per)));
+      for (let k = 1; k < m * 2; k++) addCopy();
+      reelStart();
+    }
+
     function select(i: number) {
       if (i < 0 || i >= cams.length || i === cur) return;
       cur = i;
@@ -74,6 +245,7 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
       if (descEl) descEl.textContent = c.desc;
       if (idxEl) idxEl.textContent = String(i + 1);
       tabs.forEach((t, j) => t.setAttribute("aria-pressed", j === i ? "true" : "false"));
+      buildReel(c.name);
     }
     tabs.forEach((t, i) => t.addEventListener("click", () => select(i)));
 
@@ -90,7 +262,10 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     );
     dlg.querySelector(".cam-x")?.addEventListener("click", () => dlg.close());
     dlg.addEventListener("click", e => { if (e.target === dlg) dlg.close(); });
-    dlg.addEventListener("close", () => wf.stop());
+    dlg.addEventListener("close", () => {
+      wf.stop();
+      reelStop();
+    });
     dlg.addEventListener("keydown", e => {
       if (e.key === "ArrowDown" || e.key === "ArrowRight") { e.preventDefault(); select((cur + 1) % cams.length); }
       else if (e.key === "ArrowUp" || e.key === "ArrowLeft") { e.preventDefault(); select((cur - 1 + cams.length) % cams.length); }
@@ -120,6 +295,9 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     background: rgba(3, 8, 6, 0.94);
     box-shadow: 0 0 44px rgba(57, 255, 136, 0.22), inset 0 0 34px rgba(57, 255, 136, 0.06);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    /* The reel makes the window taller; scroll inside it on short screens. */
+    max-height: calc(100vh - 2rem);
+    overflow-y: auto;
   }
   .cam-bar {
     display: flex;
@@ -198,6 +376,9 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     position: relative;
     display: flex;
     flex-direction: column;
+    /* The reel's max-content track must not widen the grid column
+       (grid items default to min-width:auto). */
+    min-width: 0;
   }
   .cam-viewport {
     position: relative;
@@ -286,6 +467,102 @@ const cams = Object.values(CAMERA_MODELS).map(c => ({
     color: #cfeee0;
     max-width: 46ch;
   }
+
+  /* ── Frame reel: photos taken with the selected camera ── */
+  .cam-reel {
+    border-top: 1px solid rgba(57, 255, 136, 0.25);
+    padding: 8px 0 10px;
+    min-width: 0;
+    overflow: hidden;
+  }
+  .cam-reel-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 18px 6px;
+  }
+  .cam-reel-t {
+    font-size: 0.56rem;
+    letter-spacing: 0.24em;
+    color: #ff8c20;
+    text-shadow: 0 0 6px rgba(255, 140, 32, 0.4);
+  }
+  .cam-reel-hint {
+    font-size: 0.5rem;
+    letter-spacing: 0.2em;
+    color: rgba(125, 255, 180, 0.55);
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.35);
+    white-space: nowrap;
+  }
+  .cam-reel-rail {
+    position: relative;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: pan-y;
+    user-select: none;
+  }
+  .cam-reel-rail.is-grab { cursor: grabbing; }
+  .cam-reel-rail.is-grab :global(.cam-reel-cell),
+  .cam-reel-rail.is-grab :global(.cam-reel-cell img) { cursor: grabbing; }
+  .cam-reel-track {
+    display: flex;
+    align-items: flex-start;
+    width: max-content;
+    will-change: transform;
+  }
+  /* Cells are created in JS, so they lack Astro's scoping attribute —
+     select them via :global under a scoped parent. */
+  .cam-reel-track :global(.cam-reel-cell) {
+    flex: none;
+    width: 150px;
+    margin-right: 8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    text-align: left;
+    font-family: inherit;
+  }
+  .cam-reel-track :global(.cam-reel-cell img) {
+    width: 150px;
+    height: 84px;
+    object-fit: cover;
+    border: 1px solid rgba(57, 255, 136, 0.35);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .cam-reel-track :global(.cam-reel-cell:hover img) {
+    border-color: #39ff88;
+    box-shadow: 0 0 14px rgba(57, 255, 136, 0.45);
+  }
+  .cam-reel-track :global(.cam-reel-label) {
+    font-family: "Times New Roman", Times, serif;
+    font-weight: 700;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    color: #4dff9b;
+    text-shadow: 0 0 8px rgba(57, 255, 136, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 150px;
+    transform: scaleX(0.82);
+    transform-origin: left;
+  }
+  .cam-reel-empty {
+    display: none;
+    margin: 6px 18px 2px;
+    font-size: 0.6rem;
+    letter-spacing: 0.22em;
+    color: rgba(125, 255, 180, 0.5);
+  }
+  .cam-reel.is-empty .cam-reel-empty { display: block; }
+  .cam-reel.is-empty .cam-reel-rail { display: none; }
 
   @media (max-width: 560px) {
     .cam-body { grid-template-columns: 1fr; }

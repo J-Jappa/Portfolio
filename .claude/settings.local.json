@@ -135,7 +135,17 @@
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\scope-check.mjs\")",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\pill-light.mjs\")",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\pill-css.mjs\")",
-      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\theme-default.mjs\")"
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\theme-default.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\scope-reel.mjs\")",
+      "PowerShell(npm run build 2>&1)",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\reel-visual.mjs\")",
+      "PowerShell(git status --short public/thumbs | Select-Object -First 8; git log --oneline -2 -- public/thumbs; \"--- committed vs working dims of one thumb ---\"; $f = \\(git diff --name-only HEAD -- public/thumbs | Select-Object -First 1\\); $f)",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\car-debug.mjs\")",
+      "PowerShell(Get-NetTCPConnection -LocalPort 4321 -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $p = Get-Process -Id $_.OwningProcess; \"$\\($p.Id\\) $\\($p.ProcessName\\) started $\\($p.StartTime\\)\" }; try { \\(Get-CimInstance Win32_Process -Filter \"ProcessId=$\\(\\(Get-NetTCPConnection -LocalPort 4321 -State Listen\\).OwningProcess | Select-Object -First 1\\)\"\\).CommandLine } catch {})",
+      "PowerShell(npx astro preview --port 4322)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\" -Raw\\) -replace 'localhost:4321', 'localhost:4322' | Set-Content \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\" -Encoding utf8; node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\edge-check2.mjs\")",
+      "PowerShell(Get-NetTCPConnection -LocalPort 4322 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -Confirm:$false })"
     ]
   }
 }

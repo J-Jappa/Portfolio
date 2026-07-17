@@ -1,12 +1,7 @@
 ---
 import Layout from "../../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { createHash } from "crypto";
-
-function thumbSrc(src: string): string {
-  const hash = createHash("md5").update(src).digest("hex").slice(0, 12);
-  return `/thumbs/${hash}.webp`;
-}
+import { thumbSrc } from "@/utils/thumbs";
 
 /** Extract the year from an ISO date string, or return null */
 function yearOf(date?: string): string | null {

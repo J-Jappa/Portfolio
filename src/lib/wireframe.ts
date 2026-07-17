@@ -135,8 +135,10 @@ export function mountWireframe(canvas: HTMLCanvasElement, opts: WireOpts = {}) {
     };
     const move = (e: PointerEvent) => {
       if (!dragging) return;
-      spin += (e.clientX - lastX) * 0.011;
-      pitch = Math.max(-1.15, Math.min(1.15, pitch + (e.clientY - lastY) * 0.009));
+      // Signs chosen so the model's near face follows the pointer (grab
+      // convention, same feel as the globe), not the reverse.
+      spin -= (e.clientX - lastX) * 0.011;
+      pitch = Math.max(-1.15, Math.min(1.15, pitch - (e.clientY - lastY) * 0.009));
       lastX = e.clientX; lastY = e.clientY;
       if (!running) draw(); // redraw immediately when auto-spin is off
     };

@@ -1,16 +1,9 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { createHash } from "crypto";
 import { SITE } from "@/config";
+import { thumbSrc } from "@/utils/thumbs";
 import CarWireframe from "@/components/CarWireframe.astro";
-
-// Maps an original image src to its pre-generated thumbnail path.
-// Matches the hash logic in scripts/gen-thumbs.mjs.
-function thumbSrc(src: string): string {
-  const hash = createHash("md5").update(src).digest("hex").slice(0, 12);
-  return `/thumbs/${hash}.webp`;
-}
 
 const projects = (await getCollection(
   "projects",
@@ -100,9 +93,9 @@ const rest = sorted.slice(3);
     </div>
 
     <!-- Wireframe solar car: three.js x-ray of the CFD surface mesh
-         (decorative; lg+ only; the 3D chunk lazy-loads when visible) -->
-    <div class="relative z-10 hidden lg:block lg:w-96 xl:w-[28rem]">
-      <CarWireframe class="h-64 xl:h-72" />
+         (decorative; the 3D chunk lazy-loads when visible) -->
+    <div class="relative z-10 lg:w-96 xl:w-[28rem]">
+      <CarWireframe class="h-56 sm:h-64 xl:h-72" />
     </div>
   </section>
 
