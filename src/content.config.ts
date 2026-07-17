@@ -21,11 +21,13 @@ const projects = defineCollection({
     })).default([]),
     tags: z.array(z.string()).default([]),
     role: z.string().optional(),
+    stat: z.string().optional(),           // short headline metric for cards
     repo: z.string().url().optional(),
     link: z.string().url().optional(),
     outcomes: z.array(z.string()).default([]),
     order: z.number().default(10),          // ← add this
     featured: z.boolean().default(false),
+    draft: z.boolean().default(false),      // hide from the list + route without deleting
     gallery: z.array(z.union([img, row])).default([]),
   })
 });

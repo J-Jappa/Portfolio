@@ -1,0 +1,40 @@
+---
+// Inline PDF viewer with a graceful fallback. Phone browsers rarely render
+// embedded PDFs, so the viewer only shows from sm: up; every screen gets
+// the open link underneath.
+interface Props {
+  src: string;
+  title: string;
+  /** Sizing classes for the viewer */
+  class?: string;
+}
+const { src, title, class: className = "h-[75vh] min-h-96" } = Astro.props;
+---
+
+<div class="not-prose my-8">
+  <object
+    data={src}
+    type="application/pdf"
+    title={title}
+    class:list={[
+      "hidden w-full rounded-xl border border-border sm:block",
+      className,
+    ]}
+  >
+    <div
+      class="flex h-full items-center justify-center p-8 text-center text-sm opacity-75"
+    >
+      This browser does not show PDFs inline. Use the link below instead.
+    </div>
+  </object>
+  <p class="mt-4 text-center">
+    <a
+      href={src}
+      target="_blank"
+      rel="noopener"
+      class="inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/5 px-5 py-2.5 text-sm font-medium text-accent no-underline glow-accent transition-colors hover:border-accent/70 hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+    >
+      Open the thesis (PDF)
+    </a>
+  </p>
+</div>

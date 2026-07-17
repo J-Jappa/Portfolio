@@ -4,7 +4,7 @@ subtitle: "Small lessons that didn't fit anywhere else"
 date: "2025-03-02"
 excerpt: "A handful of things the bench taught me that no textbook did."
 tags: ["making", "notes"]
-draft: false
+draft: true
 ---
 
 A workshop is an honest place. The material does not care about your intentions, only your tolerances. Here are a few things it taught me that I keep coming back to.

@@ -3,72 +3,70 @@ import { SITE } from "@/config";
 const year = new Date().getFullYear();
 ---
 
-<footer class="border-t mt-8">
-  <div class="mx-auto max-w-app px-4 py-6">
-    <div class="flex flex-wrap items-center justify-between gap-3">
-      <p class="text-sm opacity-60">© {year} Jasper Japp</p>
+<footer class="mt-12 border-t border-border">
+  <div class="mx-auto max-w-app px-4 py-8">
+    <!-- Top row: identity + nav -->
+    <div
+      class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
+    >
+      <!-- Identity -->
+      <div class="flex flex-col gap-1">
+        <span
+          class="text-base font-semibold tracking-tight"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          Jasper Japp
+        </span>
+        <span class="t-label opacity-50">Sydney, Australia</span>
+      </div>
 
-      <nav class="text-sm flex flex-wrap gap-4 opacity-70" aria-label="Footer">
-        <a href="/" class="hover:underline">Projects</a>
-        <a href="/about" class="hover:underline">About</a>
-        <a href="/experience" class="hover:underline">Experience</a>
-        <a href="/contact" class="hover:underline">Contact</a>
-        {SITE.linkedinUrl && (
-          <a href={SITE.linkedinUrl} target="_blank" rel="noopener noreferrer" class="hover:underline">
-            LinkedIn
-          </a>
-        )}
+      <!-- Footer nav -->
+      <nav
+        class="flex flex-wrap gap-x-5 gap-y-2"
+        aria-label="Footer navigation"
+      >
+        <a
+          href="/"
+          class="t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+        >
+          Projects
+        </a>
+        <a
+          href="/about"
+          class="t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+        >
+          About
+        </a>
+        <a
+          href="/experience"
+          class="t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+        >
+          Experience
+        </a>
+        <a
+          href="/contact"
+          class="t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+        >
+          Contact
+        </a>
+        {
+          SITE.linkedinUrl && (
+            <a
+              href={SITE.linkedinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+            >
+              LinkedIn ↗
+            </a>
+          )
+        }
       </nav>
     </div>
 
-    <!-- Quiet terminal-styled link into the photography globe (its own aesthetic). -->
-    <div class="mt-4 flex justify-center sm:justify-end">
-      <a
-        href="/photographyglobe/"
-        data-astro-reload
-        class="scope-link"
-        aria-label="Photography — location scope"
-        title="Photography · location scope"
-      >
-        <img src="/logo.svg" alt="" class="scope-link-mark" width="10" height="18" />
-        <span>PHOTO//SCOPE</span>
-      </a>
+    <!-- Bottom row: copyright -->
+    <div class="mt-6 border-t border-border/50 pt-5">
+      <p class="t-label opacity-40">© {year} Jasper Japp</p>
     </div>
   </div>
 </footer>
-
-<style>
-  .scope-link {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    padding: 4px 10px;
-    border: 1px solid rgba(57, 255, 136, 0.28);
-    border-radius: 4px;
-    background: rgba(5, 11, 8, 0.9);
-    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: #4dff9b;
-    text-decoration: none;
-    text-shadow: 0 0 6px rgba(57, 255, 136, 0.4);
-    opacity: 0.5;
-    transition: opacity 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease,
-      letter-spacing 0.25s ease;
-  }
-  .scope-link:hover,
-  .scope-link:focus-visible {
-    opacity: 1;
-    border-color: rgba(57, 255, 136, 0.7);
-    box-shadow: 0 0 16px rgba(57, 255, 136, 0.28), inset 0 0 12px rgba(57, 255, 136, 0.06);
-    letter-spacing: 0.26em;
-    outline: none;
-  }
-  .scope-link-mark {
-    display: block;
-    height: 15px;
-    width: auto;
-    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.35));
-  }
-</style>

@@ -1,33 +1,48 @@
 ---
 /**
- * props:
+ * Props (fully backward compatible — no changes to public interface):
  *  - images: { src: string; alt?: string; caption?: string }[]
  *  - cols?: 2 | 3 (default 2)
  *  - lightbox?: boolean (default true)
  */
 type Img = { src: string; alt?: string; caption?: string };
-interface Props { images: Img[]; cols?: 2 | 3; lightbox?: boolean }
+interface Props {
+  images: Img[];
+  cols?: 2 | 3;
+  lightbox?: boolean;
+}
 
 const { images = [], cols = 2, lightbox = true } = Astro.props as Props;
 const gridCols = cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
 const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<div id={uid} class={`not-prose grid gap-3 my-3 ${gridCols}`}>
+<!--
+  ImageRow gets ONE FIG number for the whole row (per-row approach).
+  The row itself is marked .zine-figure so the CSS counter increments once.
+  Individual cell captions get the same FIG prefix.
+  Outside .project-prose the counter is not active, so captions render plainly.
+-->
+<div
+  id={uid}
+  class={`not-prose zine-figure grid gap-3 my-5 ${gridCols}`}
+>
   {images.map((img: Img, i: number) => (
     <figure class="m-0">
       {lightbox ? (
         <>
-          <!-- Keep original sizing: no aspect-* wrapper, image flows naturally -->
           <button
-            class="block w-full overflow-hidden rounded-xl p-0 m-0 border-0 bg-transparent"
+            class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
+                   transition-all hover:border-accent/50
+                   hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
+                   focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
             data-open={`${uid}-dlg-${i}`}
-            aria-label={`Open image ${i + 1}`}
+            aria-label={img.alt ? `Open image: ${img.alt}` : `Open image ${i + 1}`}
           >
             <img
               src={img.src}
               alt={img.alt ?? ""}
-              class="w-full rounded-xl object-cover"
+              class="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               loading="lazy"
               decoding="async"
             />
@@ -37,9 +52,7 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
             id={`${uid}-dlg-${i}`}
             class="p-0 border-0 bg-transparent backdrop:bg-black/70"
           >
-            <!-- Outer wrapper gives margin from screen edges -->
             <div class="m-4 sm:m-8">
-              <!-- Panel with rounded corners & shadow -->
               <div class="relative rounded-xl overflow-hidden shadow-2xl bg-white dark:bg-neutral-900">
                 <img
                   src={img.src}
@@ -50,13 +63,16 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
                   decoding="async"
                   loading="eager"
                 />
-                {img.caption && <p class="m-3 text-sm opacity-80">{img.caption}</p>}
-
-                <!-- Close button -->
+                {img.caption && (
+                  <p class="m-3 text-sm opacity-80">{img.caption}</p>
+                )}
                 <form method="dialog">
                   <button
-                    class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
-                    aria-label="Close"
+                    class="absolute top-2 right-2 rounded-md border border-border
+                           bg-white/85 dark:bg-neutral-800/85 px-3 py-1 text-sm
+                           hover:border-accent/60
+                           focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
+                    aria-label="Close lightbox"
                   >
                     Close
                   </button>
@@ -66,7 +82,9 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
           </dialog>
 
           {img.caption && (
-            <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>
+            <figcaption class="row-caption mt-2 text-left">
+              {img.caption}
+            </figcaption>
           )}
         </>
       ) : (
@@ -74,12 +92,14 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
           <img
             src={img.src}
             alt={img.alt ?? ""}
-            class="w-full rounded-xl object-cover"
+            class="w-full rounded-xl border border-border object-cover"
             loading="lazy"
             decoding="async"
           />
           {img.caption && (
-            <figcaption class="mt-1 text-sm opacity-70">{img.caption}</figcaption>
+            <figcaption class="row-caption mt-2 text-left">
+              {img.caption}
+            </figcaption>
           )}
         </>
       )}
@@ -88,28 +108,62 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
 </div>
 
 {lightbox && (
-<script is:inline define:vars={{ uid }}>
-  const root = document.getElementById(uid);
-  if (!root) return;
+  <script is:inline define:vars={{ uid }}>
+    const root = document.getElementById(uid);
+    if (!root) return;
 
-  root.querySelectorAll('[data-open]').forEach((btn) => {
-    const id = btn.getAttribute('data-open');
-    if (!id) return;
+    root.querySelectorAll('[data-open]').forEach((btn) => {
+      const id = btn.getAttribute('data-open');
+      if (!id) return;
 
-    const dlg = document.getElementById(id);
+      const dlg = document.getElementById(id);
 
-    btn.addEventListener('click', () => {
-      if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+      btn.addEventListener('click', () => {
+        if (dlg && typeof dlg.showModal === 'function') dlg.showModal();
+      });
+
+      dlg && dlg.addEventListener('click', (e) => {
+        if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
+      });
+
+      dlg && dlg.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && typeof dlg.close === 'function') dlg.close();
+      });
     });
-
-    dlg && dlg.addEventListener('click', (e) => {
-      if (e.target === dlg && typeof dlg.close === 'function') dlg.close();
-    });
-
-    dlg && dlg.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && typeof dlg.close === 'function') dlg.close();
-    });
-  });
-</script>
-
+  </script>
 )}
+
+<!--
+  Per-row FIG. numbering via CSS counters.
+  The .zine-figure on the grid div increments the counter once per ImageRow
+  (same counter defined in Figure.astro's <style> block, shared via cascade).
+  Each cell's .row-caption gets the same FIG. number — so all captions in
+  one row share the same figure number, which is the cleanest read.
+  Outside .project-prose, no prefix is injected.
+-->
+<style>
+  /* Caption base */
+  .row-caption {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, currentColor 65%, transparent);
+    font-style: italic;
+  }
+
+  /* No prefix outside scope */
+  .zine-figure .row-caption::before {
+    content: none;
+  }
+
+  /* Inside .project-prose: prefix with the shared FIG counter value */
+  :where(.project-prose) .zine-figure .row-caption::before {
+    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, currentColor 55%, transparent);
+    font-style: normal;
+    margin-right: 0.25em;
+  }
+</style>

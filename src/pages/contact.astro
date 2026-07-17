@@ -4,35 +4,102 @@ import { SITE } from "@/config";
 ---
 
 <Layout title="Contact" description="Get in touch with Jasper Japp">
-  <article class="prose max-w-none dark:prose-invert">
-    <h1>Contact</h1>
-    <p>
-      I'm always happy to talk engineering. Whether it's a role, a project,
-      or just a question about solar cars or bushfire detection, drop me a line.
+  <!-- Page heading -->
+  <div class="mb-10">
+    <span class="mb-2 block t-label">01 / CONTACT</span>
+    <h1
+      class="text-3xl font-semibold tracking-tight sm:text-4xl"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      Get in touch
+    </h1>
+    <p class="mt-3 max-w-[60ch] text-sm text-foreground/75">
+      I'm always happy to talk engineering. Whether it's a role, a project, or
+      just a question about solar cars or bushfire detection, drop me a line.
     </p>
+  </div>
 
-    <ul>
-      <li>
-        <strong>Email:</strong>
-        <a id="email-link" href="#">Loading…</a>
-      </li>
-      <li>
-        <strong>LinkedIn:</strong>
-        <a href={SITE.linkedinUrl} target="_blank" rel="noopener noreferrer">
+  <!-- Contact cards -->
+  <div
+    class="grid gap-4 sm:grid-cols-2 sm:gap-6"
+    role="list"
+    aria-label="Contact methods"
+  >
+    <!-- Email card -->
+    <a
+      id="email-card"
+      href="#"
+      class="group relative block card-hover rounded-xl p-6 no-underline glow-accent before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30"
+      role="listitem"
+      aria-label="Send email"
+    >
+      <span class="mb-3 block t-label">EMAIL //</span>
+      <div class="flex items-center justify-between gap-4">
+        <span
+          id="email-display"
+          class="text-sm font-medium text-foreground/80 transition-colors group-hover:text-accent"
+        >
+          Loading…
+        </span>
+        <span
+          class="shrink-0 t-label opacity-50 transition-opacity group-hover:opacity-100"
+          >→</span
+        >
+      </div>
+    </a>
+
+    <!-- LinkedIn card -->
+    <a
+      href={SITE.linkedinUrl}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="group relative block card-hover rounded-xl p-6 no-underline glow-accent before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30"
+      role="listitem"
+      aria-label="Visit LinkedIn profile (opens in new tab)"
+    >
+      <span class="mb-3 block t-label">LINKEDIN //</span>
+      <div class="flex items-center justify-between gap-4">
+        <span
+          class="text-sm font-medium text-foreground/80 transition-colors group-hover:text-accent"
+        >
           linkedin.com/in/jasper-japp
-        </a>
-      </li>
-    </ul>
-  </article>
+        </span>
+        <span
+          class="shrink-0 t-label opacity-50 transition-opacity group-hover:opacity-100"
+          >↗</span
+        >
+      </div>
+    </a>
+  </div>
 </Layout>
 
 <script>
   // Email is stored as char codes so it never appears as plain text in the HTML.
-  const codes = [106,97,115,112,101,114,106,97,112,112,64,103,109,97,105,108,46,99,111,109];
+  const codes = [
+    106, 97, 115, 112, 101, 114, 106, 97, 112, 112, 64, 103, 109, 97, 105, 108,
+    46, 99, 111, 109,
+  ];
   const email = codes.map(c => String.fromCharCode(c)).join("");
   const link = document.getElementById("email-link") as HTMLAnchorElement;
   if (link) {
     link.href = "mailto:" + email;
     link.textContent = email;
   }
+
+  // Wire the email card
+  function wireEmailCard() {
+    const card = document.getElementById(
+      "email-card"
+    ) as HTMLAnchorElement | null;
+    const display = document.getElementById("email-display");
+    if (card) {
+      card.href = "mailto:" + email;
+      card.setAttribute("aria-label", "Send email to " + email);
+    }
+    if (display) {
+      display.textContent = email;
+    }
+  }
+  wireEmailCard();
+  document.addEventListener("astro:after-swap", wireEmailCard);
 </script>

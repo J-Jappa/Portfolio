@@ -4,10 +4,35 @@ import Layout from "../layouts/Layout.astro";
 
 <!-- src/pages/404.astro -->
 <Layout title="Not found">
-  <h1 class="text-2xl font-semibold">404: Not found</h1>
-  <p class="mt-2 opacity-80">Even good explorers miss a turn.</p>
-  <p class="mt-1"><em>always be optimising</em></p>
-  <p class="mt-4"><a href="/" class="underline">Back to projects</a></p>
-  <p class="mt-12 font-mono text-xs opacity-30">ssh guest@ssh.jasperjapp.com</p>
-</Layout>
+  <div class="flex min-h-[50vh] flex-col items-start justify-center">
+    <!-- Mono error label -->
+    <span class="mb-4 block t-label text-accent/70"
+      >ERR 404 // PAGE NOT FOUND</span
+    >
 
+    <!-- Friendly heading -->
+    <h1
+      class="text-3xl font-semibold tracking-tight sm:text-4xl"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      Even good explorers miss a turn.
+    </h1>
+
+    <p class="mt-3 text-sm text-foreground/70 italic">always be optimising</p>
+
+    <!-- Home link -->
+    <a
+      href="/"
+      class="mt-8 inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/5 px-5 py-2.5 text-sm font-medium text-accent no-underline glow-accent transition-colors hover:border-accent/70 hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      Back to projects
+      <span class="t-label">→</span>
+    </a>
+
+    <!-- Quiet terminal easter-egg -->
+    <p class="mt-16 font-mono text-xs text-foreground/25">
+      ssh guest@ssh.jasperjapp.com
+    </p>
+  </div>
+</Layout>

@@ -18,19 +18,17 @@ tags:
   - CAD
   - Solar Racing
 role: "Aero & Structures"
+stat: "CdA down about 20% vs the previous car"
 outcomes:
   - "Reduced CdA by about 20% vs the previous iteration through iterative ANSYS Fluent studies and optimisation."
   - "Validated drag predictions within 10% using constant-speed testing."
   - "Improved crosswind stability across ±30° yaw."
-  - "Automated CFD setup with Python scripting to cut setup time and improve consistency."
-  - "Developed a repeatable CFD approach for crosswind studies."
   - "Competed in the 2025 Bridgestone World Solar Challenge (BWSC)."
-  - "Produced technical handover documentation."
-
 ---
 
 import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
+import CarWireframe from "@/components/CarWireframe.astro";
 
 New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
 
@@ -49,10 +47,26 @@ I modelled and screened a set of concepts in CAD and CFD: monohull, catamaran, t
 <ImageRow
   cols={2}
   images={[
-    { src: "/images/solar/early/CAT.PNG",  alt: "Early catamaran",  caption: "Early catamaran concept selected for final development." },
-    { src: "/images/solar/early/MONO.PNG", alt: "Monohull",         caption: "Monohull developed for 2025 rule changes." },
-    { src: "/images/solar/early/SLUG.PNG", alt: "Slug",             caption: "Slug monohull with no canopy." },
-    { src: "/images/solar/early/TRI.PNG",  alt: "Trimaran",         caption: "Trimaran with narrow centre body and two front wheel fairings." },
+    {
+      src: "/images/solar/early/CAT.PNG",
+      alt: "Early catamaran",
+      caption: "Early catamaran concept selected for final development.",
+    },
+    {
+      src: "/images/solar/early/MONO.PNG",
+      alt: "Monohull",
+      caption: "Monohull developed for 2025 rule changes.",
+    },
+    {
+      src: "/images/solar/early/SLUG.PNG",
+      alt: "Slug",
+      caption: "Slug monohull with no canopy.",
+    },
+    {
+      src: "/images/solar/early/TRI.PNG",
+      alt: "Trimaran",
+      caption: "Trimaran with narrow centre body and two front wheel fairings.",
+    },
   ]}
 />
 
@@ -65,18 +79,54 @@ I ran more than 1,000 compute hours in ANSYS Fluent and generated about 1.5 TB o
 <ImageRow
   cols={2}
   images={[
-    { src: "/images/solar/early dev/image (1).png",  alt: "Early aerodynamic development study 1" },
-    { src: "/images/solar/early dev/image (2).png",  alt: "Early aerodynamic development study 2" },
-    { src: "/images/solar/early dev/image (3).png",  alt: "Early aerodynamic development study 3" },
-    { src: "/images/solar/early dev/image (4).png",  alt: "Early aerodynamic development study 4" },
-    { src: "/images/solar/early dev/image (6).png",  alt: "Early aerodynamic development study 6" },
-    { src: "/images/solar/early dev/image (7).png",  alt: "Early aerodynamic development study 7" },
-    { src: "/images/solar/early dev/image (8).png",  alt: "Early aerodynamic development study 8" },
-    { src: "/images/solar/early dev/image (9).png",  alt: "Early aerodynamic development study 9" },
-    { src: "/images/solar/early dev/image (11).png", alt: "Early aerodynamic development study 11" },
-    { src: "/images/solar/early dev/image (12).png", alt: "Early aerodynamic development study 12" },
-    { src: "/images/solar/early dev/image (13).png", alt: "Early aerodynamic development study 13" },
-    { src: "/images/solar/early dev/image (14).png", alt: "Early aerodynamic development study 14" },
+    {
+      src: "/images/solar/early dev/image (1).png",
+      alt: "Early aerodynamic development study 1",
+    },
+    {
+      src: "/images/solar/early dev/image (2).png",
+      alt: "Early aerodynamic development study 2",
+    },
+    {
+      src: "/images/solar/early dev/image (3).png",
+      alt: "Early aerodynamic development study 3",
+    },
+    {
+      src: "/images/solar/early dev/image (4).png",
+      alt: "Early aerodynamic development study 4",
+    },
+    {
+      src: "/images/solar/early dev/image (6).png",
+      alt: "Early aerodynamic development study 6",
+    },
+    {
+      src: "/images/solar/early dev/image (7).png",
+      alt: "Early aerodynamic development study 7",
+    },
+    {
+      src: "/images/solar/early dev/image (8).png",
+      alt: "Early aerodynamic development study 8",
+    },
+    {
+      src: "/images/solar/early dev/image (9).png",
+      alt: "Early aerodynamic development study 9",
+    },
+    {
+      src: "/images/solar/early dev/image (11).png",
+      alt: "Early aerodynamic development study 11",
+    },
+    {
+      src: "/images/solar/early dev/image (12).png",
+      alt: "Early aerodynamic development study 12",
+    },
+    {
+      src: "/images/solar/early dev/image (13).png",
+      alt: "Early aerodynamic development study 13",
+    },
+    {
+      src: "/images/solar/early dev/image (14).png",
+      alt: "Early aerodynamic development study 14",
+    },
   ]}
 />
 
@@ -85,10 +135,26 @@ These show a mix of section trials, partial bodies and the progression toward th
 <ImageRow
   cols={2}
   images={[
-    { src: "/images/solar/domain/1.jpg", alt: "Side domain",      caption: "Side view of the CFD domain and wake treatment." },
-    { src: "/images/solar/domain/2.jpg", alt: "Top domain",       caption: "Planform domain for straight-ahead runs." },
-    { src: "/images/solar/domain/3.jpg", alt: "Crosswind domain", caption: "Crosswind domain for yaw sweeps and stability checks." },
-    { src: "/images/solar/domain/4.jpg", alt: "Wheel setup",      caption: "Wheel and ground-treatment sensitivity checks." },
+    {
+      src: "/images/solar/domain/1.jpg",
+      alt: "Side domain",
+      caption: "Side view of the CFD domain and wake treatment.",
+    },
+    {
+      src: "/images/solar/domain/2.jpg",
+      alt: "Top domain",
+      caption: "Planform domain for straight-ahead runs.",
+    },
+    {
+      src: "/images/solar/domain/3.jpg",
+      alt: "Crosswind domain",
+      caption: "Crosswind domain for yaw sweeps and stability checks.",
+    },
+    {
+      src: "/images/solar/domain/4.jpg",
+      alt: "Wheel setup",
+      caption: "Wheel and ground-treatment sensitivity checks.",
+    },
   ]}
 />
 
@@ -104,9 +170,23 @@ Focus areas were drag reduction, crosswind stability and compatibility with syst
 <ImageRow
   cols={3}
   images={[
-    { src: "/images/solar/cfd/1.png", alt: "Velocity pathlines", caption: "Pathlines to see gross flow structure and early signs of vorticity." },
-    { src: "/images/solar/cfd/2.png", alt: "Velocity pathlines", caption: "Alternative view to trace recirculation and wake jets." },
-    { src: "/images/solar/cfd/3.png", alt: "Pressure contours",  caption: "Pressure contours used in yaw sweeps to assess crosswind response." },
+    {
+      src: "/images/solar/cfd/1.png",
+      alt: "Velocity pathlines",
+      caption:
+        "Pathlines to see gross flow structure and early signs of vorticity.",
+    },
+    {
+      src: "/images/solar/cfd/2.png",
+      alt: "Velocity pathlines",
+      caption: "Alternative view to trace recirculation and wake jets.",
+    },
+    {
+      src: "/images/solar/cfd/3.png",
+      alt: "Pressure contours",
+      caption:
+        "Pressure contours used in yaw sweeps to assess crosswind response.",
+    },
   ]}
 />
 
@@ -118,7 +198,9 @@ Alongside performance runs I did validation passes for mesh independence, domain
   maxWidth="720px"
   caption="y+ surface contours showing near-wall resolution in key zones."
 />
-Crosswind stability and performance were key. For most of development I evaluated the common wind angles −15°, 0°, and +15°. I also scripted yaw sweeps from −30° to +30° in 5° steps and ran them at major design revisions.
+Crosswind stability and performance were key. For most of development I
+evaluated the common wind angles −15°, 0°, and +15°. I also scripted yaw sweeps
+from −30° to +30° in 5° steps and ran them at major design revisions.
 
 The result was a CdA about 20% lower than the 2023 car in straight-line despite the 50% increase in array area. The car stayed stable to ±30° yaw and showed reduced drag in crosswinds, driven by careful section shaping and a wide pod stance without blowing out frontal area.
 
@@ -130,22 +212,60 @@ It was intense and very instructive. Process control, ply accuracy and bondline 
 
 Core materials:
 
-- Nomex honeycomb for stiffness at low mass  
-- Corecell foam for impact resistance in local high loads  
+- Nomex honeycomb for stiffness at low mass
+- Corecell foam for impact resistance in local high loads
 - Soric where controlled thickness and resin paths helped
 
 <ImageRow
   cols={3}
   images={[
-    { src: "/images/solar/manufacturing/1.jpg", alt: "Full car pattern",            caption: "Full Car Pattern. Our first real glimpse into the car in reality." },
-    { src: "/images/solar/manufacturing/2.jpg", alt: "Laying hatches first with soric core.",   caption: "Laying hatches first with soric core." },
-    { src: "/images/solar/manufacturing/3.jpg", alt: "first layers after debulk." ,             caption: "first layers after debulk." },
-    { src: "/images/solar/manufacturing/4.jpg", alt: "Nomex honeycomb core trimmed and laid.",          caption: "Nomex honeycomb core trimmed and laid." },
-    { src: "/images/solar/manufacturing/5.jpg", alt: "Monolithic reinforcement over a plant for roll-hoop mounts.",     caption: "Monolithic reinforcement over a plant for roll-hoop mounts." },
-    { src: "/images/solar/manufacturing/6.jpg", alt: "full car vacuum bag.",         caption: "full car vacuum bag." },
-    { src: "/images/solar/manufacturing/7.jpg", alt: "Canopy split and solar array area on top mould." ,           caption: "Canopy split and solar array area on top mould." },
-    { src: "/images/solar/manufacturing/8.jpg", alt: "First-time removing the parts from the top mould.", caption: "First-time removing the parts from the top mould." },
-    { src: "/images/solar/manufacturing/9.jpg", alt: "Full shell released from the mould and bonding the halves together.",    caption: "Full shell released from the mould and bonding the halves together." },
+    {
+      src: "/images/solar/manufacturing/1.jpg",
+      alt: "Full car pattern",
+      caption:
+        "Full Car Pattern. Our first real glimpse into the car in reality.",
+    },
+    {
+      src: "/images/solar/manufacturing/2.jpg",
+      alt: "Laying hatches first with soric core.",
+      caption: "Laying hatches first with soric core.",
+    },
+    {
+      src: "/images/solar/manufacturing/3.jpg",
+      alt: "first layers after debulk.",
+      caption: "first layers after debulk.",
+    },
+    {
+      src: "/images/solar/manufacturing/4.jpg",
+      alt: "Nomex honeycomb core trimmed and laid.",
+      caption: "Nomex honeycomb core trimmed and laid.",
+    },
+    {
+      src: "/images/solar/manufacturing/5.jpg",
+      alt: "Monolithic reinforcement over a plant for roll-hoop mounts.",
+      caption: "Monolithic reinforcement over a plant for roll-hoop mounts.",
+    },
+    {
+      src: "/images/solar/manufacturing/6.jpg",
+      alt: "full car vacuum bag.",
+      caption: "full car vacuum bag.",
+    },
+    {
+      src: "/images/solar/manufacturing/7.jpg",
+      alt: "Canopy split and solar array area on top mould.",
+      caption: "Canopy split and solar array area on top mould.",
+    },
+    {
+      src: "/images/solar/manufacturing/8.jpg",
+      alt: "First-time removing the parts from the top mould.",
+      caption: "First-time removing the parts from the top mould.",
+    },
+    {
+      src: "/images/solar/manufacturing/9.jpg",
+      alt: "Full shell released from the mould and bonding the halves together.",
+      caption:
+        "Full shell released from the mould and bonding the halves together.",
+    },
   ]}
 />
 
@@ -153,7 +273,7 @@ Seeing the shell released for the first time was a great moment. After months of
 
 ## Testing
 
-Once the car was reliable on track I ran constant-speed passes to estimate drag. Measured drag was within 10% of the CFD prediction, which supports both the workflow and the build quality. Crosswind checks on test days matched the trend from yaw sweeps.
+Once the car was reliable on track I ran constant-speed passes to estimate drag. Measured drag was within 10% of the CFD prediction, which supports both the workflow and the build quality. Crosswind checks on test days matched the trend from yaw sweeps. I closed the project out with technical handover documentation so the next iteration of the team can pick up where this one left off.
 
 <Figure
   src="/images/solar/hero.png"
@@ -168,24 +288,33 @@ Once the car was reliable on track I ran constant-speed passes to estimate drag.
 
 ## Tools and methods
 
-- SolidWorks for geometry, packaging and surface work  
-- ANSYS Fluent for CFD  
-- PyFluent API for scripting and batch runs  
-- Fluent adjoint for shape hints in key zones  
-- JavaFoil to screen 2D sections for low Re and ground effect  
+- SolidWorks for geometry, packaging and surface work
+- ANSYS Fluent for CFD
+- PyFluent API for scripting and batch runs
+- Fluent adjoint for shape hints in key zones
+- JavaFoil to screen 2D sections for low Re and ground effect
 - Simple Python tooling for data collation and plots
 
 ## What I would refine next
 
-- Use a weighted CdA based on wind occurrence to balance straight-line and crosswinds  
-- Tighter tolerances on array packaging to reduce overall body size  
-- Clearer link between yaw-stability targets and section shaping across the span  
+- Use a weighted CdA based on wind occurrence to balance straight-line and crosswinds
+- Tighter tolerances on array packaging to reduce overall body size
+- Clearer link between yaw-stability targets and section shaping across the span
 - More physical tests for crosswind sensitivity and driver workload
 
 ---
 
 ### Related projects
 
-- [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/)  
-- [Transparent Light Covers](/projects/light-covers/)  
+- [Carbon Bulkheads and Interfacing](/projects/bulkheads-interfacing/)
+- [Transparent Light Covers](/projects/light-covers/)
 - [Solar Array Hinging and Charging Setup](/projects/solar-hinging/)
+
+## Explore the model
+
+The final body as an interactive x-ray wireframe of the CFD surface mesh. Drag to orbit.
+
+<CarWireframe
+  class="h-80 sm:h-96"
+  caption="SC4 Monty · CFD surface mesh · drag to orbit"
+/>

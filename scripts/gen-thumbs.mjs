@@ -10,8 +10,8 @@ import path from "path";
 import crypto from "crypto";
 import sharp from "sharp";
 
-const THUMB_W = 480;
-const THUMB_H = 206;
+const THUMB_W = 720;
+const THUMB_H = 405;
 const QUALITY = 82;
 const PUBLIC_DIR = path.resolve("public");
 const OUT_DIR = path.join(PUBLIC_DIR, "thumbs");

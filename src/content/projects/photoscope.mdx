@@ -1,0 +1,114 @@
+---
+title: "PHOTO//SCOPE: a retro-futurist terminal for my film photos"
+summary: "A hidden corner of this site: an interactive wireframe globe and CRT contact sheet for my film photography. Photos are discovered straight from their folders, plotted where they were shot, and browsed through a Tron / Evangelion / NASA-terminal interface, complete with comets, a boot sequence and spinnable camera wireframes. A deliberate design-and-feel experiment, built almost entirely by pair-programming with Claude Code, because I am not a web developer."
+date: "2026-07-09"
+order: 6
+draft: true
+hero: "/images/scope/globe.webp"
+images:
+  - src: "/images/scope/globe.webp"
+    alt: "The PHOTO//SCOPE wireframe globe with photo pins"
+  - src: "/images/scope/contact-sheet.webp"
+    alt: "The amber CRT contact sheet view"
+  - src: "/images/scope/viewer.webp"
+    alt: "The archive viewer with metadata, histograms and a camera wireframe"
+tags: ["Creative coding", "Astro", "Canvas", "Retro-futurism", "AI-assisted"]
+role: "Concept, art direction & (AI-assisted) build"
+outcomes:
+  - "An interactive orthographic wireframe globe that plots film photos by where they were shot, rendered on a plain 2D canvas with no WebGL"
+  - "A matching CRT contact sheet, a terminal photo viewer with live RGB histograms, and camera wireframe models you can grab and spin"
+  - "Zero-maintenance content pipeline: drop a folder named '<place> · <film> · <camera>' and the shot appears, with location, film stock, camera and date parsed automatically"
+  - "Built with heavy use of Claude Code as a stand-in for the web-dev skills I don't have"
+---
+
+import Figure from "@/components/Figure.astro";
+import ImageRow from "@/components/ImageRow.astro";
+
+This one is different from the rest of my portfolio. It isn't aerodynamics or machine learning; it's a **for-the-love-of-it design project**, and it's deliberately tucked away. There's no nav link to it. The only way in is a small, dim `PHOTO//SCOPE` chip in the site footer. If you've found this write-up, consider the map already half-drawn.
+
+The short version: I shoot film, and I wanted somewhere to put those photos that felt like _the photos_, not another neat white gallery. So I built an interactive, retro-futurist terminal for them. A wireframe Earth you can spin, with every location I've shot pinned to the globe. Click a pin and a little archive viewer boots up. There's a CRT contact sheet, camera models you can rotate, comets, scanlines and a start-up sequence. It leans hard into Star Wars readouts, Tron, Evangelion warning screens and old NASA/JPL mission terminals.
+
+<Figure
+  src="/images/scope/globe.webp"
+  alt="The wireframe globe with photo pins and the frame carousel below"
+  maxWidth="820px"
+  caption="The globe. Every pin is somewhere I've stood with a camera."
+/>
+
+## Where it started
+
+The whole thing crept up on me. It began as a plain idea: give my photography its own page, styled differently to the engineering side of the site. The first version was an ordinary responsive gallery, auto-built from folders, with location and film stock on hover.
+
+Then I had a small thought that turned into a rabbit hole: what if, instead of a grid, it was a **map**? A light outline of the world on white, a dot everywhere I'd taken a photo, and clicking a dot opened that location's roll.
+
+I built that. It was nice. It was also, I decided about a day later, far too tasteful. So I asked the obvious follow-up: what if it were retro-futurist instead? Star Wars terminals? Tron? The map quietly became a **3D spinning wireframe globe**, and the project stopped being a gallery and became a whole little world.
+
+From there it was pure iteration on feel. Fewer polygons for a chunkier vector look. A low-poly lat/long cage, neon land outlines, a dotted starfield. Then **comets** (blue, red and yellow) with long trails that pass _behind_ the Earth and occlude correctly. A CRT bulge like a real curved tube. Dense scanlines. Chromatic aberration on the lines but never on the photos. A boot sequence with green phosphor text. A terminal photo viewer with a decrypt-style reveal and three little **RGB histograms** read live off each image. A condensed serif for the headings. An amber contact sheet view to switch into. It kept accreting details, and that was the fun of it.
+
+<ImageRow
+  cols={2}
+  images={[
+    {
+      src: "/images/scope/boot.webp",
+      alt: "The green phosphor boot sequence",
+      caption: "The boot sequence. It replays on every fresh load.",
+    },
+    {
+      src: "/images/scope/pin-open.webp",
+      alt: "A location pin opened, archive viewer booting",
+      caption: "Clicking a pin boots that location's archive.",
+    },
+  ]}
+/>
+
+<ImageRow
+  cols={2}
+  images={[
+    {
+      src: "/images/scope/contact-sheet.webp",
+      alt: "The amber CRT contact sheet view",
+      caption: "The amber contact sheet, for browsing everything at once.",
+    },
+    {
+      src: "/images/scope/viewer.webp",
+      alt: "Terminal photo viewer with metadata and live RGB histograms",
+      caption: "The viewer, with live RGB histograms read off each frame.",
+    },
+  ]}
+/>
+
+## The cameras
+
+The detail I'm fondest of: each roll knows **which camera shot it**, and the interface shows a live wireframe of that camera, spinning, that you can grab and orbit. It's a nod to the "CRAFT" model panels in old mission-control mock-ups. There's a little camera archive you can open to flick through all of them with specs and notes.
+
+They're the four bodies I actually use: a Nikon FM, a Yashica-A TLR, a Pentax Espio 95s point-and-shoot, and a 3D-printed Panomicron Oxygen panoramic. They're currently chunky low-poly _placeholders_ that I'm modelling properly over time, and they render with the exact same hand-rolled projection as the globe, so the whole thing shares one visual language.
+
+<Figure
+  src="/images/scope/camera-archive.webp"
+  alt="The camera archive with specs and notes"
+  maxWidth="820px"
+  caption="The camera archive: the four bodies, specs and notes. The viewer above shows the active roll's camera spinning live."
+/>
+
+## How it actually works
+
+The stack is intentionally boring so the _output_ can be loud:
+
+- **Astro**, statically generated. No framework on the client beyond a couple of vanilla scripts.
+- The globe, comets, camera models and starfield all render on a **plain 2D `<canvas>`**, using an orthographic projection written by hand (with a lot of help, more on that below). No WebGL, no three.js. Land outlines come from decimated Natural Earth coastline data.
+- **Content is just folders.** Every roll lives in a folder named `Place, Country · Film Stock · Camera`. A build-time scan (`import.meta.glob`) discovers the images, `astro:assets` optimises them to WebP (TIFFs included), and `exifr` reads the capture date. Add a roll and it shows up on the globe, the contact sheet and the carousel, with its pin placed and its metadata attached. Nothing to wire up by hand.
+- The CRT look is layered CSS and canvas: static scanlines, a barrel warp on the HUD, a vignette, and a filter-based chromatic split, kept off the photographs themselves so the actual images stay clean.
+
+Two things worth flagging: the dates are film **scan/edit** dates rather than true capture dates (that metadata doesn't survive a lab scanner), and the camera models are stylised stand-ins for now.
+
+## Built with Claude Code
+
+Here's the part I want to be upfront about: **I'm a mechanical / ML engineer, not a web developer.** A year ago I could not have built this, and I still couldn't write most of it unaided.
+
+Almost all of the code here was written by **pair-programming with Claude Code**. My half was the part I _can_ do: taste and direction. I brought the photos, the references (a Tron / Eva / JPL moodboard in my head), and a running list of what to change next. Claude turned those into the parts I can't write myself, from the orthographic projection and the comet occlusion test to the fix for the scanlines rendering wrong on the deployed build.
+
+It was genuinely collaborative, and occasionally comic. More than once we chased a bug that only appeared on the live site down through device-pixel-ratio and GPU compositing, or rebuilt an animation after I realised it had drifted from what I'd sketched. The takeaway for me, as an engineer, is less "AI wrote my website" and more that **describing intent precisely**, the same skill behind a good spec or a good research question, is most of what it now takes to build well outside your own discipline.
+
+## Find it
+
+It's meant to be stumbled upon, but since you're here: **<a href="/photoscope/" data-astro-reload>enter the scope →</a>** (best on a desktop; it boots, it spins, it wants a big screen). There's a matching contact-sheet view and a camera archive once you're inside.

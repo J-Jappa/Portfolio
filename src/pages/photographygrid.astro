@@ -107,7 +107,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
 ---
 
 <HiddenLayout
-  title="Photography · Contact Sheet"
+  title="PHOTO//SCOPE · Contact Sheet"
   description="A retro contact sheet of where my film photos were taken."
 >
   <script is:inline>
@@ -139,7 +139,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
         <span class="g-tile-label">EXIT</span>
       </a>
       <a
-        href="/photographyglobe/?nav"
+        href="/photoscope/?nav"
         class="g-tile g-tile-globe"
         data-astro-reload
         aria-label="Switch to globe view"
@@ -165,7 +165,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
     <div class="gg-main">
       <header class="gg-head">
         <div class="gg-readout">CONTACT SHEET · {pad(total)} FRAMES</div>
-        <div class="gg-title"><em>Project:</em><br />Photography</div>
+        <div class="gg-title"><em>Project:</em><br />PHOTO//SCOPE</div>
       </header>
 
       <section class="gg-grid">
@@ -355,6 +355,15 @@ const pad = (n: number) => String(n).padStart(3, "0");
       img?.classList.remove("is-loading");
       spinEl?.classList.remove("is-on");
     });
+    // Restart the loader animation from frame 0 each time loading begins, so a
+    // fresh load never picks up mid-cycle (even on its faded-out last frame).
+    function restartSpinner() {
+      if (!spinEl) return;
+      const els = spinEl.querySelectorAll<HTMLElement>(".chev-spinner, .scope-stripe, .scope-wire");
+      els.forEach(el => (el.style.animation = "none"));
+      void spinEl.offsetWidth;
+      els.forEach(el => (el.style.animation = ""));
+    }
 
     let idx = 0;
     function show() {
@@ -363,6 +372,7 @@ const pad = (n: number) => String(n).padStart(3, "0");
       img.classList.remove("is-decrypt");
       img.classList.add("is-loading");
       spinEl?.classList.add("is-on");
+      restartSpinner();
       img.src = p.full;
       img.alt = p.alt;
       if (img.complete && img.naturalWidth) onImgLoad();
@@ -822,8 +832,10 @@ const pad = (n: number) => String(n).padStart(3, "0");
     display: flex;
     align-items: center;
     justify-content: center;
-    min-height: 0;
-    min-width: 0;
+    /* Reserve room so the popup doesn't collapse (and clip the loader) before
+       the first image has any dimensions. */
+    min-width: min(300px, 62vw);
+    min-height: min(220px, 40vh);
   }
   #map-lb-img {
     display: block;

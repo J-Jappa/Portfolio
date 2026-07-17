@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { createHash } from "crypto";
+import { SITE } from "@/config";
+import CarWireframe from "@/components/CarWireframe.astro";
 
 // Maps an original image src to its pre-generated thumbnail path.
 // Matches the hash logic in scripts/gen-thumbs.mjs.
@@ -11,7 +13,8 @@ function thumbSrc(src: string): string {
 }
 
 const projects = (await getCollection(
-  "projects"
+  "projects",
+  ({ data }) => !data.draft
 )) as CollectionEntry<"projects">[];
 
 // Featured first, then by `order` (asc), then by date (newest first)
@@ -28,80 +31,340 @@ const sorted = [...projects].sort((a, b) => {
   const db = b.data.date ? new Date(b.data.date).getTime() : 0;
   return db - da;
 });
+
+const featured = sorted.slice(0, 3);
+const rest = sorted.slice(3);
 ---
 
-<Layout title="Projects" description="Engineering portfolio: projects and write-ups">
+<Layout
+  title="Jasper Japp"
+  description="Engineering portfolio of Jasper Japp: aerodynamics, composites, applied ML, and more."
+>
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- 1 / HERO                                                        -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <section
+    id="hero"
+    class="relative mb-16 flex flex-col gap-10 py-6 lg:mb-20 lg:flex-row lg:items-center lg:gap-12 lg:py-10"
+    aria-label="Introduction"
+  >
+    <!-- Blueprint-grid interactive accent (desktop pointer; static touch/reduced-motion) -->
+    <div
+      id="hero-grid"
+      aria-hidden="true"
+      class="pointer-events-none absolute inset-0 overflow-hidden rounded-2xl opacity-0 transition-opacity duration-500"
+    >
+      <canvas id="hero-canvas" class="h-full w-full"></canvas>
+    </div>
 
-  <!-- Hero -->
-  <div class="mb-8">
-    <p class="opacity-80 max-w-xl">
-      Engineer focused on tricky problems whether in aerodynamics, composite structures, or applied ML.
-      
-    </p>
-  </div>
+    <!-- Text column -->
+    <div class="relative z-10 flex flex-col gap-5 lg:flex-1">
+      <!-- Location micro-label -->
+      <p class="t-label">
+        Sydney, Australia
+        <span class="ml-2 opacity-50">−33.8688, 151.2093</span>
+      </p>
 
-  <div class="flex flex-col gap-8" id="project-list">
-    {
-      sorted.map((p) => (
-        <article class="transition" data-animate>
-          <a
-            href={`/projects/${p.slug}/`}
-            class="group card-hover block rounded-2xl border p-5 no-underline
-                   outline-offset-2 transition
-                   bg-white/70 hover:bg-accent/[0.06]
-                   dark:bg-neutral-900/50 dark:hover:bg-accent/[0.12]
-                   hover:border-accent/60 hover:shadow-lg hover:-translate-y-0.5
-                   focus-visible:outline-dashed focus-visible:outline-2 focus-visible:outline-accent"
-            data-analytics="project"
-            data-project={p.slug}
-            data-title={p.data.title}
-          >
-            <h2 class="text-lg font-semibold tracking-tight">
-  <span class="u-ink">{p.data.title}</span>
-</h2>
+      <!-- Name -->
+      <h1
+        class="text-4xl leading-tight font-bold tracking-tight text-foreground sm:text-5xl lg:text-6xl"
+        style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+      >
+        Jasper Japp
+      </h1>
 
-            <p class="mt-1 text-sm opacity-80">{p.data.summary}</p>
+      <!-- Hero intro (drafted for owner review, per no-dash preference) -->
+      <p class="max-w-2xl text-lg leading-relaxed text-foreground/80">
+        I'm Jasper, an ANU engineering grad based in Sydney. I spent the last
+        few years shaping solar car aerodynamics, laying up carbon fibre, and
+        building machine learning that spots bushfires early. Since May 2026
+        I've been an engineering specialist at AirTrunk. Here's most of what
+        I've been working on, outside of work.
+      </p>
 
-            <div class="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
-              {(p.data.images ?? [])
-                .slice(0, 3)
-                .map((img: { src: string; alt?: string }) => (
-                  <div class="aspect-[21/9] overflow-hidden rounded-lg">
-                    <img
-                      src={thumbSrc(img.src)}
-                      alt={img.alt ?? p.data.title}
-                      class="h-full w-full object-cover transition
-                             group-hover:brightness-105 group-hover:saturate-110"
-                      loading="lazy"
-                      decoding="async"
-                    />
+      <!-- Quick links -->
+      <div class="mt-1 flex flex-wrap gap-3">
+        <a
+          href="/about"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-4 py-2 text-sm font-medium no-underline glow-accent transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+        >
+          About me <span aria-hidden="true">→</span>
+        </a>
+        <a
+          href="/contact"
+          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-4 py-2 text-sm font-medium no-underline glow-accent transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+        >
+          Get in touch <span aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Wireframe solar car: three.js x-ray of the CFD surface mesh
+         (decorative; lg+ only; the 3D chunk lazy-loads when visible) -->
+    <div class="relative z-10 hidden lg:block lg:w-96 xl:w-[28rem]">
+      <CarWireframe class="h-64 xl:h-72" />
+    </div>
+  </section>
+
+  <!-- Hairline rule -->
+  <hr class="mb-12 border-border" />
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- 2 / SELECTED WORK                                               -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <section class="mb-16" aria-labelledby="selected-heading">
+    <h2
+      id="selected-heading"
+      class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      <span class="t-label" aria-hidden="true">01 /</span> Selected Work
+    </h2>
+
+    <div class="flex flex-col gap-6" id="featured-list">
+      {
+        featured.map(p => (
+          <article data-animate>
+            <a
+              href={`/projects/${p.slug}/`}
+              class="group relative block card-hover rounded-2xl p-5 no-underline outline-offset-2 before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+              data-analytics="project"
+              data-project={p.slug}
+              data-title={p.data.title}
+            >
+              <div>
+                <h3
+                  class="text-lg font-semibold tracking-tight"
+                  style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+                >
+                  <span class="u-ink">{p.data.title}</span>
+                </h3>
+                <p class="mt-1 text-sm leading-relaxed text-foreground/75">
+                  {p.data.summary}
+                </p>
+
+                {(p.data.images ?? []).length > 0 && (
+                  <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                    {(p.data.images ?? [])
+                      .slice(0, 3)
+                      .map((img: { src: string; alt?: string }) => (
+                        <div class="aspect-video overflow-hidden rounded-lg">
+                          <img
+                            src={thumbSrc(img.src)}
+                            alt={img.alt ?? p.data.title}
+                            class="h-full w-full object-cover transition group-hover:brightness-105 group-hover:saturate-110"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                      ))}
                   </div>
-                ))}
-            </div>
+                )}
 
-            {(() => {
-              const stat = (p.data.outcomes ?? []).find((o: string) => /\d/.test(o));
-              return stat ? (
-                <p class="mt-3 text-xs text-accent font-medium">↳ {stat}</p>
-              ) : null;
-            })()}
+                <div class="min-w-0">
+                  {p.data.stat ? (
+                    <p class="mt-3 font-mono text-xs tracking-wide text-accent-2">
+                      ↳ {p.data.stat}
+                    </p>
+                  ) : null}
 
-            {p.data.tags?.length ? (
-              <div class="mt-2 text-xs opacity-70">{p.data.tags.join(" · ")}</div>
-            ) : null}
+                  {p.data.tags?.length ? (
+                    <div class="mt-3 flex flex-wrap gap-1.5">
+                      {p.data.tags.map((tag: string) => (
+                        <span class="inline-block rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 t-label">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
 
-            <div class="mt-2 flex items-center gap-1 text-sm opacity-70">
-              <span class="transition group-hover:text-accent">View project</span>
-              <span class="translate-x-0 transition group-hover:translate-x-1">→</span>
-            </div>
-          </a>
-        </article>
-      ))
-    }
-  </div>
+                  <div class="mt-3 flex items-center gap-1 text-sm text-foreground/60">
+                    <span class="transition group-hover:text-accent">
+                      View project
+                    </span>
+                    <span
+                      class="translate-x-0 transition group-hover:translate-x-1"
+                      aria-hidden="true"
+                    >
+                      →
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- Hairline rule -->
+  <hr class="mb-12 border-border" />
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- 3 / ALL PROJECTS                                                -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  {
+    rest.length > 0 && (
+      <section class="mb-16" aria-labelledby="all-projects-heading">
+        <h2
+          id="all-projects-heading"
+          class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          <span class="t-label" aria-hidden="true">
+            02 /
+          </span>{" "}
+          All Projects
+        </h2>
+
+        <div
+          class="grid grid-cols-1 gap-4 lg:grid-cols-2"
+          id="all-projects-list"
+        >
+          {rest.map(p => (
+            <article data-animate>
+              <a
+                href={`/projects/${p.slug}/`}
+                class="group block h-full card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+                data-analytics="project"
+                data-project={p.slug}
+                data-title={p.data.title}
+              >
+                {/* Three thumbnails read as a story: concept, build, finished */}
+                {(p.data.images ?? []).length > 0 && (
+                  <div class="mb-3 grid grid-cols-3 gap-1.5">
+                    {(p.data.images ?? [])
+                      .slice(0, 3)
+                      .map((img: { src: string; alt?: string }) => (
+                        <div class="aspect-video overflow-hidden rounded-lg">
+                          <img
+                            src={thumbSrc(img.src)}
+                            alt={img.alt ?? p.data.title}
+                            class="h-full w-full object-cover transition group-hover:brightness-105 group-hover:saturate-110"
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                      ))}
+                  </div>
+                )}
+
+                <h3
+                  class="text-base font-semibold tracking-tight"
+                  style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+                >
+                  <span class="u-ink">{p.data.title}</span>
+                </h3>
+                <p class="mt-1 text-sm leading-relaxed text-foreground/70">
+                  {p.data.summary}
+                </p>
+
+                {p.data.tags?.length ? (
+                  <div class="mt-2 text-xs text-foreground/50">
+                    {p.data.tags.slice(0, 4).join(" · ")}
+                  </div>
+                ) : null}
+
+                <div class="mt-2 flex items-center gap-1 text-sm text-foreground/55">
+                  <span class="transition group-hover:text-accent">
+                    View project
+                  </span>
+                  <span
+                    class="translate-x-0 transition group-hover:translate-x-1"
+                    aria-hidden="true"
+                  >
+                    →
+                  </span>
+                </div>
+              </a>
+            </article>
+          ))}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Hairline rule -->
+  <hr class="mb-12 border-border" />
+
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- 4 / ELSEWHERE                                                   -->
+  <!-- ════════════════════════════════════════════════════════════════ -->
+  <section class="mb-4" aria-labelledby="elsewhere-heading">
+    <h2
+      id="elsewhere-heading"
+      class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      <span class="t-label" aria-hidden="true">03 /</span> Elsewhere
+    </h2>
+
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" data-animate>
+      <!-- Photography: styled in PHOTO//SCOPE's own terminal aesthetic -->
+      <a
+        href="/photoscope/"
+        data-astro-reload
+        class="scope-card outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+        aria-label="PHOTO//SCOPE, film photography"
+      >
+        <p class="scope-card-label">Photography //</p>
+        <p class="scope-card-title">
+          <img
+            src="/logo.svg"
+            alt=""
+            class="scope-card-mark"
+            width="10"
+            height="18"
+          />
+          <span>PHOTO//SCOPE</span>
+        </p>
+        <p class="scope-card-sub">
+          Film photos plotted where they were shot. Mostly 35mm.
+        </p>
+      </a>
+
+      <!-- Contact -->
+      <a
+        href="/contact"
+        class="group block card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+      >
+        <p class="mb-2 t-label text-accent">Contact</p>
+        <p
+          class="text-sm font-medium text-foreground transition-colors group-hover:text-accent"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          <span class="u-ink">Get in touch</span>
+        </p>
+        <p class="mt-1 text-xs leading-relaxed text-foreground/60">
+          I'm always happy to talk roles, projects, or solar cars.
+        </p>
+      </a>
+
+      <!-- LinkedIn -->
+      <a
+        href={SITE.linkedinUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        class="group block card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+      >
+        <p class="mb-2 t-label">LinkedIn</p>
+        <p
+          class="text-sm font-medium text-foreground transition-colors group-hover:text-accent"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          <span class="u-ink">Jasper Japp ↗</span>
+        </p>
+        <p class="mt-1 text-xs leading-relaxed text-foreground/60">
+          Professional profile and work history.
+        </p>
+      </a>
+    </div>
+  </section>
 </Layout>
 
 <script>
+  /* ── Scroll-reveal ──────────────────────────────────────────────── */
   function initAnimations() {
     const els = document.querySelectorAll<HTMLElement>("[data-animate]");
     const observer = new IntersectionObserver(
@@ -122,4 +385,196 @@ const sorted = [...projects].sort((a, b) => {
   }
   initAnimations();
   document.addEventListener("astro:after-swap", initAnimations);
+
+  /* ── Blueprint-grid hero accent ─────────────────────────────────── */
+  /*
+   * Renders a fine dotted/grid on a canvas behind the hero text.
+   * Gently shifts offset with pointer on desktop; completely static on
+   * touch devices. Paused / hidden under prefers-reduced-motion.
+   * No continuous rAF while idle — re-draws only on pointermove,
+   * theme change, and resize (debounced).
+   */
+  function initHeroGrid() {
+    const section = document.getElementById("hero") as HTMLElement | null;
+    const wrapper = document.getElementById("hero-grid") as HTMLElement | null;
+    const canvas = document.getElementById(
+      "hero-canvas"
+    ) as HTMLCanvasElement | null;
+    if (!section || !wrapper || !canvas) return;
+
+    // Respect reduced-motion: leave hidden, don't wire up anything.
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) return;
+
+    // Don't wire pointer effects on touch-primary devices.
+    const isTouch = window.matchMedia(
+      "(hover: none) and (pointer: coarse)"
+    ).matches;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let offsetX = 0;
+    let offsetY = 0;
+    let rafId: number | null = null;
+
+    function getAccentColor(): string {
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--accent")
+        .trim();
+    }
+
+    function drawGrid(ox: number, oy: number) {
+      const W = canvas!.width;
+      const H = canvas!.height;
+      ctx!.clearRect(0, 0, W, H);
+
+      const color = getAccentColor() || "#006cac";
+      ctx!.strokeStyle = color;
+      ctx!.globalAlpha = 0.07;
+      ctx!.lineWidth = 0.5;
+
+      const step = 28;
+      const startX = ((ox % step) + step) % step;
+      const startY = ((oy % step) + step) % step;
+
+      ctx!.beginPath();
+      for (let x = startX - step; x < W + step; x += step) {
+        ctx!.moveTo(x, 0);
+        ctx!.lineTo(x, H);
+      }
+      for (let y = startY - step; y < H + step; y += step) {
+        ctx!.moveTo(0, y);
+        ctx!.lineTo(W, y);
+      }
+      ctx!.stroke();
+
+      // Dot intersections
+      ctx!.globalAlpha = 0.12;
+      for (let x = startX - step; x < W + step; x += step) {
+        for (let y = startY - step; y < H + step; y += step) {
+          ctx!.beginPath();
+          ctx!.arc(x, y, 1.1, 0, Math.PI * 2);
+          ctx!.fillStyle = color;
+          ctx!.fill();
+        }
+      }
+      ctx!.globalAlpha = 1;
+    }
+
+    function resize() {
+      const rect = section!.getBoundingClientRect();
+      canvas!.width = rect.width;
+      canvas!.height = rect.height;
+      drawGrid(offsetX, offsetY);
+    }
+
+    // Fade in
+    wrapper.style.opacity = "1";
+
+    resize();
+
+    // Debounced resize
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    window.addEventListener("resize", () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(resize, 120);
+    });
+
+    // Pointer move — desktop only, no continuous loop
+    if (!isTouch) {
+      section.addEventListener("pointermove", (e: PointerEvent) => {
+        if (e.pointerType === "touch") return;
+        const rect = section.getBoundingClientRect();
+        const cx = (e.clientX - rect.left) / rect.width - 0.5;
+        const cy = (e.clientY - rect.top) / rect.height - 0.5;
+        offsetX = cx * 18;
+        offsetY = cy * 18;
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          drawGrid(offsetX, offsetY);
+          rafId = null;
+        });
+      });
+
+      section.addEventListener("pointerleave", () => {
+        offsetX = 0;
+        offsetY = 0;
+        if (rafId !== null) cancelAnimationFrame(rafId);
+        rafId = requestAnimationFrame(() => {
+          drawGrid(0, 0);
+          rafId = null;
+        });
+      });
+    }
+
+    // Redraw when theme changes (MutationObserver on html[data-theme])
+    const themeObserver = new MutationObserver(() => {
+      drawGrid(offsetX, offsetY);
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
+  }
+
+  // The wireframe car itself is mounted by the CarWireframe component.
+
+  // Run once on load, re-init after Astro view transitions
+  initHeroGrid();
+  document.addEventListener("astro:after-swap", initHeroGrid);
 </script>
+
+<style>
+  /* PHOTO//SCOPE card: carries the terminal aesthetic of the page it
+     links to, deliberately breaking the site palette in both themes. */
+  .scope-card {
+    display: block;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid rgba(57, 255, 136, 0.28);
+    background: rgba(5, 11, 8, 0.92);
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    text-decoration: none;
+    transition:
+      border-color 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+  .scope-card:hover,
+  .scope-card:focus-visible {
+    border-color: rgba(57, 255, 136, 0.7);
+    box-shadow:
+      0 0 18px rgba(57, 255, 136, 0.22),
+      inset 0 0 14px rgba(57, 255, 136, 0.05);
+  }
+  .scope-card-label {
+    margin-bottom: 0.5rem;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(77, 255, 155, 0.55);
+  }
+  .scope-card-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.8rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #4dff9b;
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.4);
+  }
+  .scope-card-sub {
+    margin-top: 0.5rem;
+    font-size: 0.68rem;
+    letter-spacing: 0.05em;
+    color: rgba(77, 255, 155, 0.5);
+  }
+  .scope-card-mark {
+    display: block;
+    height: 15px;
+    width: auto;
+    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.35));
+  }
+</style>

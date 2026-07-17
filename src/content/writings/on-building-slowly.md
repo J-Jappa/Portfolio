@@ -4,7 +4,7 @@ subtitle: "Why the long way is often the short way"
 date: "2025-05-18"
 excerpt: "A short case for doing fewer things, more carefully — and letting the work set its own pace."
 tags: ["process", "craft"]
-draft: false
+draft: true
 ---
 
 There is a particular kind of impatience that dresses itself up as ambition. It wants the finished thing without the unfinished middle, the result without the residue of getting there. For a long time I mistook it for drive. Now I think it is mostly fear — of the slow part, where nothing looks like progress and the work refuses to be rushed.

@@ -1,4 +1,6 @@
-const primaryColorScheme = ""; // "light" | "dark"
+// Dark is the site's signature look, so first-time visitors get it
+// regardless of OS setting; an explicit toggle is remembered and wins.
+const primaryColorScheme = "dark"; // "light" | "dark"
 
 // Get theme data from local storage
 const currentTheme = localStorage.getItem("theme");
@@ -79,10 +81,6 @@ document.addEventListener("astro:before-swap", event => {
     ?.setAttribute("content", bgColor);
 });
 
-// sync with system changes
-window
-  .matchMedia("(prefers-color-scheme: dark)")
-  .addEventListener("change", ({ matches: isDark }) => {
-    themeValue = isDark ? "dark" : "light";
-    setPreference();
-  });
+// Note: no prefers-color-scheme change listener here. The site brands
+// dark by default rather than tracking the OS, and the old listener
+// also silently overwrote the visitor's explicit toggle choice.

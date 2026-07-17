@@ -3,7 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import sitemap from "@astrojs/sitemap";
 import remarkToc from "remark-toc";
 import remarkCollapse from "remark-collapse";
-import mdx from '@astrojs/mdx';
+import mdx from "@astrojs/mdx";
 
 import {
   transformerNotationDiff,
@@ -11,24 +11,26 @@ import {
   transformerNotationWordHighlight,
 } from "@shikijs/transformers";
 import { transformerFileName } from "./src/utils/transformers/fileName";
-import { SITE } from "./src/config";
-
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://jasperjapp.com",
+  // The globe used to live at /photographyglobe/; keep old links working.
+  redirects: {
+    "/photographyglobe": "/photoscope",
+  },
   integrations: [
     sitemap({
       // Keep the hidden/unlaunched pages out of the sitemap. Remove their paths
       // here (and the `noindex` in HiddenLayout) when you're ready to launch.
       filter: page => {
-        const hidden = ["/writings", "/photography"];
+        // Keep the hidden/unlaunched pages out of the sitemap.
+        const hidden = ["/writings", "/photography", "/photoscope"];
         const { pathname } = new URL(page);
-        if (hidden.some(h => pathname.startsWith(h))) return false;
-        return SITE.showArchives || !page.endsWith("/archives");
+        return !hidden.some(h => pathname.startsWith(h));
       },
     }),
-    mdx()
+    mdx(),
   ],
   markdown: {
     remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],

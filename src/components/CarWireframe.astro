@@ -1,0 +1,60 @@
+---
+// Interactive three.js x-ray wireframe of the solar car (SC4 Monty).
+// Drop it anywhere; the heavy 3D chunk (three.js + baked mesh) lazy-loads
+// only when the container scrolls into view. See src/lib/hero-car.ts and
+// src/assets/models/README.md for the pipeline and tuning knobs.
+
+interface Props {
+  /** Sizing classes for the canvas container (height etc.) */
+  class?: string;
+  caption?: string;
+}
+
+const { class: className = "h-64", caption = "SC4 Monty · drag to orbit" } =
+  Astro.props;
+---
+
+<div class="not-prose relative">
+  <div
+    class:list={["car-wireframe w-full touch-none select-none", className]}
+    aria-hidden="true"
+  >
+  </div>
+  <!-- Floats over the canvas so the car can swing behind it -->
+  <p
+    class="pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center t-label opacity-60"
+  >
+    {caption}
+  </p>
+</div>
+
+<script>
+  let cleanups: (() => void)[] = [];
+
+  function initCarWireframes() {
+    document
+      .querySelectorAll<HTMLElement>(".car-wireframe")
+      .forEach(container => {
+        if (container.dataset.mounted) return;
+        container.dataset.mounted = "1";
+        const io = new IntersectionObserver(async entries => {
+          if (!entries.some(e => e.isIntersecting)) return;
+          io.disconnect();
+          try {
+            const { mountHeroCar } = await import("../lib/hero-car");
+            cleanups.push(mountHeroCar(container));
+          } catch (err) {
+            console.warn("car wireframe failed to load", err);
+          }
+        });
+        io.observe(container);
+      });
+  }
+
+  initCarWireframes();
+  document.addEventListener("astro:after-swap", () => {
+    cleanups.forEach(fn => fn());
+    cleanups = [];
+    initCarWireframes();
+  });
+</script>

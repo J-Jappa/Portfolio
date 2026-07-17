@@ -10,20 +10,14 @@ const education = {
 
 const roles = [
   {
-    title: "Electrical Engineer Intern at BP",
-    period: "Nov 2023 – Feb 2024",
-    bullets: [
-      "Built an Excel-based modelling tool to compare HV transmission lines vs hydrogen pipelines (standards, SIL, reactive compensation).",
-      "Added advanced loss models (corona, skin effect, bundling, phase spacing) with inputs up to 500 km / 30 GW.",
-      "Extended to n-1 and multi-line scenarios for AREH/GERI reliability analysis; validated against ETAP and consultant benchmarks.",
-      "Integrated 50+ year lifecycle costs (CAPEX/OPEX, inflation-adjusted) for NPV; identified ~10% lifecycle savings (~$400M) across scenarios.",
-      "Assessed Dynamic Line Rating (wind + thermal algorithms) with potential ~$20M savings; delivered docs and a user guide; presented to senior engineers.",
-    ],
-    tags: ["Power Systems", "HV Modelling", "NPV/Costing", "DLR", "ETAP"],
+    title: "Engineering Specialist at AirTrunk",
+    period: "May 2026 → Present",
+    bullets: [],
+    tags: [],
   },
   {
     title: "Structures Team Member, ANU Solar Racing",
-    period: "Mar 2022 – Present",
+    period: "Mar 2022 → Nov 2025",
     bullets: [
       "Aero & structures for BWSC vehicles (2023 & 2025).",
       "Led iterative CFD in ANSYS Fluent; ~20% drag reduction and improved efficiency in realistic conditions.",
@@ -34,7 +28,7 @@ const roles = [
   },
   {
     title: "Researcher, Individual Honours Project",
-    period: "Feb 2025 – Present",
+    period: "Feb 2025 → Nov 2025",
     bullets: [
       "Designed a GRU-based Gaussian-mixture variational autoencoder for early wildfire anomaly detection from eCO₂/VOC sensor streams.",
       "Trained on normal conditions to improve sensitivity while reducing false positives.",
@@ -43,52 +37,176 @@ const roles = [
     ],
     tags: ["ML", "Anomaly Detection", "IoT", "PyTorch", "Embedded"],
   },
+  {
+    title: "Electrical Engineer Intern at BP",
+    period: "Nov 2023 → Feb 2024",
+    bullets: [
+      "Built an Excel-based modelling tool to compare HV transmission lines vs hydrogen pipelines (standards, SIL, reactive compensation).",
+      "Added advanced loss models (corona, skin effect, bundling, phase spacing) with inputs up to 500 km / 30 GW.",
+      "Extended to n-1 and multi-line scenarios for AREH/GERI reliability analysis; validated against ETAP and consultant benchmarks.",
+      "Integrated 50+ year lifecycle costs (CAPEX/OPEX, inflation-adjusted) for NPV; identified ~10% lifecycle savings (~$400M) across scenarios.",
+      "Assessed Dynamic Line Rating (wind + thermal algorithms) with potential ~$20M savings; delivered docs and a user guide; presented to senior engineers.",
+    ],
+    tags: ["Power Systems", "HV Modelling", "NPV/Costing", "DLR", "ETAP"],
+  },
 ];
-
-
 
 const cvHref = "/JasperJapp_CV.pdf"; // ensure this file is in /public
 ---
 
 <Layout title="Experience" description="Experience and CV">
-  <section class="mb-6">
-    <h1 class="text-2xl font-semibold">Experience</h1>
-    <p class="opacity-80">
-      A more formal overview of selected roles & projects.
+  <!-- Page heading -->
+  <div class="mb-10">
+    <span class="mb-2 block t-label">01 / EXPERIENCE</span>
+    <h1
+      class="text-3xl font-semibold tracking-tight sm:text-4xl"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      Experience
+    </h1>
+    <p class="mt-2 text-sm text-foreground/70">
+      A more formal overview of selected roles &amp; projects.
     </p>
-    <p class="mt-2"><a href={cvHref} class="underline">Download CV (PDF)</a></p>
-  </section>
-
-  <div class="space-y-6">
-    {
-      roles.map(r => (
-        <article class="rounded-2xl border p-5">
-          <header class="flex items-baseline justify-between gap-4">
-            <h2 class="text-lg font-semibold">{r.title}</h2>
-            <span class="text-sm opacity-70">{r.period}</span>
-          </header>
-
-          <ul class="mt-3 ml-6 list-disc">
-            {r.bullets.map(b => (
-              <li>{b}</li>
-            ))}
-          </ul>
-
-          {r.tags?.length ? (
-            <div class="mt-3 text-xs opacity-70">{r.tags.join(" · ")}</div>
-          ) : null}
-        </article>
-      ))
-    }
+    <a
+      href={cvHref}
+      class="mt-4 inline-flex items-center gap-2 rounded-lg border border-accent/40 bg-accent/5 px-5 py-2.5 text-sm font-medium text-accent no-underline glow-accent transition-colors hover:border-accent/70 hover:bg-accent/10 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      Download CV
+      <span class="t-label">PDF ↗</span>
+    </a>
   </div>
 
-  <section class="mt-10 rounded-2xl border p-5">
-    <div class="flex items-center gap-3 flex-wrap">
-      <h2 class="text-lg font-semibold">Education</h2>
-      <span class="text-xs font-medium text-accent border border-accent/40 rounded-full px-2 py-0.5">First Class Honours</span>
+  <!-- ── Roles timeline ──────────────────────────────────────────────────── -->
+  <section aria-labelledby="roles-heading" class="mb-14">
+    <h2
+      id="roles-heading"
+      class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      <span class="t-label">02 /</span> Roles
+    </h2>
+
+    <!-- Timeline container: hairline spine on left -->
+    <div class="relative">
+      <!-- Vertical hairline spine -->
+      <div
+        class="absolute top-0 bottom-0 left-0 hidden w-px bg-border sm:block"
+        aria-hidden="true"
+      >
+      </div>
+
+      <div class="space-y-10 sm:pl-10">
+        {
+          roles.map((r, i) => (
+            <article
+              data-animate
+              class="relative"
+              aria-labelledby={`role-title-${i}`}
+            >
+              {/* Node marker on spine (visible sm+) */}
+              <span
+                class="absolute top-5 -left-[2.625rem] hidden h-2.5 w-2.5 rounded-full border-2 border-accent bg-background ring-4 ring-background sm:block"
+                aria-hidden="true"
+              />
+
+              {/* Two-column on lg+: period label | card */}
+              <div class="lg:grid lg:grid-cols-[11rem_1fr] lg:gap-8">
+                {/* Period label */}
+                <div class="mb-3 lg:mb-0 lg:pt-5 lg:text-right">
+                  <span class="t-label">{r.period}</span>
+                </div>
+
+                {/* Role card */}
+                <div class="relative card-hover p-5 before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30">
+                  <h3
+                    id={`role-title-${i}`}
+                    class="text-base font-semibold sm:text-lg"
+                    style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+                  >
+                    {r.title}
+                  </h3>
+
+                  {r.bullets.length ? (
+                    <ul class="mt-3 ml-4 list-disc space-y-1.5 text-sm text-foreground/85 marker:text-accent">
+                      {r.bullets.map(b => (
+                        <li>{b}</li>
+                      ))}
+                    </ul>
+                  ) : null}
+
+                  {r.tags?.length ? (
+                    <div class="mt-4 flex flex-wrap gap-2">
+                      {r.tags.map(tag => (
+                        <span
+                          class="rounded-md border border-border bg-muted/60 px-2 py-0.5 t-label text-foreground/70 transition-colors hover:border-accent/40 hover:text-accent"
+                          style="font-size: 0.62rem;"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </article>
+          ))
+        }
+      </div>
     </div>
-    <p class="mt-1">{education.uni}</p>
-    <p class="opacity-80">{education.details}</p>
-    <p class="text-sm opacity-70">GPA 6.6/7.0 · WAM 81</p>
+  </section>
+
+  <!-- ── Education ──────────────────────────────────────────────────────── -->
+  <section aria-labelledby="edu-heading" class="mb-10" data-animate>
+    <h2
+      id="edu-heading"
+      class="mb-6 flex items-baseline gap-3 text-xl font-semibold"
+      style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+    >
+      <span class="t-label">EDU //</span> Education
+    </h2>
+
+    <div
+      class="relative card-hover p-6 before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30"
+    >
+      <div class="flex flex-wrap items-center gap-3">
+        <h3
+          class="text-base font-semibold sm:text-lg"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          {education.uni}
+        </h3>
+        <span
+          class="inline-flex items-center rounded-full border border-accent/40 bg-accent/8 px-2.5 py-0.5 text-xs font-medium text-accent"
+        >
+          First Class Honours
+        </span>
+      </div>
+      <p class="mt-2 text-sm text-foreground/80">{education.details}</p>
+      <p class="mt-1 t-label text-foreground/60">GPA 6.6/7.0 · WAM 81</p>
+    </div>
   </section>
 </Layout>
+
+<script>
+  // Scroll-reveal for data-animate elements
+  const observer = new IntersectionObserver(
+    entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add("is-visible");
+          observer.unobserve(e.target);
+        }
+      });
+    },
+    { threshold: 0.08 }
+  );
+  document
+    .querySelectorAll("[data-animate]")
+    .forEach(el => observer.observe(el));
+  document.addEventListener("astro:after-swap", () => {
+    document
+      .querySelectorAll("[data-animate]")
+      .forEach(el => observer.observe(el));
+  });
+</script>

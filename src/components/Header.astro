@@ -15,7 +15,8 @@ const currentPath =
 
 // Mark "/" as active on both "/" and "/projects/*"
 const isActive = (href: string) => {
-  if (href === "/") return currentPath === "/" || currentPath.startsWith("/projects");
+  if (href === "/")
+    return currentPath === "/" || currentPath.startsWith("/projects");
   return currentPath === href || currentPath.startsWith(href);
 };
 ---
@@ -29,25 +30,39 @@ const isActive = (href: string) => {
     Skip to content
   </a>
 
-  <div id="nav-container" class="mx-auto flex max-w-app flex-col items-center justify-between sm:flex-row">
+  <div
+    id="nav-container"
+    class="mx-auto flex max-w-app flex-col items-center justify-between sm:flex-row"
+  >
     <div
       id="top-nav-wrap"
-      class="relative flex w-full items-baseline justify-between bg-background p-4 sm:items-center sm:py-6"
+      class="relative flex w-full items-baseline justify-between bg-background p-4 sm:items-center sm:py-5"
     >
-      <!-- brand: no absolute positioning -->
+      <!-- Brand -->
       <a
         href="/"
         title="always be optimising"
-        class="py-1 whitespace-nowrap sm:my-auto"
+        class="group flex flex-col gap-0.5 py-1 whitespace-nowrap no-underline sm:my-auto"
+        aria-label="Jasper Japp, home"
       >
-        <span class="text-xl leading-8 font-semibold sm:text-2xl sm:leading-none">{SITE.title}</span>
-        <span class="hidden sm:block text-xs opacity-45 mt-0.5 font-normal italic">always be optimising</span>
+        <span
+          class="text-xl leading-tight font-semibold tracking-tight sm:text-2xl"
+          style="font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;"
+        >
+          Jasper Japp
+        </span>
+        <span
+          class="hidden t-label opacity-50 transition-opacity group-hover:opacity-80 sm:block"
+        >
+          always be optimising
+        </span>
       </a>
 
       <nav
         id="nav-menu"
-        class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-4 sm:py-0"
+        class="flex w-full flex-col items-center sm:ms-4 sm:flex-row sm:justify-end sm:space-x-1 sm:py-0"
       >
+        <!-- Hamburger (mobile only) -->
         <button
           id="menu-btn"
           class="focus-outline self-end p-2 sm:hidden"
@@ -59,63 +74,129 @@ const isActive = (href: string) => {
           <IconMenuDeep id="menu-icon" />
         </button>
 
+        <!-- Nav items -->
         <ul
           id="menu-items"
           class:list={[
-            // smaller mobile top gap
-            "mt-2 grid w-44 grid-cols-2 place-content-center gap-2",
-            "[&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium [&>li>a]:hover:text-accent sm:[&>li>a]:px-2 sm:[&>li>a]:py-1",
-            "hidden",
-            "sm:mt-0 sm:flex sm:w-auto sm:gap-x-5 sm:gap-y-0",
+            /* Mobile: full-width column, polished card-like panel */
+            "mt-2 flex w-full flex-col gap-1 rounded-xl border border-border bg-muted/60 px-3 py-3 shadow-sm backdrop-blur-sm",
+            /* Desktop: inline row, no panel */
+            "hidden sm:mt-0 sm:flex sm:w-auto sm:flex-row sm:items-center sm:gap-x-1 sm:rounded-none sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none",
           ]}
         >
-          <li class="col-span-2">
-            <a href="/" class:list={{ "active-nav": isActive("/") }}>Projects</a>
+          <li>
+            <a
+              href="/"
+              class:list={[
+                "block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent sm:rounded-md sm:px-2 sm:py-1",
+                { "active-nav text-accent": isActive("/") },
+                { "text-foreground": !isActive("/") },
+              ]}
+            >
+              Projects
+            </a>
           </li>
-          <li class="col-span-2">
-            <a href="/about" class:list={{ "active-nav": isActive("/about") }}>About</a>
+          <li>
+            <a
+              href="/about"
+              class:list={[
+                "block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent sm:rounded-md sm:px-2 sm:py-1",
+                { "active-nav text-accent": isActive("/about") },
+                { "text-foreground": !isActive("/about") },
+              ]}
+            >
+              About
+            </a>
           </li>
-          <li class="col-span-2">
-            <a href="/experience" class:list={{ "active-nav": isActive("/experience") }}>Experience</a>
+          <li>
+            <a
+              href="/experience"
+              class:list={[
+                "block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent sm:rounded-md sm:px-2 sm:py-1",
+                { "active-nav text-accent": isActive("/experience") },
+                { "text-foreground": !isActive("/experience") },
+              ]}
+            >
+              Experience
+            </a>
           </li>
-          <li class="col-span-2">
-            <a href="/contact" class:list={{ "active-nav": isActive("/contact") }}>Contact</a>
+          <li>
+            <a
+              href="/contact"
+              class:list={[
+                "block rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:text-accent sm:rounded-md sm:px-2 sm:py-1",
+                { "active-nav text-accent": isActive("/contact") },
+                { "text-foreground": !isActive("/contact") },
+              ]}
+            >
+              Contact
+            </a>
           </li>
 
-          <li class="col-span-2 flex items-center justify-center sm:col-span-1">
+          <!-- PHOTO//SCOPE: terminal-styled, matching the page it opens -->
+          <li class="px-3 py-2 sm:ms-2 sm:p-0">
+            <a
+              href="/photoscope/"
+              data-astro-reload
+              class="scope-link"
+              aria-label="PHOTO//SCOPE, film photography"
+              title="PHOTO//SCOPE"
+            >
+              <img
+                src="/logo.svg"
+                alt=""
+                class="scope-link-mark"
+                width="10"
+                height="18"
+              />
+              <span>PHOTO//SCOPE</span>
+            </a>
+          </li>
+
+          <!-- Divider (mobile only) -->
+          <li
+            class="my-1 border-t border-border/50 sm:hidden"
+            aria-hidden="true"
+          >
+          </li>
+
+          <!-- LinkedIn icon -->
+          <li class="sm:ms-2">
             <a
               href={SITE.linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              class="focus-outline flex p-3 hover:text-accent sm:p-1"
+              class="flex items-center justify-center rounded-lg p-2.5 transition-colors hover:text-accent sm:rounded-md sm:p-1.5"
               aria-label="LinkedIn"
               title="LinkedIn"
             >
-              <IconLinkedIn class="h-5 w-5" />
+              <IconLinkedIn class="h-4.5 w-4.5" />
               <span class="sr-only">LinkedIn</span>
             </a>
           </li>
 
-          {SITE.lightAndDarkMode && (
-            <li class="col-span-2 flex items-center justify-center sm:col-span-1">
-              <button
-                id="theme-btn"
-                class="focus-outline relative size-12 p-4 sm:size-8 hover:[&>svg]:stroke-accent"
-                title="Toggles light & dark"
-                aria-label="auto"
-                aria-live="polite"
-              >
-                <IconMoon class="absolute top-[50%] left-[50%] -translate-[50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                <IconSunHigh class="absolute top-[50%] left-[50%] -translate-[50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
-              </button>
-            </li>
-          )}
+          <!-- Theme toggle -->
+          {
+            SITE.lightAndDarkMode && (
+              <li>
+                <button
+                  id="theme-btn"
+                  class="focus-outline relative flex items-center justify-center rounded-lg p-2.5 transition-colors sm:rounded-md sm:p-1.5 hover:[&>svg]:stroke-accent"
+                  title="Toggles light & dark"
+                  aria-label="auto"
+                  aria-live="polite"
+                >
+                  <IconMoon class="h-4.5 w-4.5 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
+                  <IconSunHigh class="absolute h-4.5 w-4.5 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                </button>
+              </li>
+            )
+          }
         </ul>
       </nav>
     </div>
   </div>
 
-  <!-- no extra margins on the rule -->
   <Hr class="m-0" />
 </header>
 
@@ -139,3 +220,48 @@ const isActive = (href: string) => {
   toggleNav();
   document.addEventListener("astro:after-swap", toggleNav);
 </script>
+
+<style>
+  /* Terminal-styled pill in PHOTO//SCOPE's own aesthetic. The pill stays
+     fully opaque (element opacity would wash the dark background out on
+     the light theme); the resting state is dimmed via colour instead. */
+  .scope-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 10px;
+    border: 1px solid rgba(57, 255, 136, 0.3);
+    border-radius: 4px;
+    background: #050b08;
+    font-family:
+      ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(77, 255, 155, 0.75);
+    text-decoration: none;
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.25);
+    transition:
+      color 0.25s ease,
+      border-color 0.25s ease,
+      box-shadow 0.25s ease,
+      letter-spacing 0.25s ease;
+  }
+  .scope-link:hover,
+  .scope-link:focus-visible {
+    color: #4dff9b;
+    text-shadow: 0 0 6px rgba(57, 255, 136, 0.4);
+    border-color: rgba(57, 255, 136, 0.7);
+    box-shadow:
+      0 0 16px rgba(57, 255, 136, 0.28),
+      inset 0 0 12px rgba(57, 255, 136, 0.06);
+    letter-spacing: 0.26em;
+    outline: none;
+  }
+  .scope-link-mark {
+    display: block;
+    height: 15px;
+    width: auto;
+    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.35));
+  }
+</style>

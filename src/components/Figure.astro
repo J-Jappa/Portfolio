@@ -1,5 +1,5 @@
 ---
-/** Props:
+/** Props (fully backward compatible — no changes to public interface):
  *  - src: string
  *  - alt?: string
  *  - width?: string = "100%"
@@ -7,7 +7,7 @@
  *  - caption?: string
  *  - lightbox?: boolean = true
  */
- interface Props {
+interface Props {
   src: string;
   alt?: string;
   width?: string;
@@ -17,32 +17,45 @@
 }
 
 const {
-  src, alt = "", width = "100%", maxWidth = "none", caption, lightbox = true,
+  src,
+  alt = "",
+  width = "100%",
+  maxWidth = "none",
+  caption,
+  lightbox = true,
 } = Astro.props as Props;
 
 const uid = `fig-${Math.random().toString(36).slice(2, 8)}`;
 const styleObj = { width, maxWidth, marginInline: "auto" };
 ---
 
-<figure class="not-prose my-3" style={styleObj}>
+<!--
+  .project-prose scopes the CSS counter so pages without figures are unaffected.
+  The counter is incremented by each <figure class="zine-figure"> inside that context.
+  The ::before on figcaption renders "FIG. 01 — " automatically.
+-->
+<figure class="not-prose my-5 zine-figure" style={styleObj}>
   {lightbox ? (
     <>
       <button
         type="button"
-        class="block w-full overflow-hidden rounded-xl p-0 m-0 border-0 bg-transparent"
+        class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
+               transition-all hover:border-accent/50
+               hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
+               focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
         data-open={uid}
-        aria-label="Open image"
+        aria-label={alt ? `Open image: ${alt}` : "Open image"}
       >
         <img
           src={src}
           alt={alt}
           loading="lazy"
           decoding="async"
-          class="w-full rounded-xl object-cover"
+          class="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.01]"
         />
       </button>
 
-      <!-- Centered lightbox dialog -->
+      {/* Lightbox dialog — keeps exact data-lightbox attribute for Layout.astro handler */}
       <dialog
         id={uid}
         data-lightbox
@@ -59,13 +72,17 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
               decoding="async"
               loading="eager"
             />
-            {caption && <p class="m-3 text-sm opacity-80 text-center">{caption}</p>}
-
+            {caption && (
+              <p class="m-3 text-sm opacity-80 text-center">{caption}</p>
+            )}
             <form method="dialog">
               <button
                 type="submit"
-                class="absolute top-2 right-2 rounded-md border bg-white/85 dark:bg-neutral-800/85 px-3 py-1"
-                aria-label="Close"
+                class="absolute top-2 right-2 rounded-md border border-border
+                       bg-white/85 dark:bg-neutral-800/85 px-3 py-1 text-sm
+                       hover:border-accent/60
+                       focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
+                aria-label="Close lightbox"
               >
                 Close
               </button>
@@ -75,7 +92,9 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
       </dialog>
 
       {caption && (
-        <figcaption class="mt-1 text-center text-sm opacity-70">{caption}</figcaption>
+        <figcaption class="zine-caption mt-2 text-left">
+          {caption}
+        </figcaption>
       )}
     </>
   ) : (
@@ -85,10 +104,12 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
         alt={alt}
         loading="lazy"
         decoding="async"
-        class="w-full rounded-xl object-cover"
+        class="w-full rounded-xl border border-border object-cover"
       />
       {caption && (
-        <figcaption class="mt-1 text-center text-sm opacity-70">{caption}</figcaption>
+        <figcaption class="zine-caption mt-2 text-left">
+          {caption}
+        </figcaption>
       )}
     </>
   )}
@@ -131,3 +152,51 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
     })();
   </script>
 )}
+
+<!--
+  CSS counter for FIG numbering.
+  .project-prose is the scope; counter increments on each .zine-figure.
+  ::before on .zine-caption generates "FIG. 01 — " in mono.
+  Scoped via a <style> block here so it doesn't bleed globally.
+  prefers-reduced-motion: the counter is CSS-only, no motion concerns.
+-->
+<style>
+  /* Initialise the counter on the prose scope.
+     Using :where() avoids specificity wars. */
+  :where(.project-prose) {
+    counter-reset: fig-counter;
+  }
+
+  /* Each figure that lives inside .project-prose increments the counter */
+  :where(.project-prose) .zine-figure {
+    counter-increment: fig-counter;
+  }
+
+  /* Caption gets the FIG. prefix prepended automatically */
+  :where(.project-prose) .zine-caption::before {
+    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
+    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: color-mix(in srgb, currentColor 55%, transparent);
+    margin-right: 0.25em;
+  }
+
+  /* Caption base style */
+  .zine-caption {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: color-mix(in srgb, currentColor 65%, transparent);
+    font-style: italic;
+  }
+
+  /* Outside .project-prose: no counter prefix, caption still styled */
+  .zine-figure .zine-caption::before {
+    content: none;
+  }
+
+  :where(.project-prose) .zine-figure .zine-caption::before {
+    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
+  }
+</style>
