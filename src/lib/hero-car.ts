@@ -52,7 +52,87 @@ function decimate(
   return geom;
 }
 
-export function mountHeroCar(container: HTMLElement): () => void {
+// ── Intro: reorder wireframe edges into a growth sequence ────────────────
+// BFS from a couple of random seed edges, spreading across shared vertices,
+// so that drawing the first N edge pairs reads as traces linking outward
+// until the car is complete. Disconnected patches of the mesh (the model
+// has a few) seed their own growth front. Jitter keeps the wave organic.
+function growthOrdered(geo: THREE.BufferGeometry): THREE.BufferGeometry {
+  const src = geo.attributes.position.array as Float32Array;
+  const edges = src.length / 6;
+  const keyOf = (v: number) => {
+    const o = v * 3;
+    return (
+      Math.round(src[o] * 1000) +
+      ":" +
+      Math.round(src[o + 1] * 1000) +
+      ":" +
+      Math.round(src[o + 2] * 1000)
+    );
+  };
+  const byVertex = new Map<string, number[]>();
+  for (let e = 0; e < edges; e++) {
+    for (const v of [2 * e, 2 * e + 1]) {
+      const k = keyOf(v);
+      const list = byVertex.get(k);
+      if (list) list.push(e);
+      else byVertex.set(k, [e]);
+    }
+  }
+  const depth = new Float32Array(edges).fill(-1);
+  const queue: number[] = [];
+  const seed = (e: number) => {
+    if (depth[e] < 0) {
+      depth[e] = 0;
+      queue.push(e);
+    }
+  };
+  seed(Math.floor(Math.random() * edges));
+  seed(Math.floor(Math.random() * edges));
+  let head = 0;
+  let processed = 0;
+  while (processed < edges) {
+    if (head >= queue.length) {
+      for (let e = 0; e < edges; e++) {
+        if (depth[e] < 0) {
+          seed(e);
+          break;
+        }
+      }
+    }
+    const e = queue[head++];
+    processed++;
+    for (const v of [2 * e, 2 * e + 1]) {
+      for (const n of byVertex.get(keyOf(v)) ?? []) {
+        if (depth[n] < 0) {
+          depth[n] = depth[e] + 1;
+          queue.push(n);
+        }
+      }
+    }
+  }
+  const activation = new Float32Array(edges);
+  for (let e = 0; e < edges; e++) activation[e] = depth[e] + Math.random() * 1.5;
+  const order = Array.from({ length: edges }, (_, e) => e).sort(
+    (a, b) => activation[a] - activation[b]
+  );
+  const out = new Float32Array(src.length);
+  order.forEach((e, i) => out.set(src.subarray(e * 6, e * 6 + 6), i * 6));
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.BufferAttribute(out, 3));
+  geo.dispose();
+  return g;
+}
+
+export type HeroCarOpts = {
+  /** Play the construct-the-car intro animation on mount */
+  intro?: boolean;
+};
+
+export function mountHeroCar(
+  container: HTMLElement,
+  opts: HeroCarOpts = {}
+): () => void {
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ── Renderer (transparent background) ─────────────────────────────
@@ -154,23 +234,80 @@ export function mountHeroCar(container: HTMLElement): () => void {
 
   const root = new THREE.Group();
   root.name = "SC4-Monty";
+  const introOn = !!opts.intro && !reduced;
   const wires: THREE.LineSegments[] = [];
+  const fronts: THREE.LineSegments[] = [];
+  const edgeTotals: number[] = [];
+  // Brighter material for the newest edges, so the growth front reads as
+  // live traces linking up rather than lines quietly appearing.
+  const frontMat = introOn
+    ? new THREE.LineBasicMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.95,
+      })
+    : null;
   for (const g of [topDec, botDec, wheelDec]) {
-    const wire = new THREE.LineSegments(
-      new THREE.WireframeGeometry(g),
-      wireMat
-    );
+    let wgeo: THREE.BufferGeometry = new THREE.WireframeGeometry(g);
+    if (introOn) wgeo = growthOrdered(wgeo);
+    const wire = new THREE.LineSegments(wgeo, wireMat);
     wires.push(wire);
     root.add(wire);
+    if (introOn && frontMat) {
+      edgeTotals.push(wgeo.attributes.position.count / 2);
+      wgeo.setDrawRange(0, 0);
+      const fg = new THREE.BufferGeometry();
+      fg.setAttribute("position", wgeo.attributes.position);
+      fg.setDrawRange(0, 0);
+      const front = new THREE.LineSegments(fg, frontMat);
+      fronts.push(front);
+      root.add(front);
+    }
   }
   scene.add(root);
+
+  // ── Intro playback: reveal edges in growth order over a fixed run ──
+  const INTRO_MS = 2500;
+  let introElapsed = 0;
+  let introDone = !introOn;
+  function updateIntro(dt: number) {
+    if (introDone) return;
+    frontMat?.color.copy(wireMat.color); // follow the theme accent
+    introElapsed += dt;
+    const t = Math.min(1, introElapsed / INTRO_MS);
+    const p = t * t * (3 - 2 * t); // smoothstep
+    wires.forEach((w, i) => {
+      const total = edgeTotals[i];
+      const vis = Math.floor(total * p);
+      w.geometry.setDrawRange(0, vis * 2);
+      const win = Math.max(24, Math.floor(total * 0.05));
+      const start = Math.max(0, vis - win);
+      fronts[i]?.geometry.setDrawRange(start * 2, (vis - start) * 2);
+    });
+    if (t >= 1) {
+      introDone = true;
+      wires.forEach(w => w.geometry.setDrawRange(0, Infinity));
+      fronts.forEach(f => {
+        root.remove(f);
+        // position attribute is shared with the base wire; only the front's
+        // material is uniquely ours to free
+      });
+      fronts.length = 0;
+      frontMat?.dispose();
+    }
+  }
 
   // ── Render loop, gated on visibility ───────────────────────────────
   let raf = 0;
   let visible = false;
+  let lastFrame = 0;
   const renderOnce = () => renderer.render(scene, camera);
   function loop() {
     if (!visible) return;
+    const now = performance.now();
+    const dt = lastFrame ? Math.min(50, now - lastFrame) : 16;
+    lastFrame = now;
+    updateIntro(dt);
     controls.update();
     renderOnce();
     raf = requestAnimationFrame(loop);
@@ -178,6 +315,7 @@ export function mountHeroCar(container: HTMLElement): () => void {
   const io = new IntersectionObserver(entries => {
     visible = entries[0]?.isIntersecting ?? false;
     cancelAnimationFrame(raf);
+    lastFrame = 0; // avoid a huge dt after being scrolled away
     if (visible && !reduced) raf = requestAnimationFrame(loop);
   });
   io.observe(container);
@@ -220,6 +358,7 @@ export function mountHeroCar(container: HTMLElement): () => void {
       g.dispose();
     }
     wireMat.dispose();
+    frontMat?.dispose();
     renderer.dispose();
     renderer.domElement.remove();
   };

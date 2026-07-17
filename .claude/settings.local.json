@@ -145,7 +145,8 @@
       "PowerShell(npx astro preview --port 4322)",
       "PowerShell(\\(Get-Content \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\" -Raw\\) -replace 'localhost:4321', 'localhost:4322' | Set-Content \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\" -Encoding utf8; node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-car.mjs\")",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\edge-check2.mjs\")",
-      "PowerShell(Get-NetTCPConnection -LocalPort 4322 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -Confirm:$false })"
+      "PowerShell(Get-NetTCPConnection -LocalPort 4322 -State Listen -ErrorAction SilentlyContinue | Select-Object -ExpandProperty OwningProcess -Unique | ForEach-Object { Stop-Process -Id $_ -Force -Confirm:$false })",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\intro-check.mjs\")"
     ]
   }
 }
