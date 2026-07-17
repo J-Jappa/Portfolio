@@ -29,6 +29,7 @@ outcomes:
 import ImageRow from "@/components/ImageRow.astro";
 import Figure from "@/components/Figure.astro";
 import CarWireframe from "@/components/CarWireframe.astro";
+import AeroYawChart from "@/components/AeroYawChart.astro";
 
 New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
 
@@ -201,6 +202,10 @@ Alongside performance runs I did validation passes for mesh independence, domain
 Crosswind stability and performance were key. For most of development I
 evaluated the common wind angles −15°, 0°, and +15°. I also scripted yaw sweeps
 from −30° to +30° in 5° steps and ran them at major design revisions.
+
+<AeroYawChart />
+
+This chart is the real shape of that post-processing, with the drag axis normalised so the absolute figures stay with the team. Each point is a CFD run at 85 km/h, and the bars show how often each crosswind occurs on route, taken from my wind analysis of conditions along the course. Weighting the drag curve by occurrence gives the single figure we optimised, marked by the dashed line. Beyond roughly 20° of yaw the drag area goes negative, so in a strong crosswind the body produces net thrust, the sailing effect the catamaran concept was chosen for.
 
 The result was a CdA about 20% lower than the 2023 car in straight-line despite the 50% increase in array area. The car stayed stable to ±30° yaw and showed reduced drag in crosswinds, driven by careful section shaping and a wide pod stance without blowing out frontal area.
 

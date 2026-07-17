@@ -1,0 +1,88 @@
+{
+  "meta": {
+    "description": "Yaw sweep shape for the site chart. Drag is normalised to the straight-ahead value; absolute coefficients are deliberately not published.",
+    "V_car_kmh": 85,
+    "occurrence_source": "Jasper's own wind analysis of conditions along the route"
+  },
+  "stations": [
+    {
+      "wind": -50,
+      "aoa": -30.47,
+      "rel": -0.9414,
+      "occ": 0.1
+    },
+    {
+      "wind": -40,
+      "aoa": -25.2,
+      "rel": -0.2301,
+      "occ": 0.81
+    },
+    {
+      "wind": -30,
+      "aoa": -19.44,
+      "rel": 0.4681,
+      "occ": 2.97
+    },
+    {
+      "wind": -20,
+      "aoa": -13.24,
+      "rel": 0.9158,
+      "occ": 4.09
+    },
+    {
+      "wind": -15,
+      "aoa": -10.01,
+      "rel": 1.015,
+      "occ": 4.62
+    },
+    {
+      "wind": -10,
+      "aoa": -6.71,
+      "rel": 1.0355,
+      "occ": 10.32
+    },
+    {
+      "wind": 0,
+      "aoa": 0,
+      "rel": 1,
+      "occ": 29.2
+    },
+    {
+      "wind": 10,
+      "aoa": 6.71,
+      "rel": 0.9917,
+      "occ": 21.39
+    },
+    {
+      "wind": 15,
+      "aoa": 10.01,
+      "rel": 0.89,
+      "occ": 10.19
+    },
+    {
+      "wind": 20,
+      "aoa": 13.24,
+      "rel": 0.7283,
+      "occ": 10.65
+    },
+    {
+      "wind": 30,
+      "aoa": 19.44,
+      "rel": 0.1982,
+      "occ": 5.31
+    },
+    {
+      "wind": 40,
+      "aoa": 25.2,
+      "rel": -0.4593,
+      "occ": 0.36
+    },
+    {
+      "wind": 50,
+      "aoa": 30.47,
+      "rel": -1.116,
+      "occ": 0
+    }
+  ],
+  "weightedRel": 0.8836
+}

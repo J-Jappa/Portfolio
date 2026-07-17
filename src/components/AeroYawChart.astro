@@ -1,0 +1,263 @@
+---
+// Interactive yaw-sweep chart from the CFD post-processing.
+// Deliberately value-free: the drag curve is normalised to the
+// straight-ahead value and no coefficients appear on the page or in its
+// payload (src/data/aero-yaw.json holds only the shape + occurrences).
+import aero from "@/data/aero-yaw.json";
+
+const V = aero.meta.V_car_kmh;
+const payload = JSON.stringify({
+  stations: aero.stations,
+  weightedRel: aero.weightedRel,
+});
+---
+
+<div class="aero-chart not-prose mx-auto my-8 max-w-3xl" data-chart={payload}>
+  <p class="mb-2 t-label">Yaw sweep // CFD at {V} km/h</p>
+  <div
+    class="relative rounded-xl border border-border bg-muted/30 p-2 before:absolute before:top-2 before:left-2 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2 after:bottom-2 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30 sm:p-3 dark:bg-muted/20"
+  >
+    <canvas
+      class="block h-64 w-full touch-none sm:h-80"
+      aria-label="Chart of relative drag area versus yaw angle with wind occurrence bars. Absolute values are withheld."
+    ></canvas>
+  </div>
+  <p
+    class="mt-2 min-h-5 font-mono text-[0.7rem] tracking-wide text-foreground/70"
+    data-readout
+  >
+    Hover or tap the curve for station data.
+  </p>
+</div>
+
+<script>
+  type Station = { wind: number; aoa: number; rel: number; occ: number };
+  type Payload = { stations: Station[]; weightedRel: number };
+
+  function cssVar(name: string): string {
+    return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  function initAeroCharts() {
+    document.querySelectorAll<HTMLElement>(".aero-chart").forEach(rootEl => {
+      if (rootEl.dataset.mounted) return;
+      rootEl.dataset.mounted = "1";
+      const { stations, weightedRel } = JSON.parse(rootEl.dataset.chart!) as Payload;
+      const canvas = rootEl.querySelector("canvas");
+      const readout = rootEl.querySelector<HTMLElement>("[data-readout]");
+      const ctx = canvas?.getContext("2d");
+      if (!canvas || !ctx) return;
+
+      let hover = -1;
+      // plot frame in CSS px, recomputed per draw
+      let L = 0, R = 0, T = 0, B = 0, W = 0, H = 0;
+
+      const X0 = -33, X1 = 33;
+      const xOf = (aoa: number) => L + ((aoa - X0) / (X1 - X0)) * (W - L - R);
+
+      function draw() {
+        const dpr = Math.min(2, window.devicePixelRatio || 1);
+        W = canvas!.clientWidth;
+        H = canvas!.clientHeight;
+        if (!W || !H) return;
+        if (canvas!.width !== Math.round(W * dpr)) canvas!.width = Math.round(W * dpr);
+        if (canvas!.height !== Math.round(H * dpr)) canvas!.height = Math.round(H * dpr);
+        ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+        ctx!.clearRect(0, 0, W, H);
+
+        const accent = cssVar("--accent") || "#006cac";
+        const accent2 = cssVar("--accent-2") || "#b45309";
+        const fg = cssVar("--foreground") || "#22211f";
+        const border = cssVar("--border") || "#888";
+        L = 20; R = 44; T = 16; B = 30;
+
+        const vals = stations.map(s => s.rel);
+        let vmin = Math.min(0, ...vals);
+        let vmax = Math.max(0, ...vals);
+        const pad = (vmax - vmin) * 0.12;
+        vmin -= pad;
+        vmax += pad;
+        const yOf = (v: number) => T + ((vmax - v) / (vmax - vmin)) * (H - T - B);
+        const occMax = 32;
+        const yOcc = (o: number) => H - B - (o / occMax) * (H - T - B);
+
+        ctx!.font = "10px ui-monospace, SFMono-Regular, Menlo, monospace";
+        ctx!.lineWidth = 1;
+
+        // frame
+        ctx!.strokeStyle = border;
+        ctx!.globalAlpha = 0.9;
+        ctx!.strokeRect(L, T, W - L - R, H - T - B);
+        ctx!.globalAlpha = 1;
+
+        // x ticks every 10 deg (yaw geometry is not a secret)
+        ctx!.fillStyle = fg;
+        ctx!.textAlign = "center";
+        ctx!.textBaseline = "top";
+        for (let a = -30; a <= 30; a += 10) {
+          const x = xOf(a);
+          ctx!.globalAlpha = 0.25;
+          ctx!.beginPath();
+          ctx!.moveTo(x, T);
+          ctx!.lineTo(x, H - B);
+          ctx!.strokeStyle = border;
+          ctx!.stroke();
+          ctx!.globalAlpha = 0.6;
+          ctx!.fillText(`${a}°`, x, H - B + 6);
+        }
+        ctx!.globalAlpha = 0.6;
+        ctx!.fillText("yaw", (L + W - R) / 2, H - 12);
+
+        // right axis: occurrence (published distribution)
+        ctx!.textAlign = "left";
+        ctx!.textBaseline = "middle";
+        for (let o = 0; o <= occMax; o += 10) {
+          ctx!.globalAlpha = 0.45;
+          ctx!.fillText(`${o}%`, W - R + 6, yOcc(o));
+        }
+        ctx!.globalAlpha = 0.7;
+        ctx!.textBaseline = "alphabetic";
+        ctx!.textAlign = "left";
+        ctx!.fillText("relative CdA · values withheld", L + 6, T + 12);
+        ctx!.textAlign = "right";
+        ctx!.fillText("occurrence", W - R - 6, T + 12);
+        ctx!.globalAlpha = 1;
+
+        // occurrence bars
+        for (const s of stations) {
+          if (!s.occ) continue;
+          const x = xOf(s.aoa);
+          ctx!.fillStyle = accent2;
+          ctx!.globalAlpha = 0.22;
+          ctx!.fillRect(x - 5, yOcc(s.occ), 10, H - B - yOcc(s.occ));
+        }
+        ctx!.globalAlpha = 1;
+
+        // zero drag line: below it the body is producing net thrust
+        const y0 = yOf(0);
+        ctx!.strokeStyle = fg;
+        ctx!.globalAlpha = 0.35;
+        ctx!.setLineDash([4, 4]);
+        ctx!.beginPath();
+        ctx!.moveTo(L, y0);
+        ctx!.lineTo(W - R, y0);
+        ctx!.stroke();
+        ctx!.setLineDash([]);
+        ctx!.globalAlpha = 0.55;
+        ctx!.textAlign = "left";
+        ctx!.textBaseline = "top";
+        ctx!.fillText("zero drag", L + 6, y0 + 4);
+        ctx!.globalAlpha = 1;
+
+        // occurrence-weighted CdA marker (position only, no value)
+        const yw = yOf(weightedRel);
+        ctx!.strokeStyle = accent2;
+        ctx!.globalAlpha = 0.8;
+        ctx!.setLineDash([6, 4]);
+        ctx!.beginPath();
+        ctx!.moveTo(L, yw);
+        ctx!.lineTo(W - R, yw);
+        ctx!.stroke();
+        ctx!.setLineDash([]);
+        ctx!.fillStyle = accent2;
+        ctx!.textAlign = "left";
+        ctx!.textBaseline = "bottom";
+        ctx!.fillText("occurrence weighted CdA", L + 6, yw - 3);
+        ctx!.globalAlpha = 1;
+
+        // curve
+        ctx!.strokeStyle = accent;
+        ctx!.lineWidth = 2;
+        ctx!.lineJoin = "round";
+        ctx!.shadowColor = accent;
+        ctx!.shadowBlur = 6;
+        ctx!.beginPath();
+        stations.forEach((s, i) => {
+          const x = xOf(s.aoa);
+          const y = yOf(s.rel);
+          if (i === 0) ctx!.moveTo(x, y);
+          else ctx!.lineTo(x, y);
+        });
+        ctx!.stroke();
+        ctx!.shadowBlur = 0;
+
+        // station points (diamonds)
+        stations.forEach((s, i) => {
+          const x = xOf(s.aoa);
+          const y = yOf(s.rel);
+          const r = i === hover ? 5 : 3.2;
+          ctx!.beginPath();
+          ctx!.moveTo(x, y - r);
+          ctx!.lineTo(x + r, y);
+          ctx!.lineTo(x, y + r);
+          ctx!.lineTo(x - r, y);
+          ctx!.closePath();
+          ctx!.fillStyle = accent;
+          ctx!.fill();
+          if (i === hover) {
+            ctx!.strokeStyle = accent;
+            ctx!.globalAlpha = 0.5;
+            ctx!.setLineDash([3, 3]);
+            ctx!.beginPath();
+            ctx!.moveTo(x, T);
+            ctx!.lineTo(x, H - B);
+            ctx!.stroke();
+            ctx!.setLineDash([]);
+            ctx!.globalAlpha = 1;
+          }
+        });
+        ctx!.lineWidth = 1;
+      }
+
+      function setReadout() {
+        if (!readout) return;
+        if (hover < 0) {
+          readout.textContent = "Hover or tap the curve for station data.";
+          return;
+        }
+        const s = stations[hover];
+        const windTxt =
+          s.wind === 0
+            ? "no crosswind"
+            : `crosswind ${Math.abs(s.wind)} km/h from ${s.wind < 0 ? "right" : "left"}`;
+        const thrust = s.rel < 0 ? " · net thrust" : "";
+        readout.textContent = `${windTxt} · yaw ${s.aoa}° · ${s.occ}% of route${thrust}`;
+      }
+
+      canvas.addEventListener("pointermove", e => {
+        const rect = canvas.getBoundingClientRect();
+        const px = e.clientX - rect.left;
+        let best = -1;
+        let bestD = 24;
+        stations.forEach((s, i) => {
+          const d = Math.abs(xOf(s.aoa) - px);
+          if (d < bestD) {
+            bestD = d;
+            best = i;
+          }
+        });
+        if (best !== hover) {
+          hover = best;
+          draw();
+          setReadout();
+        }
+      });
+      canvas.addEventListener("pointerleave", () => {
+        hover = -1;
+        draw();
+        setReadout();
+      });
+
+      const ro = new ResizeObserver(() => draw());
+      ro.observe(canvas);
+      new MutationObserver(() => draw()).observe(document.documentElement, {
+        attributes: true,
+        attributeFilter: ["data-theme"],
+      });
+      draw();
+    });
+  }
+
+  initAeroCharts();
+  document.addEventListener("astro:after-swap", initAeroCharts);
+</script>

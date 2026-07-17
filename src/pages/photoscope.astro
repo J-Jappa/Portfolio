@@ -271,6 +271,19 @@ const galleryJSON = esc(
         </span>
         <span class="g-tile-label">CAMERAS</span>
       </button>
+      <button type="button" class="g-tile g-tile-scan" id="g-scan" aria-label="Scan to a random frame">
+        <span class="g-tile-art" aria-hidden="true">
+          <svg viewBox="0 0 48 48">
+            <circle cx="24" cy="24" r="12"></circle>
+            <line x1="24" y1="4" x2="24" y2="13"></line>
+            <line x1="24" y1="35" x2="24" y2="44"></line>
+            <line x1="4" y1="24" x2="13" y2="24"></line>
+            <line x1="35" y1="24" x2="44" y2="24"></line>
+            <circle cx="24" cy="24" r="1.6" fill="currentColor" stroke="none"></circle>
+          </svg>
+        </span>
+        <span class="g-tile-label">SCAN</span>
+      </button>
     </nav>
     <div class="g-coord" id="g-coord" aria-hidden="true"></div>
     <div class="g-title"><em>Project:</em><br />PHOTO//SCOPE</div>
@@ -718,6 +731,105 @@ const galleryJSON = esc(
       });
     });
 
+    // ── SCAN: sweep the globe to a random pin, lock on, open a frame ──
+    type Scan = {
+      phase: "sweep" | "lock";
+      t: number; dur: number; lockDur: number;
+      fromSpin: number; toSpin: number;
+      fromTilt: number; toTilt: number;
+      mi: number; pi: number;
+    };
+    let scanAnim: Scan | null = null;
+    document.getElementById("g-scan")?.addEventListener("click", () => {
+      if (dlg.open || scanAnim || !gallery.length) return;
+      const mi = Math.floor(Math.random() * gallery.length);
+      const pi = Math.floor(Math.random() * Math.max(1, gallery[mi].photos.length));
+      const m = markers[mi];
+      // Shortest rotation to face the pin; small hops get a full extra
+      // revolution so the scan always reads as a sweep.
+      const twoPi = Math.PI * 2;
+      let d = ((m.lon * DEG - spin) % twoPi + twoPi) % twoPi;
+      if (d > Math.PI) d -= twoPi;
+      if (Math.abs(d) < 1.2) d += d >= 0 ? twoPi : -twoPi;
+      scanAnim = {
+        phase: "sweep",
+        t: 0,
+        dur: reduced ? 0 : 1.4,
+        lockDur: reduced ? 0 : 0.6,
+        fromSpin: spin,
+        toSpin: spin + d,
+        fromTilt: tilt,
+        toTilt: Math.max(-1.3, Math.min(1.3, m.lat * DEG)),
+        mi, pi,
+      };
+    });
+    function updateScan(dt: number) {
+      if (!scanAnim) return;
+      scanAnim.t += dt;
+      if (scanAnim.phase === "sweep") {
+        const u = scanAnim.dur > 0 ? Math.min(1, scanAnim.t / scanAnim.dur) : 1;
+        const e = u * u * (3 - 2 * u);
+        spin = scanAnim.fromSpin + (scanAnim.toSpin - scanAnim.fromSpin) * e;
+        tilt = scanAnim.fromTilt + (scanAnim.toTilt - scanAnim.fromTilt) * e;
+        if (u >= 1) {
+          // Hold and lock on so it's obvious which pin was found.
+          scanAnim.phase = "lock";
+          scanAnim.t = 0;
+          const p = project(markers[scanAnim.mi].lon, markers[scanAnim.mi].lat);
+          if (tip) {
+            tip.textContent = markers[scanAnim.mi].label;
+            tip.style.left = `${p.sx}px`;
+            tip.style.top = `${p.sy}px`;
+            tip.classList.add("is-on");
+          }
+        }
+        return;
+      }
+      if (scanAnim.t >= scanAnim.lockDur) {
+        const done = scanAnim;
+        scanAnim = null;
+        tip?.classList.remove("is-on");
+        const p = project(markers[done.mi].lon, markers[done.mi].lat);
+        openGallery(done.mi, p.sx, p.sy, done.pi);
+      }
+    }
+    // Lock-on flair: converging ring + rotating ticks + blinking tag, drawn
+    // over the target pin while the globe holds still. Warning-red, quick.
+    function drawScanLock() {
+      if (!scanAnim || scanAnim.phase !== "lock") return;
+      const p = mp[scanAnim.mi];
+      if (!p || !p.vis) return;
+      const u = Math.min(1, scanAnim.t / Math.max(0.001, scanAnim.lockDur));
+      const conv = Math.min(1, u * 1.5); // converge fast, hold briefly
+      const r = 64 - 46 * (conv * (2 - conv)); // ease-out shrink 64 → 18
+      ctx!.strokeStyle = rgba(RED, 0.95);
+      ctx!.lineWidth = 1.6;
+      ctx!.shadowColor = rgba(RED, 0.8);
+      ctx!.shadowBlur = 10;
+      ctx!.beginPath();
+      ctx!.arc(p.sx, p.sy, r, 0, 6.2832);
+      ctx!.stroke();
+      // rotating ticks riding the ring
+      for (let k = 0; k < 4; k++) {
+        const a = scanAnim.t * 4 + (k * Math.PI) / 2;
+        ctx!.beginPath();
+        ctx!.moveTo(p.sx + Math.cos(a) * (r + 3), p.sy + Math.sin(a) * (r + 3));
+        ctx!.lineTo(p.sx + Math.cos(a) * (r + 11), p.sy + Math.sin(a) * (r + 11));
+        ctx!.stroke();
+      }
+      ctx!.shadowBlur = 0;
+      reticle(p.sx, p.sy, 28 + (1 - conv) * 42, RED, 1.8);
+      const blink = 0.55 + 0.45 * Math.sin(scanAnim.t * 24);
+      ctx!.font = "700 10px ui-monospace, monospace";
+      ctx!.textAlign = "center";
+      ctx!.textBaseline = "top";
+      ctx!.fillStyle = rgba(RED, blink);
+      ctx!.shadowColor = rgba(RED, 0.6);
+      ctx!.shadowBlur = 6;
+      ctx!.fillText("TARGET LOCK", p.sx, p.sy + r + 16);
+      ctx!.shadowBlur = 0;
+    }
+
     nextBtn?.addEventListener("click", next);
     prevBtn?.addEventListener("click", prev);
     dlg.querySelector(".map-lb-close")?.addEventListener("click", () => dlg.close());
@@ -878,6 +990,7 @@ const galleryJSON = esc(
           movedFar = true;
           dragging = true;
           paused = true;
+          scanAnim = null; // grabbing the globe cancels a scan in flight
           tip?.classList.remove("is-on");
           if (stage) stage.style.cursor = "grabbing";
         }
@@ -1199,7 +1312,8 @@ const galleryJSON = esc(
       // snapping, and ease it back when released.
       const spinTarget = paused || reduced ? 0 : 1;
       spinGain += (spinTarget - spinGain) * Math.min(1, dt * 5);
-      spin += dt * 0.12 * spinGain;
+      if (scanAnim) updateScan(dt);
+      else spin += dt * 0.12 * spinGain;
 
       ctx!.clearRect(0, 0, W, H);
       ctx!.fillStyle = "#03040a";
@@ -1219,6 +1333,7 @@ const galleryJSON = esc(
       drawLimb();
       for (const c of comets) drawComet(c, false);
       drawMarkers();
+      drawScanLock();
       updateCoordReadout();
 
       rafId = requestAnimationFrame(frame);
