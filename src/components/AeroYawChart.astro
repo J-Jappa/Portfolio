@@ -224,11 +224,12 @@ const payload = JSON.stringify({
         readout.textContent = `${windTxt} · yaw ${s.aoa}° · ${s.occ}% of route${thrust}`;
       }
 
-      canvas.addEventListener("pointermove", e => {
+      // pointerdown too, so a plain tap works on touch screens
+      const pick = (e: PointerEvent) => {
         const rect = canvas.getBoundingClientRect();
         const px = e.clientX - rect.left;
         let best = -1;
-        let bestD = 24;
+        let bestD = 30;
         stations.forEach((s, i) => {
           const d = Math.abs(xOf(s.aoa) - px);
           if (d < bestD) {
@@ -241,8 +242,12 @@ const payload = JSON.stringify({
           draw();
           setReadout();
         }
-      });
-      canvas.addEventListener("pointerleave", () => {
+      };
+      canvas.addEventListener("pointermove", pick);
+      canvas.addEventListener("pointerdown", pick);
+      canvas.addEventListener("pointerleave", e => {
+        // Touch pointers "leave" the instant a tap ends; keep their pick
+        if (e.pointerType !== "mouse") return;
         hover = -1;
         draw();
         setReadout();

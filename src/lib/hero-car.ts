@@ -270,8 +270,12 @@ export function mountHeroCar(
   const INTRO_MS = 2500;
   let introElapsed = 0;
   let introDone = !introOn;
+  // Hold the start until the canvas is properly on screen; on phones the
+  // hero sits below the intro text, and starting at first paint meant the
+  // build finished before anyone scrolled to it.
+  let introArmed = false;
   function updateIntro(dt: number) {
-    if (introDone) return;
+    if (introDone || !introArmed) return;
     frontMat?.color.copy(wireMat.color); // follow the theme accent
     introElapsed += dt;
     const t = Math.min(1, introElapsed / INTRO_MS);
@@ -312,12 +316,17 @@ export function mountHeroCar(
     renderOnce();
     raf = requestAnimationFrame(loop);
   }
-  const io = new IntersectionObserver(entries => {
-    visible = entries[0]?.isIntersecting ?? false;
-    cancelAnimationFrame(raf);
-    lastFrame = 0; // avoid a huge dt after being scrolled away
-    if (visible && !reduced) raf = requestAnimationFrame(loop);
-  });
+  const io = new IntersectionObserver(
+    entries => {
+      const e = entries[0];
+      visible = e?.isIntersecting ?? false;
+      if ((e?.intersectionRatio ?? 0) >= 0.85) introArmed = true;
+      cancelAnimationFrame(raf);
+      lastFrame = 0; // avoid a huge dt after being scrolled away
+      if (visible && !reduced) raf = requestAnimationFrame(loop);
+    },
+    { threshold: [0, 0.85] }
+  );
   io.observe(container);
 
   if (reduced) {

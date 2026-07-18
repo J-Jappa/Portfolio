@@ -162,7 +162,9 @@
       "PowerShell(Test-Path \"public\\\\images\\\\solar\\\\bulkheads\\\\poster.jpg\"; try { \\(Get-Command ffmpeg -ErrorAction Stop\\).Source } catch { \"no ffmpeg\" })",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\poster-grab.mjs\")",
       "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\groups-check.mjs\")",
-      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\video-shot.mjs\")"
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\video-shot.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\mobile-audit.mjs\")",
+      "PowerShell(node \"C:\\\\Users\\\\JappPC\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--Users-JappPC-Documents-Portfolio-Portfolio\\\\977cbd0d-6544-4eab-9b78-3c6fa17bcdca\\\\scratchpad\\\\audit-fix-check.mjs\")"
     ]
   }
 }
