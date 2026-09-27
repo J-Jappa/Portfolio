@@ -102,9 +102,9 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
   /* Inside .project-prose: prefix with the shared FIG counter value */
   :where(.project-prose) .zine-figure .row-caption::before {
     content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
-    font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
+    font-family: "EB Garamond", ui-serif, Georgia, serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
     text-transform: uppercase;
     color: color-mix(in srgb, currentColor 55%, transparent);
     font-style: normal;

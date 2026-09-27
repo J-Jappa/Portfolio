@@ -11,7 +11,7 @@
     h4,
     th {
       @apply mb-3 text-foreground;
-      font-family: "Space Grotesk", ui-sans-serif, system-ui, sans-serif;
+      font-family: "EB Garamond", ui-serif, Georgia, serif;
     }
 
     h3 {

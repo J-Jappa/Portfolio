@@ -31,6 +31,7 @@ html[data-theme="dark"] {
   --color-accent-2: var(--accent-2);
   --color-muted: var(--muted);
   --color-border: var(--border);
+  --font-serif: "EB Garamond", ui-serif, Georgia, Cambria, "Times New Roman", serif;
 }
 
 /* ── Base reset / defaults ───────────────────────────────────────────── */
@@ -42,6 +43,10 @@ html[data-theme="dark"] {
   }
   html {
     @apply overflow-y-scroll scroll-smooth;
+  }
+  /* Garamond runs small; nudge the main site up (hidden pages keep 16px) */
+  html.site-root {
+    font-size: 106.25%;
   }
   body {
     @apply flex min-h-svh flex-col bg-background font-sans text-foreground selection:bg-accent/75 selection:text-background;
@@ -66,12 +71,12 @@ html[data-theme="dark"] {
 }
 
 /* ── Micro-label utility ─────────────────────────────────────────────── */
-/* .t-label — monospace, uppercase, letter-spaced, small, muted colour   */
+/* .t-label — Garamond, uppercase, letter-spaced, small, muted colour    */
 @utility t-label {
-  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
-  font-size: 0.68rem;
+  font-family: var(--font-serif);
+  font-size: 0.78rem;
   font-weight: 400;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
   line-height: 1.4;

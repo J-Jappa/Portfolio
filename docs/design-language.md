@@ -22,16 +22,16 @@ Tailwind colour aliases (use in classes): `bg-background`, `text-foreground`, `t
 
 ## Typography
 
-- **Headings** — `font-family: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif` (loaded via Google Fonts in `Layout.astro`). Apply inline style or a heading wrapper class.
+- **Headings and body** — `font-family: 'EB Garamond', ui-serif, Georgia, serif` (loaded via Google Fonts in `Layout.astro`). Apply inline style or a heading wrapper class.
 - **Body** — system sans stack (Tailwind default `font-sans`).
-- **Mono micro-labels** — `ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace`.
+- **Micro-labels** — EB Garamond via `var(--font-serif)`, uppercase and letter-spaced. Monospace is reserved for code and the PHOTO//SCOPE terminal styling.
 
 ---
 
 ## Utility Classes
 
 ### `.t-label`
-Mono micro-label: monospace, `0.68rem`, uppercase, `letter-spacing: 0.14em`, muted colour (55 % foreground opacity). Use for section codes (`FIG.01`), figure captions, stat prefixes, small metadata.
+Micro-label: EB Garamond, `0.78rem`, uppercase, `letter-spacing: 0.1em`, muted colour (65 % foreground opacity). Use for section codes (`FIG.01`), figure captions, stat prefixes, small metadata.
 
 ```html
 <span class="t-label">01 / Projects</span>
@@ -96,7 +96,7 @@ Add `data-animate` to any element. An `IntersectionObserver` (in `index.astro` a
 
 **Numbered section heading:**
 ```html
-<h2 class="flex items-baseline gap-3 text-xl font-semibold" style="font-family: 'Space Grotesk', sans-serif;">
+<h2 class="flex items-baseline gap-3 text-xl font-semibold" style="font-family: 'EB Garamond', serif;">
   <span class="t-label">02 /</span> Experience
 </h2>
 ```
