@@ -1,0 +1,36 @@
+---
+// Writing prompt for a draft page. Renders only in `astro dev`, so a page
+// can be full of signposts and still build clean (production renders
+// nothing). Delete each one as its section gets written.
+interface Props {
+  /** What this section is for, in a few words */
+  title?: string;
+}
+const { title } = Astro.props;
+const show = import.meta.env.DEV;
+---
+
+{
+  show && (
+    <aside class="signpost not-prose mx-auto my-6 max-w-2xl rounded-xl border border-dashed border-accent/60 bg-accent/5 px-5 py-4 text-sm leading-relaxed">
+      <p class="m-0 mb-2 t-label text-accent">To write{title ? `: ${title}` : ""}</p>
+      <div class="signpost-body">
+        <slot />
+      </div>
+    </aside>
+  )
+}
+
+<style>
+  .signpost-body :global(ul) {
+    margin: 0;
+    padding-left: 1.1rem;
+    list-style: disc;
+  }
+  .signpost-body :global(li) {
+    margin: 0.25rem 0;
+  }
+  .signpost-body :global(p) {
+    margin: 0.4rem 0;
+  }
+</style>

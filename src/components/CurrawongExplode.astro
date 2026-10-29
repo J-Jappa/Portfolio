@@ -1,0 +1,128 @@
+---
+// Scroll-driven exploded view of Currawong, in the same x-ray wireframe as
+// the Monty hero. The stage pins while you scroll through a tall track and
+// the assembly comes apart layer by layer, with callouts per part. The 3D
+// chunk (three.js + baked edges) lazy-loads as the track nears the viewport.
+// See src/lib/currawong-explode.ts for tuning and
+// scripts/gen-currawong-geo.mjs to re-bake after a new CAD export.
+import { GROUPS } from "../assets/models/currawong-geo.js";
+
+interface Props {
+  /** Scroll distance the explode plays over, as a CSS length */
+  length?: string;
+  /** Height of the pinned stage */
+  stageClass?: string;
+  caption?: string;
+  /** Shown in place of the caption once it can be dragged round */
+  hint?: string;
+}
+
+const {
+  length = "260svh",
+  stageClass = "h-[88svh]",
+  caption = "Currawong. Keep scrolling to take it apart.",
+  hint = "Drag to turn it.",
+} = Astro.props;
+
+// Labels are rendered here (server side only, the geometry is not shipped
+// with this page) so the client script just positions them.
+const labels = GROUPS.filter(g => g.label).map(g => ({ id: g.id, label: g.label! }));
+---
+
+<div class="cx-track not-prose relative" style={`height: ${length}`}>
+  <div class:list={["cx-stage sticky top-0 w-full overflow-hidden", stageClass]}>
+    <div class="cx-canvas absolute inset-0" aria-hidden="true"></div>
+    <div class="cx-overlay pointer-events-none absolute inset-0 text-accent" aria-hidden="true">
+      <svg class="absolute inset-0 h-full w-full overflow-visible" preserveAspectRatio="none"></svg>
+      {
+        labels.map(l => (
+          <span class="cx-label t-label absolute top-0 left-0 whitespace-nowrap opacity-0" data-label={l.id}>
+            {l.label}
+          </span>
+        ))
+      }
+    </div>
+    <p class="cx-ticker pointer-events-none absolute inset-x-0 bottom-10 text-center t-label" aria-hidden="true"></p>
+    <p class="cx-caption pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center t-label opacity-60">
+      {caption}
+    </p>
+    <p class="cx-hint pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center t-label" aria-hidden="true">
+      {hint}
+    </p>
+    <p class="sr-only">
+      Exploded view of Currawong, showing the {labels.map(l => l.label.toLowerCase()).join(", ")}.
+    </p>
+  </div>
+</div>
+
+<style>
+  /* Callouts only float beside the model on wide stages; narrow stages use
+     the single ticker line instead (toggled by the script). */
+  .cx-overlay:not(.is-wide) .cx-label,
+  .cx-overlay:not(.is-wide) svg {
+    display: none;
+  }
+  .cx-label {
+    will-change: transform, opacity;
+  }
+  .cx-ticker {
+    transition: opacity 0.2s ease;
+  }
+  .cx-ticker:empty {
+    opacity: 0;
+  }
+  /* Caption swaps for the drag hint once the model is fully apart */
+  .cx-caption,
+  .cx-hint {
+    transition: opacity 0.3s ease;
+  }
+  .cx-hint {
+    opacity: 0;
+  }
+  .cx-track.cx-can-orbit .cx-caption {
+    opacity: 0;
+  }
+  .cx-track.cx-can-orbit .cx-hint {
+    opacity: 0.6;
+  }
+</style>
+
+<script>
+  let cleanups: (() => void)[] = [];
+
+  function initCurrawongExplodes() {
+    document.querySelectorAll<HTMLElement>(".cx-track").forEach(track => {
+      if (track.dataset.mounted) return;
+      track.dataset.mounted = "1";
+      const canvas = track.querySelector<HTMLElement>(".cx-canvas")!;
+      // Start loading a screen early so the model is ready when it pins
+      const io = new IntersectionObserver(
+        async entries => {
+          if (!entries.some(e => e.isIntersecting)) return;
+          io.disconnect();
+          try {
+            const { mountCurrawongExplode } = await import("../lib/currawong-explode");
+            cleanups.push(
+              mountCurrawongExplode(canvas, {
+                track,
+                overlay: track.querySelector<HTMLElement>(".cx-overlay"),
+                ticker: track.querySelector<HTMLElement>(".cx-ticker"),
+              })
+            );
+          } catch (err) {
+            console.warn("currawong exploded view failed to load", err);
+          }
+        },
+        { rootMargin: "100% 0px" }
+      );
+      io.observe(track);
+    });
+  }
+
+  initCurrawongExplodes();
+  document.addEventListener("astro:after-swap", () => {
+    cleanups.forEach(fn => fn());
+    cleanups = [];
+    initCurrawongExplodes();
+  });
+</script>

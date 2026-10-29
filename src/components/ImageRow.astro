@@ -17,12 +17,6 @@ const gridCols = cols === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2";
 const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
 ---
 
-<!--
-  ImageRow gets ONE FIG number for the whole row (per-row approach).
-  The row itself is marked .zine-figure so the CSS counter increments once.
-  Individual cell captions get the same FIG prefix.
-  Outside .project-prose the counter is not active, so captions render plainly.
--->
 <div
   id={uid}
   class={`not-prose zine-figure grid gap-3 my-5 ${gridCols}`}
@@ -33,9 +27,8 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
         <>
           {/* Opens the shared #site-lightbox in Layout.astro */}
           <button
-            class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
-                   transition-all hover:border-accent/50
-                   hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
+            class="block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
+                   transition-colors hover:border-accent/50
                    focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
             data-lb-src={img.src}
             data-lb-alt={img.alt ?? ""}
@@ -45,7 +38,7 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
             <img
               src={img.src}
               alt={img.alt ?? ""}
-              class="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+              class="w-full rounded-xl object-cover"
               loading="lazy"
               decoding="async"
             />
@@ -77,37 +70,11 @@ const uid = `row-${Math.random().toString(36).slice(2, 8)}`;
   ))}
 </div>
 
-<!--
-  Per-row FIG. numbering via CSS counters.
-  The .zine-figure on the grid div increments the counter once per ImageRow
-  (same counter defined in Figure.astro's <style> block, shared via cascade).
-  Each cell's .row-caption gets the same FIG. number — so all captions in
-  one row share the same figure number, which is the cleanest read.
-  Outside .project-prose, no prefix is injected.
--->
 <style>
-  /* Caption base */
   .row-caption {
     font-size: 0.8rem;
     line-height: 1.5;
     color: color-mix(in srgb, currentColor 65%, transparent);
     font-style: italic;
-  }
-
-  /* No prefix outside scope */
-  .zine-figure .row-caption::before {
-    content: none;
-  }
-
-  /* Inside .project-prose: prefix with the shared FIG counter value */
-  :where(.project-prose) .zine-figure .row-caption::before {
-    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
-    font-family: "EB Garamond", ui-serif, Georgia, serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, currentColor 55%, transparent);
-    font-style: normal;
-    margin-right: 0.25em;
   }
 </style>

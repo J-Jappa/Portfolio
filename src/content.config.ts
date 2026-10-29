@@ -28,6 +28,7 @@ const projects = defineCollection({
     order: z.number().default(10),          // ← add this
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),      // hide from the list + route without deleting
+    hero3d: z.enum(["currawong"]).optional(), // interactive 3D hero in place of the image strip
     gallery: z.array(z.union([img, row])).default([]),
   })
 });

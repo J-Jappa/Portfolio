@@ -66,8 +66,7 @@ const { src, poster, label = "Video", type = "video/mp4" } = Astro.props;
   .site-video-overlay:hover {
     background: rgba(5, 7, 13, 0.28);
   }
-  /* Same family as the site's mono chips and buttons; the solid panel
-     keeps the label readable over any poster frame. */
+  /* The solid panel keeps the label readable over any poster frame. */
   .site-video-chip {
     display: inline-flex;
     align-items: center;
@@ -77,10 +76,8 @@ const { src, poster, label = "Video", type = "video/mp4" } = Astro.props;
     border: 1px solid var(--color-border);
     background: color-mix(in srgb, var(--color-background) 90%, transparent);
     backdrop-filter: blur(4px);
-    font-family: "EB Garamond", ui-serif, Georgia, serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
+    font-family: var(--font-site);
+    font-size: 0.95rem;
     color: var(--color-foreground);
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
     transition:

@@ -3,22 +3,19 @@ import { SITE } from "@/config";
 const year = new Date().getFullYear();
 ---
 
-<footer class="mt-12 border-t border-border">
+<footer class="mt-12 w-full border-t border-border">
   <div class="mx-auto max-w-app px-4 py-8">
     <!-- Top row: identity + nav -->
     <div
       class="flex flex-col gap-6 sm:flex-row sm:items-start sm:justify-between"
     >
       <!-- Identity -->
-      <div class="flex flex-col gap-1">
-        <span
-          class="text-base font-semibold tracking-tight"
-          style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
-        >
-          Jasper Japp
-        </span>
-        <span class="t-label opacity-50">Sydney, Australia</span>
-      </div>
+      <span
+        class="text-base font-semibold tracking-tight"
+        style="font-family: var(--font-site);"
+      >
+        Jasper Japp
+      </span>
 
       <!-- Footer nav -->
       <nav
@@ -27,25 +24,25 @@ const year = new Date().getFullYear();
       >
         <a
           href="/"
-          class="-my-2 inline-block py-2 t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+          class="-my-2 inline-block py-2 text-sm text-foreground/60 no-underline transition-colors hover:text-accent"
         >
           Projects
         </a>
         <a
           href="/about"
-          class="-my-2 inline-block py-2 t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+          class="-my-2 inline-block py-2 text-sm text-foreground/60 no-underline transition-colors hover:text-accent"
         >
           About
         </a>
         <a
           href="/experience"
-          class="-my-2 inline-block py-2 t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+          class="-my-2 inline-block py-2 text-sm text-foreground/60 no-underline transition-colors hover:text-accent"
         >
           Experience
         </a>
         <a
           href="/contact"
-          class="-my-2 inline-block py-2 t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+          class="-my-2 inline-block py-2 text-sm text-foreground/60 no-underline transition-colors hover:text-accent"
         >
           Contact
         </a>
@@ -55,7 +52,7 @@ const year = new Date().getFullYear();
               href={SITE.linkedinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              class="-my-2 inline-block py-2 t-label no-underline opacity-60 transition-opacity hover:text-accent hover:opacity-100"
+              class="-my-2 inline-block py-2 text-sm text-foreground/60 no-underline transition-colors hover:text-accent"
             >
               LinkedIn ↗
             </a>

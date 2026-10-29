@@ -1,0 +1,21 @@
+---
+// Pixel-art branch from the Currawong UI, drawn as crisp SVG pixels in the
+// text colour so it works in both themes. Use as a section divider.
+interface Props {
+  class?: string;
+  /** Mirror it left to right */
+  flip?: boolean;
+}
+const { class: className = "", flip = false } = Astro.props;
+---
+
+<div class:list={["not-prose mx-auto my-10 w-full max-w-2xl text-foreground/80", className]} aria-hidden="true">
+  <svg
+    viewBox="0 0 224 28"
+    class="block h-auto w-full"
+    shape-rendering="crispEdges"
+    style={flip ? "transform: scaleX(-1)" : undefined}
+  >
+    <path fill="currentColor" d="M121 0h1v1h-1zM126 0h1v1h-1zM120 1h3v1h-3zM125 1h3v1h-3zM121 2h1v1h-1zM126 2h1v1h-1zM122 3h1v1h-1zM125 3h1v1h-1zM123 4h1v1h-1zM125 4h1v1h-1zM124 5h1v1h-1zM9 6h1v1h-1zM124 6h1v1h-1zM218 6h6v1h-6zM8 7h3v1h-3zM125 7h1v1h-1zM199 7h3v1h-3zM211 7h10v1h-10zM223 7h1v1h-1zM9 8h1v1h-1zM125 8h1v1h-1zM127 8h12v1h-12zM154 8h18v1h-18zM185 8h23v1h-23zM209 8h4v1h-4zM215 8h9v1h-9zM8 9h1v1h-1zM117 9h9v1h-9zM127 9h15v1h-15zM144 9h25v1h-25zM170 9h24v1h-24zM196 9h11v1h-11zM209 9h2v1h-2zM214 9h3v1h-3zM7 10h1v1h-1zM105 10h3v1h-3zM109 10h46v1h-46zM161 10h6v1h-6zM170 10h22v1h-22zM195 10h12v1h-12zM209 10h2v1h-2zM212 10h2v1h-2zM6 11h1v1h-1zM101 11h3v1h-3zM109 11h35v1h-35zM148 11h6v1h-6zM155 11h11v1h-11zM168 11h8v1h-8zM181 11h21v1h-21zM6 12h1v1h-1zM29 12h4v1h-4zM47 12h12v1h-12zM98 12h31v1h-31zM131 12h12v1h-12zM144 12h26v1h-26zM175 12h8v1h-8zM187 12h5v1h-5zM5 13h1v1h-1zM25 13h30v1h-30zM56 13h19v1h-19zM84 13h28v1h-28zM115 13h11v1h-11zM138 13h13v1h-13zM161 13h1v1h-1zM163 13h16v1h-16zM0 14h14v1h-14zM19 14h19v1h-19zM44 14h5v1h-5zM50 14h5v1h-5zM60 14h36v1h-36zM100 14h8v1h-8zM111 14h3v1h-3zM118 14h2v1h-2zM161 14h1v1h-1zM166 14h9v1h-9zM0 15h42v1h-42zM43 15h4v1h-4zM50 15h10v1h-10zM61 15h32v1h-32zM97 15h11v1h-11zM160 15h1v1h-1zM0 16h2v1h-2zM5 16h12v1h-12zM19 16h14v1h-14zM38 16h9v1h-9zM49 16h19v1h-19zM72 16h35v1h-35zM159 16h1v1h-1zM0 17h16v1h-16zM17 17h33v1h-33zM54 17h17v1h-17zM74 17h16v1h-16zM91 17h10v1h-10zM158 17h1v1h-1zM0 18h29v1h-29zM41 18h1v1h-1zM59 18h14v1h-14zM74 18h15v1h-15zM93 18h8v1h-8zM150 18h1v1h-1zM157 18h1v1h-1zM162 18h1v1h-1zM0 19h12v1h-12zM20 19h2v1h-2zM41 19h1v1h-1zM70 19h6v1h-6zM77 19h11v1h-11zM99 19h1v1h-1zM105 19h1v1h-1zM149 19h3v1h-3zM157 19h1v1h-1zM161 19h3v1h-3zM0 20h1v1h-1zM3 20h5v1h-5zM41 20h1v1h-1zM46 20h1v1h-1zM99 20h2v1h-2zM104 20h3v1h-3zM150 20h1v1h-1zM157 20h2v1h-2zM162 20h1v1h-1zM2 21h4v1h-4zM36 21h1v1h-1zM42 21h1v1h-1zM45 21h3v1h-3zM100 21h3v1h-3zM105 21h1v1h-1zM149 21h1v1h-1zM156 21h1v1h-1zM159 21h3v1h-3zM1 22h3v1h-3zM35 22h3v1h-3zM40 22h2v1h-2zM43 22h1v1h-1zM46 22h1v1h-1zM102 22h3v1h-3zM149 22h1v1h-1zM155 22h1v1h-1zM0 23h2v1h-2zM36 23h1v1h-1zM38 23h2v1h-2zM43 23h3v1h-3zM150 23h2v1h-2zM154 23h1v1h-1zM0 24h2v1h-2zM152 24h2v1h-2zM0 25h1v1h-1zM0 26h1v1h-1zM0 27h1v1h-1z" />
+  </svg>
+</div>

@@ -1,0 +1,708 @@
+---
+// Interactive stand-in for the Currawong dial. The torque maths is ported
+// from the ESP32 firmware (firmware/currawong_knob/src/feel.h and haptics()
+// in main.cpp): the same detent hills, walls, end-stop taper, coasting,
+// landmarks and magnet, with the same constants. The motor and the hand are
+// simulated; a click plays (and phones that support it buzz) on each detent.
+//
+// The dial drawing is the real part: crease edges of "Dial v2-1.STL" from
+// src/assets/models/currawong, seen from the front, in mm about its centre
+// (the 24 grip slots, the chamfer and the two counterbored screws).
+// The front case's opening is the same 21 mm radius, drawn as the ring.
+const DIAL_EDGES =
+  "M18.72 -3.22L20.7 -3.46 12.76 -2.51 13 -0.52 20.94 -1.47 20.83 -2.64 20.98 0.74 20.77 3.11 18.8 2.72 18.98 0.67 18.95 -1.23 13 -0.52M18.72 -3.22L12.76 -2.51M18.72 -3.22L18.21 -5.37 17.64 -7.03 12.19 -4.51 19.45 -7.87 18.91 -9.09 18.61 -9.69 11.35 -6.33 16.8 -8.85 15.56 -10.86 14.59 -12.14 16.06 -13.5 10.19 -8.06 8.83 -9.53 14.7 -14.96 12.5 -16.84 15.05 -14.62 17.2 -12.01 16.06 -13.5 15.05 -14.62 14.7 -14.96 13.23 -13.6 8.83 -9.53M-13.64 -13.21L-13.79 -13.05 -15.71 -10.67 -16.08 -10.1 -10.85 -7.17 -17.83 -11.07 -16.08 -10.1M-13.64 -13.21L-9.56 -8.81 -8.09 -10.17 -13.53 -16.04 -15 -14.68 -13.64 -13.21M1.25 18.98L-1.42 18.97 -2.7 18.83 -3.09 20.8 -1.54 12.95 -2.7 18.83M1.25 18.98L1.49 20.97 1.82 20.95 5.15 20.38 8.35 19.29 11.33 17.7 14.02 15.66 13.52 16.09 12.16 14.62 8.08 10.22 13.52 16.09 11.33 17.7 9.71 18.65 6.35 11.38 4.53 12.22 7.05 17.67 4.66 18.45 3.24 18.75 3.48 20.74 5.15 20.38 7.89 19.48 4.53 12.22M1.25 18.98L0.54 13.03 1.49 20.97 -1.56 20.97 -4.9 20.45 -5.05 20.41 -3.5 12.56 -1.54 12.95M-18.81 -2.67L-18.88 -2.15 -18.98 0.91 -18.96 1.29 -13.01 0.57 -12.77 2.56 -18.73 3.27 -18.6 3.94 -17.73 6.87 -17.65 7.08 -19.46 7.92 -19.59 7.6 -20.55 4.36 -20.71 3.51 -12.77 2.56M-18.81 -2.67L-20.78 -3.06 -20.87 -2.37 -20.98 1 -20.55 4.36M-18.81 -2.67L-12.93 -1.51 -12.54 -3.47 -18.43 -4.63 -20.39 -5.02 -20.78 -3.06 -12.93 -1.51M12.16 14.62L10.25 16.02 8.87 16.83 6.35 11.38M11.81 5.48L17.05 8.4 17.8 6.65 18.41 4.69 20.38 5.07 19.68 7.35 18.8 9.38 18.25 10.41 17.82 11.13 16.07 10.15 14.79 11.95 13.62 13.26 14.99 14.73 16.34 13.21 17.82 11.13 10.84 7.23 16.07 10.15M11.81 5.48L18.8 9.38 17.05 8.4M11.81 5.48L10.84 7.23M-17.06 -8.35L-11.82 -5.43 -18.81 -9.33 -19.03 -8.86 -17.36 -11.79 -17.83 -11.07 -18.81 -9.33 -17.06 -8.35 -17.22 -8.01 -18.29 -5.15 -18.43 -4.63M-11.82 -5.43L-10.85 -7.17M3.24 18.75L2.53 12.79 3.48 20.74 1.82 20.95 -1.56 20.97 -3.09 20.8 -4.9 20.45 -8.12 19.4 -5.05 20.41 -4.67 18.45 -7.34 17.55 -8.38 17.08 -5.46 11.84 -9.36 18.83 -11.11 17.85 -10.13 16.1 -7.21 10.87 -11.11 17.85 -13.83 15.83 -11.12 17.85 -8.12 19.4 -9.36 18.83 -8.38 17.08M-3.25 -18.69L-6.13 -17.96 -7.06 -17.61 -4.54 -12.17 -6.36 -11.33 -9.72 -18.59 -9.88 -18.51 -12.73 -16.68 -13.53 -16.04 -12.17 -14.57 -11.51 -15.09 -8.94 -16.74 -8.88 -16.77 -6.36 -11.33M-3.25 -18.69L-3.49 -20.68 -1.5 -20.92 -0.14 -20.97 -3.5 -20.68 -6.78 -19.85 -7.9 -19.43 -4.54 -12.17M-3.25 -18.69L-2.54 -12.74 -0.55 -12.98 -1.27 -18.93 -0.12 -18.97 2.69 -18.78 1.53 -12.9 3.08 -20.75 -0.14 -20.97 3.23 -20.72 3.08 -20.75 2.69 -18.78M5.45 -11.79L7.19 -10.82 10.12 -16.05 11.31 -15.23 13.23 -13.6M5.45 -11.79L8.37 -17.03 5.9 -18.03 4.65 -18.39 3.49 -12.51 5.04 -20.36 3.23 -20.72 6.52 -19.93 9.64 -18.63 9.35 -18.78 5.45 -11.79M7.19 -10.82L11.09 -17.8 12.5 -16.84 9.64 -18.63 11.09 -17.8 10.12 -16.05M-7.06 -17.61L-7.9 -19.43 -9.72 -18.59 -8.88 -16.77M10.19 -8.06L14.59 -12.14M11.35 -6.33L12.19 -4.51M8.37 -17.03L9.35 -18.78 6.52 -19.93 5.04 -20.36 4.65 -18.39M18.8 2.72L12.92 1.56 12.53 3.52 20.38 5.07 20.6 4.1 19.68 7.35 18.25 10.41 16.34 13.21 14.02 15.66 14.99 14.73 9.55 8.86 13.62 13.26M-3.5 12.56L-4.67 18.45M-9.56 -8.81L-15 -14.68 -15.24 -14.43 -12.73 -16.68M7.05 17.67L7.89 19.48 8.35 19.29 9.71 18.65 8.87 16.83M0.54 13.03L2.53 12.79M-18.73 3.27L-20.71 3.51 -20.95 1.52 -18.96 1.29M-16.81 8.9L-16.4 9.63 -14.65 12.13 -14.6 12.19 -10.2 8.11 -8.84 9.58 -14.71 15.02 -16.07 13.55 -16.19 13.41 -18.13 10.64 -19.59 7.6M-16.81 8.9L-18.62 9.74 -19.46 7.92 -12.2 4.57 -17.65 7.08M-16.81 8.9L-11.36 6.38 -12.2 4.57M-9.88 -18.51L-6.78 -19.85 -3.49 -20.68 -2.54 -12.74M-20.87 -2.37L-20.61 -4.05 -20.21 -5.69 -19.03 -8.86M-15.24 -14.43L-17.36 -11.79M-13.01 0.57L-20.95 1.52 -20.98 1M-10.13 16.1L-12.52 14.33 -13.24 13.66 -14.71 15.02 -13.83 15.83 -16.19 13.41M-20.21 -5.69L-20.39 -5.02 -12.54 -3.47M-5.46 11.84L-7.21 10.87M1.53 -12.9L3.49 -12.51M-0.55 -12.98L-1.5 -20.92 -1.27 -18.93M-8.84 9.58L-13.24 13.66M17.64 -7.03L19.45 -7.87 20.13 -5.94 20.83 -2.64 20.7 -3.46 20.13 -5.94 18.91 -9.09 17.2 -12.01 18.61 -9.69 16.8 -8.85M8.08 10.22L9.55 8.86M-8.09 -10.17L-12.17 -14.57M-10.2 8.11L-16.07 13.55 -14.6 12.19M-18.13 10.64L-18.62 9.74 -11.36 6.38M12.53 3.52L18.41 4.69M12.92 1.56L20.77 3.11 20.6 4.1 20.98 0.74 20.94 -1.47 18.95 -1.23M-3.44 -7.79L-3.17 -7.48 -2.99 -7.12 -3.44 -7.79 -4.16 -8.14 -3.77 -8.01 -3.44 -7.79M3.28 5.65L3.95 5.21 4.34 5.13 4.75 5.15 5.47 5.51 5.13 5.28 4.75 5.15 3.95 5.21 3.58 5.39 3.28 5.65 2.93 6.37 3.06 5.99 3.28 5.65M2.93 6.37L2.98 7.17 3.16 7.54 3.43 7.84 4.15 8.19 3.76 8.06 3.43 7.84 2.98 7.17 2.9 6.78 2.93 6.37M-7.2 -6.44L-7.16 -7.15 -6.93 -7.83 -6.53 -8.43 -5.99 -8.9 -5.35 -9.22 -4.64 -9.36 -3.92 -9.32 -3.24 -9.09 -2.65 -8.69 -2.17 -8.15 -1.86 -7.51 -1.71 -6.8 -1.76 -6.09 -1.99 -5.41 -2.39 -4.81 -2.93 -4.34 -3.57 -4.02 -4.27 -3.88 -4.99 -3.92 -5.67 -4.15 -6.27 -4.55 -6.74 -5.09 -7.06 -5.73 -7.2 -6.44M2.16 8.2L2.64 8.74 3.23 9.14 3.91 9.37 4.63 9.42 5.33 9.28 5.98 8.96 6.52 8.48 6.92 7.89 7.14 7.21 7.19 6.49 7.05 5.79 6.73 5.14 6.26 4.6 5.66 4.2 4.98 3.98 4.26 3.93 3.56 4.07 2.92 4.39 2.38 4.86 1.98 5.46 1.75 6.14 1.7 6.86 1.84 7.56 2.16 8.2M5.47 5.51L5.73 5.81 5.91 6.17 5.99 6.57 5.97 6.97 5.91 6.17 5.47 5.51M-4.96 -8.09L-4.56 -8.17 -4.16 -8.14 -4.96 -8.09 -5.62 -7.64 -5.32 -7.91 -4.96 -8.09M-5.93 -6.12L-5.75 -5.76 -5.48 -5.45 -4.76 -5.1 -4.35 -5.07 -3.96 -5.15 -3.6 -5.33 -3.29 -5.6 -2.94 -6.32 -3.07 -5.94 -3.29 -5.6 -3.96 -5.15 -4.76 -5.1 -5.14 -5.23 -5.48 -5.45 -5.93 -6.12 -5.98 -6.92 -5.62 -7.64 -5.85 -7.3 -5.98 -6.92 -6 -6.52 -5.93 -6.12M4.15 8.19L4.95 8.14 5.31 7.96 5.61 7.69 5.84 7.36 5.97 6.97 5.61 7.69 4.95 8.14 4.55 8.22 4.15 8.19M-2.94 -6.32L-2.91 -6.72 -2.99 -7.12 -2.94 -6.32";
+const MM = 100 / 21; // the dial's 21 mm radius fills r = 100 here
+interface Props {
+  caption?: string;
+}
+const { caption = "Drag the dial, or flick it. Pick a screen to change how it feels." } = Astro.props;
+const modes = [
+  { id: "menu", label: "Menu" },
+  { id: "artists", label: "Artists" },
+  { id: "scrub", label: "Scrubbing" },
+  { id: "eq", label: "Equaliser" },
+  { id: "queue", label: "Up Next" },
+];
+---
+
+<figure class="hd not-prose my-10" data-hd>
+  <div class="hd-modes" role="group" aria-label="Dial mode">
+    {
+      modes.map((m, i) => (
+        <button type="button" class="hd-mode" data-mode={m.id} aria-pressed={i === 0 ? "true" : "false"}>
+          {m.label}
+        </button>
+      ))
+    }
+  </div>
+
+  <div class="hd-stage">
+    <div class="hd-dial-wrap">
+      <svg
+        class="hd-dial"
+        viewBox="-120 -120 240 240"
+        tabindex="0"
+        role="slider"
+        aria-label="Haptic dial. Use the arrow keys to turn it one click."
+        aria-valuetext=""
+        data-dial
+      >
+        <circle r="104" class="hd-ring" />
+        <g data-rotor>
+          <circle r="100" class="hd-cap" />
+          <path d={DIAL_EDGES} transform={`scale(${MM.toFixed(4)})`} class="hd-cad" vector-effect="non-scaling-stroke" />
+        </g>
+        <path d="" class="hd-torque" data-torque />
+      </svg>
+      <p class="hd-readout t-label" data-readout aria-live="off"></p>
+    </div>
+
+    <div class="hd-screen" aria-hidden="true">
+      <p class="hd-title" data-title></p>
+      <div class="hd-body" data-body></div>
+    </div>
+  </div>
+
+  <p class="hd-note" data-note></p>
+  <div class="hd-foot">
+    <figcaption class="t-label">{caption}</figcaption>
+    <button type="button" class="hd-sound t-label" data-skip hidden>Skip track</button>
+    <button type="button" class="hd-icon" data-sound aria-pressed="true" aria-label="Click sound" title="Click sound">
+      <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+        <g class="hd-on"><path d="M15.5 9a4 4 0 0 1 0 6" /><path d="M18 6.5a7.5 7.5 0 0 1 0 11" /></g>
+        <g class="hd-off"><path d="M16 9.5l5 5" /><path d="M21 9.5l-5 5" /></g>
+      </svg>
+    </button>
+  </div>
+</figure>
+
+<style>
+  .hd {
+    max-width: 44rem;
+    margin-inline: auto;
+  }
+  .hd-modes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  .hd-mode {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.8rem;
+    min-height: 2.25rem;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: var(--color-foreground);
+    font-family: inherit;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+  .hd-mode:hover {
+    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+  .hd-mode[aria-pressed="true"] {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+  }
+  .hd-stage {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem 2.5rem;
+  }
+  .hd-dial-wrap {
+    text-align: center;
+  }
+  .hd-dial {
+    width: 15rem;
+    height: 15rem;
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    outline: none;
+  }
+  .hd-dial:focus-visible {
+    outline: 2px dashed var(--color-accent);
+    outline-offset: 4px;
+    border-radius: 9999px;
+  }
+  .hd-dial.is-grabbing {
+    cursor: grabbing;
+  }
+  .hd-ring {
+    fill: none;
+    stroke: color-mix(in srgb, var(--color-foreground) 30%, transparent);
+    stroke-width: 1.2;
+  }
+  .hd-cap {
+    fill: color-mix(in srgb, var(--color-accent) 5%, var(--color-background));
+  }
+  .hd-cad {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.1;
+    stroke-linejoin: round;
+    opacity: 0.85;
+  }
+  .hd-torque {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 5;
+    stroke-linecap: round;
+    opacity: 0.85;
+  }
+  .hd-readout {
+    margin: 0.4rem 0 0;
+    min-height: 1.4em;
+    font-variant-numeric: tabular-nums;
+  }
+  /* A light, 1-bit-ish panel standing in for the Sharp screen */
+  .hd-screen {
+    width: 12rem;
+    height: 15rem;
+    padding: 0.75rem 0.7rem;
+    border-radius: 0.6rem;
+    border: 1px solid var(--color-border);
+    background: #e9e8e2;
+    color: #1a1a1a;
+    font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+    font-size: 0.72rem;
+    line-height: 1.35;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+  .hd-title {
+    margin: 0 0 0.5rem;
+    padding-bottom: 0.3rem;
+    border-bottom: 1px solid #1a1a1a;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+  }
+  .hd-screen :global(.hd-row) {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.12rem 0.3rem;
+    white-space: nowrap;
+  }
+  .hd-screen :global(.hd-row.is-sel) {
+    background: #1a1a1a;
+    color: #e9e8e2;
+  }
+  .hd-screen :global(.hd-big) {
+    font-size: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 1.2rem 0 0.6rem;
+  }
+  .hd-screen :global(.hd-barbox) {
+    height: 0.6rem;
+    border: 1px solid #1a1a1a;
+    margin: 0.4rem 0.2rem;
+  }
+  .hd-screen :global(.hd-barfill) {
+    height: 100%;
+    background: #1a1a1a;
+  }
+  .hd-screen :global(.hd-centre) {
+    text-align: center;
+  }
+  .hd-note {
+    margin: 1.1rem auto 0;
+    max-width: 34rem;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    text-align: center;
+  }
+  .hd-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.4rem 1rem;
+    margin-top: 0.6rem;
+  }
+  .hd-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: transparent;
+    color: color-mix(in srgb, var(--color-foreground) 75%, transparent);
+    cursor: pointer;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .hd-icon:hover {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
+  }
+  .hd-icon[aria-pressed="false"] .hd-on,
+  .hd-icon[aria-pressed="true"] .hd-off {
+    display: none;
+  }
+  .hd-sound {
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    padding: 0.4rem 0.2rem;
+    min-height: 2.25rem;
+    text-decoration: underline dashed;
+    text-underline-offset: 4px;
+  }
+  /* Phones: dial and screen side by side, a little smaller */
+  @media (max-width: 30rem) {
+    .hd-stage {
+      flex-wrap: nowrap;
+      gap: 0.75rem;
+    }
+    .hd-dial {
+      width: 11rem;
+      height: 11rem;
+    }
+    .hd-screen {
+      width: 9.5rem;
+      height: 12rem;
+      font-size: 0.66rem;
+      padding: 0.6rem 0.5rem;
+    }
+    .hd-screen :global(.hd-big) {
+      font-size: 1.2rem;
+      margin: 0.8rem 0 0.4rem;
+    }
+  }
+</style>
+
+<script>
+  // ── Constants from the firmware (main.cpp) ─────────────────────────────
+  const rad = (d: number) => (d * Math.PI) / 180;
+  const VOLTAGE_LIMIT = 2.0;
+  const DAMPING = 0.02; // V per rad/s
+  const ENDSTOP_FULL_S = 0.5;
+  const ENDSTOP_FADE_S = 1.0;
+  const ENDSTOP_HOLD = 0.33;
+  const COAST_FROM = 6.0; // rad/s
+  const COAST_TO = 14.0;
+  const COAST_MIN_POSITIONS = 16;
+  const MARK_GAIN = 2.0;
+  const MARK_COAST_MIN = 0.6;
+  const MAGNET_VOLTS = 0.6;
+  const MAGNET_RANGE = 2.0;
+  const MAGNET_NEIGHBOUR = 0.45;
+  const LIST_WIDTH_DEG = 20;
+  const RANGE_ENDSTOP = 12;
+  const SPIN_MS = 700;
+  const MOTION_KP = 6.0;
+  const MOTION_KD = 0.04;
+
+  // ── Simulation of the physical bits (not in the firmware) ──────────────
+  const MOTOR_GAIN = 600; // rad/s² per volt on the knob
+  const FRICTION = 3; // 1/s, bearing drag and back-EMF
+  const HAND_K = 6000; // rad/s² per rad: how firmly a finger holds the knob
+  const HAND_C = 150; // 1/s
+  const HAND_MAX = 1100; // rad/s²: a fingertip, a little less than the motor's 2 V
+  const SLIP = 0.35; // rad: past this the finger slides over the knob
+  const RELEASE_S = 0.15; // a finger lifts off over this long, it doesn't vanish
+  const STEP = 0.001; // s, physics substep
+
+  // feel.h, ported
+  const coastFactor = (speed: number, from: number, to: number) => {
+    if (speed <= from) return 1;
+    if (speed >= to) return 0;
+    const t = (speed - from) / (to - from);
+    return 1 - t * t * (3 - 2 * t);
+  };
+  const hill = (err: number, deadzone: number, edge: number, peak: number) => {
+    const a = Math.abs(err);
+    if (a <= deadzone || a >= edge) return 0;
+    const f = peak * Math.sin((Math.PI * (a - deadzone)) / (edge - deadzone));
+    return err > 0 ? -f : f;
+  };
+  const magnetPull = (x: number, reach: number, volts: number) =>
+    reach <= 0 || Math.abs(x) >= reach ? 0 : -volts * Math.sin((Math.PI * x) / reach);
+
+  type Mode = {
+    title: string;
+    positions: number;
+    start: number;
+    widthDeg: number;
+    strength: number;
+    snap: number;
+    endstop: number;
+    marks?: Set<number>;
+    magnet?: number;
+    note: string;
+    view: (pos: number) => string;
+    text: (pos: number) => string;
+  };
+
+  // Artists: letters with a few entries each; a landmark at each new letter
+  const letters = "ABCDEFGHIJKLMNOPRSTW".split("");
+  const counts = [3, 2, 4, 2, 1, 3, 2, 2, 1, 3, 2, 3, 4, 1, 3, 2, 4, 5, 3, 2];
+  const artistLetter: string[] = [];
+  const artistMarks = new Set<number>();
+  letters.forEach((l, i) => {
+    artistMarks.add(artistLetter.length);
+    for (let k = 0; k < counts[i]; k++) artistLetter.push(l);
+  });
+
+  const list = (items: string[], pos: number, extra?: (i: number) => string) => {
+    const first = Math.max(0, Math.min(pos - 3, items.length - 8));
+    return items
+      .slice(first, first + 8)
+      .map((it, k) => {
+        const i = first + k;
+        return `<div class="hd-row${i === pos ? " is-sel" : ""}"><span>${it}</span><span>${extra ? extra(i) : ""}</span></div>`;
+      })
+      .join("");
+  };
+  const mmss = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
+  const TRACK_S = 210;
+  const SCRUB_STEP_S = 2;
+  const libraryItems = ["ARTISTS", "ALBUMS", "PLAYLISTS", "UP NEXT", "SHUFFLE ALL", "RESCAN"];
+
+  const MODES: Record<string, Mode> = {
+    menu: {
+      title: "LIBRARY",
+      positions: libraryItems.length,
+      start: 0,
+      widthDeg: LIST_WIDTH_DEG,
+      strength: 0.8,
+      snap: 0.55,
+      endstop: 12,
+      note: "Menus get one detent per item and a wall at each end. Push into a wall and it holds firm for half a second, then eases down to a third so it never fights you.",
+      view: p => list(libraryItems, p),
+      text: p => libraryItems[p].toLowerCase(),
+    },
+    artists: {
+      title: "ARTISTS",
+      positions: artistLetter.length,
+      start: 0,
+      widthDeg: LIST_WIDTH_DEG,
+      strength: 0.8,
+      snap: 0.55,
+      endstop: 12,
+      marks: artistMarks,
+      note: "Long lists coast: flick it and above about a turn a second the clicks fade so it glides, then come back as it slows. Each new letter clicks twice as hard.",
+      view: p => list(artistLetter.map((l, i) => `${l} · artist ${String(i + 1).padStart(2, "0")}`), p),
+      text: p => `artist ${p + 1} of ${artistLetter.length}, letter ${artistLetter[p]}`,
+    },
+    scrub: {
+      title: "NOW PLAYING",
+      positions: TRACK_S / SCRUB_STEP_S + 1,
+      start: 21,
+      widthDeg: 7.5,
+      strength: 0.25,
+      snap: 0.55,
+      endstop: RANGE_ENDSTOP,
+      note: "Scrubbing gets 48 light clicks per turn, two seconds each, with walls at 0:00 and the end of the song. Skip spins the dial a full turn on its own.",
+      text: p => `${mmss(Math.min(TRACK_S, p * SCRUB_STEP_S))} of ${mmss(TRACK_S)}`,
+      view: p => {
+        const s = Math.min(TRACK_S, p * SCRUB_STEP_S);
+        return `<p class="hd-big">${mmss(s)}</p><div class="hd-barbox"><div class="hd-barfill" style="width:${(s / TRACK_S) * 100}%"></div></div><p class="hd-centre">-${mmss(TRACK_S - s)}</p>`;
+      },
+    },
+    eq: {
+      title: "EQ · 250 HZ",
+      positions: 13,
+      start: 6,
+      widthDeg: LIST_WIDTH_DEG,
+      strength: 0.8,
+      snap: 0.55,
+      endstop: 12,
+      note: "Each equaliser band clicks once per dB, from −6 to +6, with walls at both ends.",
+      text: p => `${p - 6} dB`,
+      view: p => {
+        const db = p - 6;
+        return `<p class="hd-big">${db > 0 ? "+" : ""}${db} dB</p><div class="hd-barbox"><div class="hd-barfill" style="width:${(p / 12) * 100}%"></div></div><p class="hd-centre">−6 &nbsp; 0 &nbsp; +6</p>`;
+      },
+    },
+    queue: {
+      title: "UP NEXT",
+      positions: 10,
+      start: 7,
+      widthDeg: LIST_WIDTH_DEG,
+      strength: 0.8,
+      snap: 0.55,
+      endstop: 12,
+      magnet: 3,
+      note: "In Up Next the playing track pulls the dial in like a magnet from two positions away, and the clicks beside it soften so it can.",
+      view: p => list(Array.from({ length: 10 }, (_, i) => `Track ${String(i + 1).padStart(2, "0")}`), p, i => (i === 3 ? "▶" : "")),
+      text: p => `track ${p + 1}${p === 3 ? ", now playing" : ""}`,
+    },
+  };
+
+  function initDials() {
+    document.querySelectorAll<HTMLElement>("[data-hd]").forEach(root => {
+      if (root.dataset.mounted) return;
+      root.dataset.mounted = "1";
+      const dial = root.querySelector<SVGSVGElement>("[data-dial]")!;
+      const rotor = root.querySelector<SVGGElement>("[data-rotor]")!;
+      const torquePath = root.querySelector<SVGPathElement>("[data-torque]")!;
+      const readout = root.querySelector<HTMLElement>("[data-readout]")!;
+      const titleEl = root.querySelector<HTMLElement>("[data-title]")!;
+      const bodyEl = root.querySelector<HTMLElement>("[data-body]")!;
+      const noteEl = root.querySelector<HTMLElement>("[data-note]")!;
+      const soundBtn = root.querySelector<HTMLButtonElement>("[data-sound]")!;
+
+      let mode: Mode = MODES.menu;
+      let angle = 0, vel = 0, centre = 0, position = 0;
+      let wallSince = -1;
+      let lastU = 0;
+      // Hand
+      let dragging = false, grip = 0, handAngle = 0, handVel = 0, lastPointerA = 0, lastMoveT = 0;
+      // Spin (track skip)
+      let spin: { from: number; to: number; t0: number } | null = null;
+      let simTime = 0;
+
+      // Sound and buzz on each detent
+      let sound = true;
+      let ctx: AudioContext | null = null;
+      function click(strong: boolean) {
+        if (navigator.vibrate) {
+          try { navigator.vibrate(strong ? 12 : 6); } catch {}
+        }
+        if (!sound) return;
+        try {
+          ctx ??= new AudioContext();
+          const t = ctx.currentTime;
+          const len = Math.floor(ctx.sampleRate * 0.006);
+          const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+          const d = buf.getChannelData(0);
+          for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          const g = ctx.createGain();
+          g.gain.value = strong ? 0.35 : 0.16;
+          const f = ctx.createBiquadFilter();
+          f.type = "bandpass";
+          f.frequency.value = strong ? 2200 : 3200;
+          src.connect(f).connect(g).connect(ctx.destination);
+          src.start(t);
+        } catch {}
+      }
+      soundBtn.addEventListener("click", () => {
+        sound = !sound;
+        soundBtn.setAttribute("aria-pressed", String(sound));
+      });
+
+      function endstopFactor(pushing: boolean) {
+        if (!pushing) { wallSince = -1; return 1; }
+        if (wallSince < 0) wallSince = simTime;
+        const t = simTime - wallSince;
+        if (t <= ENDSTOP_FULL_S) return 1;
+        const k = Math.min(1, (t - ENDSTOP_FULL_S) / ENDSTOP_FADE_S);
+        return 1 - (1 - ENDSTOP_HOLD) * k;
+      }
+
+      // haptics() from main.cpp, DETENT kind
+      function haptics(): number {
+        const width = rad(mode.widthDeg);
+        let err = angle - centre;
+        const canUp = position < mode.positions - 1;
+        const canDown = position > 0;
+        if (err > width * mode.snap && canUp) {
+          centre += width; position++; err -= width; moved();
+        } else if (err < -width * mode.snap && canDown) {
+          centre -= width; position--; err += width; moved();
+        }
+        const deadzone = Math.min(width * 0.2, rad(1));
+        const coastable = mode.positions > COAST_MIN_POSITIONS;
+        const coast = coastable ? coastFactor(Math.abs(vel), COAST_FROM, COAST_TO) : 1;
+        const nearest = position + Math.round(err / width);
+        let gain = coast;
+        if (mode.marks?.has(nearest)) gain = MARK_GAIN * Math.max(coast, MARK_COAST_MIN);
+        else if (mode.magnet !== undefined && Math.abs(nearest - mode.magnet) === 1) gain *= MAGNET_NEIGHBOUR;
+        const beyond = (position === mode.positions - 1 && err > 0) || (position === 0 && err < 0);
+        let u: number;
+        if (beyond && Math.abs(err) > deadzone) {
+          u = -mode.endstop * (err - Math.sign(err) * deadzone) * endstopFactor(true);
+        } else {
+          endstopFactor(false);
+          u = hill(err - width * Math.round(err / width), deadzone, width / 2, mode.strength * gain);
+          if (mode.magnet !== undefined)
+            u += magnetPull(angle - (centre + (mode.magnet - position) * width), MAGNET_RANGE * width, MAGNET_VOLTS);
+        }
+        u -= DAMPING * coast * vel;
+        return Math.max(-VOLTAGE_LIMIT, Math.min(VOLTAGE_LIMIT, u));
+      }
+
+      function spinVolts(): number | null {
+        if (!spin) return null;
+        const t = Math.min(1, (simTime * 1000 - spin.t0) / SPIN_MS);
+        const e = t * t * (3 - 2 * t);
+        const sp = spin.from + (spin.to - spin.from) * e;
+        const spVel = ((spin.to - spin.from) * 6 * t * (1 - t) * 1000) / SPIN_MS;
+        if (t >= 1) {
+          // endMotion() -> recentre(): the detent centre is wherever it stopped
+          spin = null;
+          centre = angle;
+        }
+        return Math.max(-VOLTAGE_LIMIT, Math.min(VOLTAGE_LIMIT, MOTION_KP * (sp - angle) + MOTION_KD * (spVel - vel)));
+      }
+
+      let lastClickPos = 0;
+      function moved() {
+        const strong = !!mode.marks?.has(position);
+        if (position !== lastClickPos) click(strong);
+        lastClickPos = position;
+        dirtyScreen = true;
+      }
+
+      let dirtyScreen = true;
+      function drawScreen() {
+        titleEl.textContent = mode.title;
+        bodyEl.innerHTML = mode.view(position);
+        dial.setAttribute("aria-valuenow", String(position));
+        dial.setAttribute("aria-valuemin", "0");
+        dial.setAttribute("aria-valuemax", String(mode.positions - 1));
+        dial.setAttribute("aria-valuetext", mode.text(position));
+        dirtyScreen = false;
+      }
+      const skipBtn = root.querySelector<HTMLButtonElement>("[data-skip]")!;
+      skipBtn.addEventListener("click", () => {
+        // Skip: the dial spins a full turn on its own, and the new song starts at 0:00
+        spin = { from: angle, to: angle + Math.PI * 2, t0: simTime * 1000 };
+        position = 0; centre = angle; lastClickPos = 0;
+        dirtyScreen = true;
+        kick();
+      });
+
+      function drawDial() {
+        rotor.setAttribute("transform", `rotate(${((angle * 180) / Math.PI).toFixed(2)})`);
+        // Torque arc on the ring: length and direction follow the motor volts
+        const mag = Math.min(1, Math.abs(lastU) / VOLTAGE_LIMIT);
+        if (mag < 0.02) torquePath.setAttribute("d", "");
+        else {
+          const sweep = mag * 70 * (lastU > 0 ? 1 : -1);
+          const a0 = -90, a1 = a0 + sweep;
+          const p = (a: number) => [112 * Math.cos(rad(a)), 112 * Math.sin(rad(a))];
+          const [x0, y0] = p(a0), [x1, y1] = p(a1);
+          torquePath.setAttribute("d", `M${x0.toFixed(1)} ${y0.toFixed(1)} A112 112 0 0 ${sweep > 0 ? 1 : 0} ${x1.toFixed(1)} ${y1.toFixed(1)}`);
+        }
+        readout.textContent = `motor ${lastU >= 0 ? "+" : "−"}${Math.abs(lastU).toFixed(2)} V`;
+        if (dirtyScreen) drawScreen();
+      }
+
+      function setMode(id: string) {
+        mode = MODES[id];
+        position = mode.start; lastClickPos = position;
+        centre = angle; vel = 0; spin = null; wallSince = -1;
+        noteEl.textContent = mode.note;
+        skipBtn.hidden = id !== "scrub";
+        root.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach(b =>
+          b.setAttribute("aria-pressed", String(b.dataset.mode === id))
+        );
+        dirtyScreen = true;
+        drawDial();
+      }
+      root.querySelectorAll<HTMLButtonElement>("[data-mode]").forEach(b =>
+        b.addEventListener("click", () => setMode(b.dataset.mode!))
+      );
+
+      // ── Physics loop ──────────────────────────────────────────────────
+      let raf = 0, last = 0;
+      function frame(now: number) {
+        raf = 0;
+        const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
+        last = now;
+        const steps = Math.round(dt / STEP);
+        // A pointer that has stopped moving is a finger holding still
+        if (dragging && performance.now() - lastMoveT > 40) handVel = 0;
+        for (let i = 0; i < steps; i++) {
+          simTime += STEP;
+          const sv = spinVolts();
+          const u = sv ?? haptics();
+          lastU = u;
+          let acc = u * MOTOR_GAIN - FRICTION * vel;
+          if (!dragging && grip > 0) {
+            // Lifting off: the finger keeps its own motion and lets go
+            grip = Math.max(0, grip - STEP / RELEASE_S);
+            handAngle += handVel * STEP;
+          }
+          if (grip > 0) {
+            const h = HAND_K * (handAngle - angle) + HAND_C * (handVel - vel);
+            acc += grip * Math.max(-HAND_MAX, Math.min(HAND_MAX, h));
+          }
+          vel += acc * STEP;
+          angle += vel * STEP;
+        }
+        drawDial();
+        const busy = grip > 0 || spin || Math.abs(vel) > 0.02 || Math.abs(lastU) > 0.03 || wallSince >= 0;
+        if (busy) raf = requestAnimationFrame(frame);
+        else { last = 0; lastU = 0; drawDial(); }
+      }
+      const kick = () => { if (!raf) raf = requestAnimationFrame(frame); };
+
+      // ── Pointer: the hand is a stiff spring to the pointer's angle ──────
+      const pointerAngle = (e: PointerEvent) => {
+        const r = dial.getBoundingClientRect();
+        return Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2)));
+      };
+      dial.addEventListener("pointerdown", e => {
+        dragging = true;
+        grip = 1;
+        spin = null; // grabbing stops a spin
+        lastPointerA = pointerAngle(e);
+        handVel = 0;
+        lastMoveT = performance.now();
+        handAngle = angle;
+        dial.setPointerCapture(e.pointerId);
+        dial.classList.add("is-grabbing");
+        e.preventDefault();
+        kick();
+      });
+      dial.addEventListener("pointermove", e => {
+        if (!dragging) return;
+        const a = pointerAngle(e);
+        let d = a - lastPointerA;
+        if (d > Math.PI) d -= 2 * Math.PI;
+        if (d < -Math.PI) d += 2 * Math.PI;
+        lastPointerA = a;
+        const now = performance.now();
+        const el = Math.max(0.004, (now - lastMoveT) / 1000);
+        lastMoveT = now;
+        handVel += (d / el - handVel) * 0.5;
+        handAngle = Math.max(angle - SLIP, Math.min(angle + SLIP, handAngle + d));
+        kick();
+      });
+      const release = () => {
+        if (!dragging) return;
+        dragging = false;
+        dial.classList.remove("is-grabbing");
+        kick();
+      };
+      dial.addEventListener("pointerup", release);
+      dial.addEventListener("pointercancel", release);
+
+      // Keyboard: nudge one detent
+      let keyTimer = 0;
+      dial.addEventListener("keydown", e => {
+        const dir = e.key === "ArrowRight" || e.key === "ArrowUp" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowDown" ? -1 : 0;
+        if (!dir) return;
+        e.preventDefault();
+        dragging = true;
+        grip = 1;
+        handVel = 0;
+        handAngle = centre + dir * rad(mode.widthDeg);
+        kick();
+        clearTimeout(keyTimer);
+        keyTimer = window.setTimeout(() => { dragging = false; kick(); }, 140);
+      });
+
+      setMode("menu");
+    });
+  }
+
+  initDials();
+  document.addEventListener("astro:after-swap", initDials);
+</script>

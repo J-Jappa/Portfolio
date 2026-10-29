@@ -10,12 +10,15 @@ interface Props {
   caption?: string;
   /** Play the construct-the-car intro animation on mount */
   intro?: boolean;
+  /** Put the caption under the canvas instead of floating over it */
+  captionBelow?: boolean;
 }
 
 const {
   class: className = "h-64",
-  caption = "SC4 Monty · drag to orbit",
+  caption = "Monty, SC4. Drag to turn it.",
   intro = false,
+  captionBelow = false,
 } = Astro.props;
 ---
 
@@ -26,12 +29,16 @@ const {
     aria-hidden="true"
   >
   </div>
-  <!-- Floats over the canvas so the car can swing behind it -->
-  <p
-    class="pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center t-label opacity-60"
-  >
-    {caption}
-  </p>
+  {
+    captionBelow ? (
+      <p class="mt-2 text-center t-label">{caption}</p>
+    ) : (
+      /* Floats over the canvas so the car can swing behind it */
+      <p class="pointer-events-none absolute inset-x-0 bottom-2 z-10 text-center t-label opacity-60">
+        {caption}
+      </p>
+    )
+  }
 </div>
 
 <script>

@@ -1,0 +1,15 @@
+flowchart LR
+    BAT[1S LiPo] --> GAUGE[MAX17048<br/>fuel gauge]
+    GAUGE --> PB[PowerBoost 1000C<br/>charger + 5 V boost]
+    USB[USB-C] --> PB
+    PB -- 5 V --> PI[Raspberry Pi Zero W<br/>audio, UI]
+    PB -- 5 V --> TMC[TMC6300<br/>motor driver]
+    PB -- 5 V via Schottky --> ESP[XIAO ESP32-S3<br/>FOC loop]
+    PI -- SPI --> LCD[Sharp 2.7in<br/>memory LCD]
+    PI -- I2C --> GAUGE
+    PI -- GPIO --> BTN[5 buttons]
+    PI -- USB OTG --> DAC[Dawn Pro 2<br/>USB DAC] --> HP[3.5 mm out]
+    PI -. Bluetooth A2DP .-> BT[Headphones]
+    PI <-- UART --> ESP
+    ESP -- 6 PWM --> TMC --> MOT[2804 BLDC]
+    MOT --- ENC[AS5600] -- I2C --> ESP

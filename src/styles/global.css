@@ -12,6 +12,10 @@ html[data-theme="light"] {
   --accent-2: #b45309;
   --muted: #eceae6;
   --border: #e2dfd8;
+  /* Site typeface: the one place to change it. Tinos (loaded in
+     Layout.astro) is a metric match for phones without Times New Roman.
+     Previous: "EB Garamond", ui-serif, Georgia, serif (at 106.25% below) */
+  --font-site: "Times New Roman", Times, Tinos, serif;
 }
 
 html[data-theme="dark"] {
@@ -31,7 +35,7 @@ html[data-theme="dark"] {
   --color-accent-2: var(--accent-2);
   --color-muted: var(--muted);
   --color-border: var(--border);
-  --font-serif: "EB Garamond", ui-serif, Georgia, Cambria, "Times New Roman", serif;
+  --font-serif: var(--font-site);
 }
 
 /* ── Base reset / defaults ───────────────────────────────────────────── */
@@ -44,9 +48,10 @@ html[data-theme="dark"] {
   html {
     @apply overflow-y-scroll scroll-smooth;
   }
-  /* Garamond runs small; nudge the main site up (hidden pages keep 16px) */
+  /* Base size for the main site (hidden pages keep 16px). Garamond ran
+     small and needed 106.25%; Times New Roman sits right at 100%. */
   html.site-root {
-    font-size: 106.25%;
+    font-size: 100%;
   }
   body {
     @apply flex min-h-svh flex-col bg-background font-sans text-foreground selection:bg-accent/75 selection:text-background;
@@ -71,13 +76,15 @@ html[data-theme="dark"] {
 }
 
 /* ── Micro-label utility ─────────────────────────────────────────────── */
-/* .t-label — Garamond, uppercase, letter-spaced, small, muted colour    */
+/* .t-label — small italic site serif, sentence case, muted colour.      */
+/* Used for captions and dates.                                          */
 @utility t-label {
   font-family: var(--font-serif);
-  font-size: 0.78rem;
+  font-style: italic;
+  font-size: 0.85rem;
   font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  letter-spacing: 0;
+  text-transform: none;
   color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
   line-height: 1.4;
 }
@@ -85,8 +92,8 @@ html[data-theme="dark"] {
 /* ── Card recipe ─────────────────────────────────────────────────────── */
 /*
  * .card-hover — hairline border, rounded, slightly-offset bg.
- * Hover: accent border, soft glow shadow, -translate-y.
- * Existing index.astro uses this class on project cards.
+ * Hover: the border picks up the accent. No lift, no glow.
+ * Reserved for things that are links to projects.
  */
 @utility card-hover {
   border: 1px solid var(--color-border);
@@ -94,8 +101,6 @@ html[data-theme="dark"] {
   background-color: color-mix(in srgb, var(--color-background) 80%, white 20%);
   transition:
     border-color 0.22s ease,
-    box-shadow 0.22s ease,
-    transform 0.22s ease,
     background-color 0.22s ease;
 }
 
@@ -103,11 +108,6 @@ html[data-theme="dark"] {
   &:hover,
   &:focus-visible {
     border-color: color-mix(in srgb, var(--color-accent) 55%, transparent);
-    box-shadow:
-      0 0 0 1px color-mix(in srgb, var(--color-accent) 12%, transparent),
-      0 4px 20px color-mix(in srgb, var(--color-accent) 10%, transparent),
-      0 1px 4px rgba(0, 0, 0, 0.06);
-    transform: translateY(-2px);
   }
 }
 
@@ -118,23 +118,6 @@ html[data-theme="dark"] .card-hover {
     var(--color-background) 85%,
     var(--color-muted) 15%
   );
-}
-
-/* ── Accent glow — hover/focus interactive elements ──────────────────── */
-/*
- * .glow-accent — soft box-shadow glow for links / buttons / icons.
- * Use on wrapping element; the shadow expands on :hover / :focus-visible.
- */
-@utility glow-accent {
-  transition: box-shadow 0.2s ease;
-}
-
-@utility glow-accent {
-  &:hover,
-  &:focus-visible {
-    box-shadow: 0 0 12px
-      color-mix(in srgb, var(--color-accent) 30%, transparent);
-  }
 }
 
 /* ── Animated underline — nav links ──────────────────────────────────── */
@@ -174,26 +157,6 @@ html[data-theme="dark"] .card-hover {
 
 @media (prefers-reduced-motion: reduce) {
   .u-ink {
-    transition: none;
-  }
-}
-
-/* ── Scroll-reveal animation ─────────────────────────────────────────── */
-[data-animate] {
-  opacity: 0;
-  transform: translateY(14px);
-  transition:
-    opacity 0.4s ease,
-    transform 0.4s ease;
-}
-[data-animate].is-visible {
-  opacity: 1;
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  [data-animate] {
-    opacity: 1;
-    transform: none;
     transition: none;
   }
 }

@@ -36,25 +36,34 @@ const isActive = (href: string) => {
   >
     <div
       id="top-nav-wrap"
-      class="relative flex w-full items-baseline justify-between bg-background p-4 sm:items-center sm:py-5"
+      class="relative flex w-full items-center justify-between p-4 sm:py-5"
     >
       <!-- Brand -->
       <a
         href="/"
         title="always be optimising"
-        class="group flex flex-col gap-0.5 py-1 whitespace-nowrap no-underline sm:my-auto"
+        class="group flex items-center gap-5 py-1 whitespace-nowrap no-underline sm:my-auto"
         aria-label="Jasper Japp, home"
       >
-        <span
-          class="text-xl leading-tight font-semibold tracking-tight sm:text-2xl"
-          style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
-        >
-          Jasper Japp
-        </span>
-        <span
-          class="t-label opacity-50 transition-opacity group-hover:opacity-80"
-        >
-          always be optimising
+        <img
+          src="/logo.svg"
+          alt=""
+          width="10"
+          height="18"
+          class="h-10 w-auto sm:h-11"
+        />
+        <span class="flex flex-col gap-0.5">
+          <span
+            class="text-xl leading-tight font-semibold tracking-tight sm:text-2xl"
+            style="font-family: var(--font-site);"
+          >
+            Jasper Japp
+          </span>
+          <span
+            class="t-label opacity-50 transition-opacity group-hover:opacity-80"
+          >
+            always be optimising
+          </span>
         </span>
       </a>
 
@@ -142,13 +151,6 @@ const isActive = (href: string) => {
               aria-label="PHOTO//SCOPE, film photography"
               title="PHOTO//SCOPE"
             >
-              <img
-                src="/logo.svg"
-                alt=""
-                class="scope-link-mark"
-                width="10"
-                height="18"
-              />
               <span>PHOTO//SCOPE</span>
             </a>
           </li>
@@ -257,11 +259,5 @@ const isActive = (href: string) => {
       inset 0 0 12px rgba(57, 255, 136, 0.06);
     letter-spacing: 0.26em;
     outline: none;
-  }
-  .scope-link-mark {
-    display: block;
-    height: 15px;
-    width: auto;
-    filter: drop-shadow(0 0 4px rgba(57, 255, 136, 0.35));
   }
 </style>

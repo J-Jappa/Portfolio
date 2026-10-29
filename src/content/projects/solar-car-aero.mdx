@@ -1,6 +1,6 @@
 ---
 title: "Solar Car Aerodynamics"
-summary: "Designed, simulated and manufactured an ultra-low-drag catamaran-style solar car body using SolidWorks CAD, ANSYS Fluent and carbon-fibre composites."
+summary: "Monty's body: a catamaran picked from four concepts, shaped over about 1,000 hours of CFD and 64 CAD versions, then laid up in carbon by hand. CdA down about 20% on the previous car."
 order: 0
 date: "2025-06-01"
 hero: "/images/solar/hero.png"
@@ -31,8 +31,6 @@ import Figure from "@/components/Figure.astro";
 import CarWireframe from "@/components/CarWireframe.astro";
 import AeroYawChart from "@/components/AeroYawChart.astro";
 import CompareCarousel from "@/components/CompareCarousel.astro";
-
-New to Solar Racing? Read [What is Solar Racing?](/solar-racing/) for a quick overview.
 
 ## Scope and objectives
 
@@ -79,7 +77,6 @@ The catamaran balanced drag, stability and packaging. The wider stance supported
 I ran more than 1,000 compute hours in ANSYS Fluent and generated about 1.5 TB of data. The SolidWorks model saw 64 major versions plus many small changes. I iterated domain setup, meshing, wheel treatments and yaw studies. To seed the 3D body, I screened 2D sections in JavaFoil for low Reynolds numbers and ground effect, then tailored a family of sections for the pods and centre body. Those were reshaped in CAD and validated in 3D CFD.
 
 <CompareCarousel
-  class="h-40 sm:h-56"
   images={[
     {
       src: "/images/solar/early dev/image (1).png",
@@ -105,7 +102,6 @@ I ran more than 1,000 compute hours in ANSYS Fluent and generated about 1.5 TB o
 />
 
 <CompareCarousel
-  class="h-56 sm:h-80"
   images={[
     {
       src: "/images/solar/early dev/image (6).png",
@@ -133,7 +129,6 @@ I ran more than 1,000 compute hours in ANSYS Fluent and generated about 1.5 TB o
 />
 
 <CompareCarousel
-  class="h-56 sm:h-80"
   images={[
     {
       src: "/images/solar/early dev/image (11).png",
@@ -348,5 +343,5 @@ The final body as an interactive x-ray wireframe of the CFD surface mesh. Drag t
 
 <CarWireframe
   class="h-80 sm:h-96"
-  caption="SC4 Monty · CFD surface mesh · drag to orbit"
+  caption="Monty, SC4. The CFD surface mesh. Drag to turn it."
 />

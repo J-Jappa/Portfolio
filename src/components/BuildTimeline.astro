@@ -1,0 +1,233 @@
+---
+// Build timeline as overlapping workstreams: one lane per stream, bars for
+// spans of work and dots for single events, on a shared day axis. Scrolls
+// sideways on narrow screens rather than squashing.
+type Bar = { from: string; to: string; label?: string; soft?: boolean };
+type Mark = { on: string; label: string };
+type Lane = { label: string; bars?: Bar[]; marks?: Mark[] };
+interface Props {
+  /** First and last day shown, ISO dates */
+  start: string;
+  end: string;
+  lanes: Lane[];
+  /** Axis tick dates, ISO */
+  ticks?: string[];
+  caption?: string;
+}
+const { start, end, lanes = [], ticks = [], caption } = Astro.props;
+
+const DAY = 86_400_000;
+const t0 = Date.parse(start);
+const span = (Date.parse(end) - t0) / DAY + 1; // inclusive of the last day
+// Position of the start of a day, and of the end of a day, as a % of the track
+const at = (d: string) => ((Date.parse(d) - t0) / DAY / span) * 100;
+const endOf = (d: string) => at(d) + 100 / span;
+const fmt = (d: string) =>
+  new Date(d + "T00:00:00").toLocaleDateString("en-AU", { day: "numeric", month: "short" });
+// Keep labels near the edges from running off the track
+const anchor = (p: number) => (p < 8 ? "left" : p > 92 ? "right" : "centre");
+---
+
+<figure class="bt not-prose my-8">
+  <div class="bt-scroll">
+    <div class="bt-grid">
+      <div class="bt-axis-spacer" aria-hidden="true"></div>
+      <div class="bt-axis" aria-hidden="true">
+        {
+          ticks.map(t => (
+            <span class="bt-tick t-label" style={`left: ${at(t)}%`}>
+              {fmt(t)}
+            </span>
+          ))
+        }
+      </div>
+      {
+        lanes.map(lane => (
+          <>
+            <div class="bt-lane-label t-label">{lane.label}</div>
+            <div class:list={["bt-track", (lane.marks ?? []).length > 1 ? "bt-track-tall" : (lane.marks ?? []).length === 1 ? "bt-track-mid" : "bt-track-short"]}>
+              {ticks.map(t => (
+                <span class="bt-gridline" style={`left: ${at(t)}%`} aria-hidden="true" />
+              ))}
+              {(lane.bars ?? []).map(b => (
+                <span
+                  class:list={["bt-bar", { "bt-bar-soft": b.soft }]}
+                  style={`left: ${at(b.from)}%; width: ${endOf(b.to) - at(b.from)}%`}
+                  title={`${b.label ?? lane.label}: ${fmt(b.from)} to ${fmt(b.to)}`}
+                >
+                  {b.label && <span class="bt-bar-label">{b.label}</span>}
+                </span>
+              ))}
+              {/* Lanes with no events: print the date range beside the bar */}
+              {(lane.marks ?? []).length === 0 &&
+                (lane.bars ?? []).map(b => {
+                  const late = endOf(b.to) > 75;
+                  return (
+                    <span
+                      class="bt-range"
+                      style={late ? `right: ${100 - at(b.from) + 1}%` : `left: ${endOf(b.to) + 1}%`}
+                    >
+                      {fmt(b.from)} to {fmt(b.to)}
+                    </span>
+                  );
+                })}
+              {(lane.marks ?? []).map((m, i) => {
+                const p = at(m.on) + 50 / span;
+                // Alternate label rows so close-together events don't collide
+                return (
+                  <span class:list={["bt-mark", `bt-mark-${anchor(p)}`, { "bt-mark-low": i % 2 === 1 }]} style={`left: ${p}%`}>
+                    <span class="bt-dot" aria-hidden="true" />
+                    <span class="bt-mark-label">
+                      <span class="bt-mark-date">{fmt(m.on)}</span> {m.label}
+                    </span>
+                  </span>
+                );
+              })}
+            </div>
+          </>
+        ))
+      }
+    </div>
+  </div>
+  {caption && <figcaption class="mt-2 text-center t-label">{caption}</figcaption>}
+  <ul class="sr-only">
+    {
+      lanes.flatMap(lane => [
+        ...(lane.bars ?? []).map(b => (
+          <li>
+            {lane.label}: {b.label ?? "work"} from {fmt(b.from)} to {fmt(b.to)}
+          </li>
+        )),
+        ...(lane.marks ?? []).map(m => (
+          <li>
+            {fmt(m.on)}: {m.label}
+          </li>
+        )),
+      ])
+    }
+  </ul>
+</figure>
+
+<style>
+  .bt-scroll {
+    overflow-x: auto;
+  }
+  .bt-grid {
+    display: grid;
+    grid-template-columns: 8.5rem minmax(0, 1fr);
+    row-gap: 0.25rem;
+    min-width: 44rem;
+  }
+  .bt-axis {
+    position: relative;
+    height: 1.4rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .bt-tick {
+    position: absolute;
+    bottom: 0.2rem;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    font-size: 0.75rem;
+  }
+  .bt-lane-label {
+    align-self: start;
+    padding-top: 0.55rem;
+    padding-right: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.25;
+  }
+  .bt-track {
+    position: relative;
+    height: 4.3rem;
+    border-bottom: 1px dashed color-mix(in srgb, var(--color-border) 70%, transparent);
+  }
+  .bt-track-mid {
+    height: 3.1rem;
+  }
+  .bt-track-short {
+    height: 2.2rem;
+  }
+  .bt-range {
+    position: absolute;
+    top: 0.55rem;
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-style: italic;
+    color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  }
+  .bt-gridline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  }
+  .bt-bar {
+    position: absolute;
+    top: 0.85rem;
+    height: 0.55rem;
+    border-radius: 9999px;
+    background: color-mix(in srgb, var(--color-accent) 75%, transparent);
+  }
+  .bt-bar-soft {
+    background: repeating-linear-gradient(
+      -45deg,
+      color-mix(in srgb, var(--color-accent) 45%, transparent) 0 4px,
+      transparent 4px 8px
+    );
+  }
+  .bt-bar-label {
+    position: absolute;
+    top: 0.85rem;
+    left: 0;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  .bt-mark {
+    position: absolute;
+    top: 0.72rem;
+  }
+  .bt-dot {
+    position: absolute;
+    left: -0.4rem;
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 9999px;
+    background: var(--color-background);
+    border: 1.5px solid var(--color-accent);
+  }
+  .bt-mark-label {
+    position: absolute;
+    top: 1.05rem;
+    white-space: nowrap;
+    font-size: 0.8rem;
+    line-height: 1.3;
+  }
+  .bt-mark-low .bt-mark-label {
+    top: 2.15rem;
+  }
+  .bt-mark-low .bt-dot::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 0.75rem;
+    width: 1px;
+    height: 1.05rem;
+    background: color-mix(in srgb, var(--color-accent) 50%, transparent);
+  }
+  .bt-mark-centre .bt-mark-label {
+    transform: translateX(-50%);
+  }
+  .bt-mark-left .bt-mark-label {
+    left: -0.4rem;
+  }
+  .bt-mark-right .bt-mark-label {
+    right: -0.4rem;
+  }
+  .bt-mark-date {
+    font-style: italic;
+    color: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  }
+</style>

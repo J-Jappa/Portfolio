@@ -1,0 +1,225 @@
+---
+// Currawong system diagram, laid out by hand: power on the left, the two
+// computers in the middle, and what each one drives on the right. Grey lines
+// carry power, accent lines carry data. Coordinates are in a 900 × 500 box.
+interface Props {
+  caption?: string;
+}
+const { caption = "Power on the left, the two computers in the middle, and what each one drives on the right." } = Astro.props;
+
+type Box = { x: number; y: number; w: number; h: number; name: string; sub?: string; notes?: string[]; main?: boolean };
+const boxes: Box[] = [
+  // Power
+  { x: 20, y: 40, w: 180, h: 44, name: "MAX17048", sub: "fuel gauge" },
+  { x: 20, y: 128, w: 180, h: 44, name: "Battery", sub: "5000 mAh LiPo" },
+  { x: 20, y: 216, w: 180, h: 56, name: "PowerBoost 1000C", sub: "charges, and boosts to 5 V" },
+  { x: 20, y: 320, w: 180, h: 44, name: "USB-C", sub: "charging" },
+  // The two computers
+  {
+    x: 330, y: 36, w: 200, h: 176, main: true,
+    name: "Raspberry Pi Zero W", sub: "music, screen and menus",
+    notes: ["Tells the dial how to feel,", "gets turns and clicks back"],
+  },
+  {
+    x: 330, y: 296, w: 200, h: 168, main: true,
+    name: "XIAO ESP32-S3", sub: "the haptic dial",
+    notes: ["Runs the dial's feel on its", "own, so Linux never makes", "it stutter"],
+  },
+  // What the Pi drives
+  { x: 640, y: 36, w: 240, h: 36, name: "Sharp memory display" },
+  { x: 640, y: 82, w: 240, h: 36, name: "Five buttons" },
+  { x: 640, y: 128, w: 240, h: 36, name: "USB DAC", sub: "3.5 mm out" },
+  { x: 640, y: 174, w: 240, h: 36, name: "Bluetooth headphones" },
+  // What the XIAO drives
+  { x: 640, y: 300, w: 240, h: 40, name: "TMC6300", sub: "motor driver" },
+  { x: 640, y: 362, w: 240, h: 40, name: "2804 motor", sub: "the dial itself" },
+  { x: 640, y: 424, w: 240, h: 40, name: "AS5600", sub: "reads the dial's angle" },
+];
+
+type Link = { d: string; label?: string; lx?: number; ly?: number; anchor?: "start" | "middle"; dashed?: boolean; both?: boolean; end?: boolean };
+// Data between parts
+const data: Link[] = [
+  { d: "M200 62 H330", label: "battery level", lx: 265, ly: 55, end: true },
+  { d: "M530 54 H640", label: "SPI", lx: 585, ly: 47, end: true },
+  { d: "M640 100 H530", label: "presses", lx: 585, ly: 93, end: true },
+  { d: "M530 146 H640", label: "USB audio", lx: 585, ly: 139, end: true },
+  { d: "M530 192 H640", label: "wireless", lx: 585, ly: 185, end: true, dashed: true },
+  { d: "M430 212 V296", label: "UART", lx: 442, ly: 258, anchor: "start", end: true, both: true },
+  { d: "M530 320 H640", label: "PWM", lx: 585, ly: 313, end: true },
+  { d: "M640 444 H530", label: "angle", lx: 585, ly: 437, end: true },
+  // Inside the dial stack
+  { d: "M760 340 V362", label: "3 phase", lx: 770, ly: 356, anchor: "start" },
+  { d: "M760 402 V424", label: "magnet", lx: 770, ly: 418, anchor: "start", dashed: true },
+];
+// Power: the battery chain, then one 5 V rail into both computers
+const power: Link[] = [
+  { d: "M110 84 V128" },
+  { d: "M110 172 V216" },
+  { d: "M110 320 V272", end: true },
+  { d: "M200 244 H280" },
+  { d: "M280 124 V380" },
+  { d: "M280 124 H330", end: true },
+  { d: "M280 380 H330", end: true },
+];
+---
+
+<figure class="cs not-prose my-8">
+  <div class="cs-scroll">
+    <svg
+      class="cs-svg"
+      viewBox="0 0 900 500"
+      role="img"
+      aria-label="System diagram. The battery charges and discharges through a PowerBoost 1000C, which takes USB-C for charging and puts out 5 V to the Raspberry Pi Zero W, the XIAO ESP32-S3 and the motor driver. A MAX17048 fuel gauge on the battery reports its level to the Pi. The Pi drives the Sharp display, reads the five buttons, and plays audio to the USB DAC or Bluetooth headphones. The Pi and XIAO talk over UART. The XIAO drives the 2804 motor through a TMC6300 driver and reads the dial's angle from an AS5600 sensor."
+    >
+      <defs>
+        <marker id="cs-arrow-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0 1 L9 5 L0 9 z" class="cs-head-data" />
+        </marker>
+        <marker id="cs-arrow-power" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+          <path d="M0 1 L9 5 L0 9 z" class="cs-head-power" />
+        </marker>
+      </defs>
+
+      <text x="20" y="22" class="cs-head">Power</text>
+      <text x="330" y="22" class="cs-head">Two computers</text>
+      <text x="640" y="22" class="cs-head">What they drive</text>
+
+      {power.map(l => <path d={l.d} class="cs-power" marker-end={l.end ? "url(#cs-arrow-power)" : undefined} />)}
+      <text x="240" y="236" class="cs-rail" text-anchor="middle">5 V</text>
+
+      {
+        data.map(l => (
+          <>
+            <path
+              d={l.d}
+              class:list={["cs-data", { "cs-dashed": l.dashed }]}
+              marker-end={l.end ? "url(#cs-arrow-data)" : undefined}
+              marker-start={l.both ? "url(#cs-arrow-data)" : undefined}
+            />
+            {l.label && (
+              <text x={l.lx} y={l.ly} class="cs-link" text-anchor={l.anchor ?? "middle"}>
+                {l.label}
+              </text>
+            )}
+          </>
+        ))
+      }
+
+      {
+        boxes.map(b => {
+          const cy = b.y + b.h / 2;
+          return (
+            <g>
+              <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="6" class:list={["cs-box", { "cs-main": b.main }]} />
+              {b.main ? (
+                <>
+                  <text x={b.x + 14} y={b.y + 28} class="cs-name cs-name-main">{b.name}</text>
+                  <text x={b.x + 14} y={b.y + 48} class="cs-sub">{b.sub}</text>
+                  {(b.notes ?? []).map((n, i) => (
+                    <text x={b.x + 14} y={b.y + b.h - 16 - ((b.notes!.length - 1 - i) * 16)} class="cs-note">{n}</text>
+                  ))}
+                </>
+              ) : b.sub && b.h >= 40 ? (
+                <>
+                  <text x={b.x + 12} y={cy - 3} class="cs-name">{b.name}</text>
+                  <text x={b.x + 12} y={cy + 13} class="cs-sub">{b.sub}</text>
+                </>
+              ) : (
+                <text x={b.x + 12} y={cy + 5} class="cs-name">
+                  {b.name}
+                  {b.sub && <tspan class="cs-sub" dx="8">{b.sub}</tspan>}
+                </text>
+              )}
+            </g>
+          );
+        })
+      }
+
+      <text x="20" y="400" class="cs-sub">The 5 V rail also feeds</text>
+      <text x="20" y="416" class="cs-sub">the motor driver.</text>
+      <g transform="translate(20 446)">
+        <path d="M0 5 H34" class="cs-power" />
+        <text x="44" y="10" class="cs-sub">power</text>
+        <path d="M0 29 H34" class="cs-data" />
+        <text x="44" y="34" class="cs-sub">data</text>
+      </g>
+    </svg>
+  </div>
+  {caption && <figcaption class="mt-2 text-center t-label">{caption}</figcaption>}
+</figure>
+
+<style>
+  .cs-scroll {
+    overflow-x: auto;
+  }
+  .cs-svg {
+    display: block;
+    width: 100%;
+    min-width: 40rem;
+    max-width: 56rem;
+    margin-inline: auto;
+    height: auto;
+    font-family: inherit;
+  }
+  .cs-head {
+    font-size: 15px;
+    font-style: italic;
+    fill: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  }
+  .cs-box {
+    fill: var(--color-background);
+    stroke: color-mix(in srgb, var(--color-foreground) 40%, transparent);
+    stroke-width: 1.2;
+  }
+  .cs-main {
+    stroke: var(--color-accent);
+    stroke-width: 1.8;
+  }
+  .cs-name {
+    font-size: 14px;
+    font-weight: 600;
+    fill: var(--color-foreground);
+  }
+  .cs-name-main {
+    font-size: 16px;
+  }
+  .cs-sub,
+  .cs-note {
+    font-size: 12.5px;
+    font-weight: 400;
+    fill: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  }
+  .cs-note {
+    font-style: italic;
+  }
+  .cs-link,
+  .cs-rail {
+    font-size: 12px;
+    font-style: italic;
+  }
+  .cs-link {
+    fill: var(--color-accent);
+  }
+  .cs-rail {
+    fill: color-mix(in srgb, var(--color-foreground) 65%, transparent);
+  }
+  .cs-power {
+    fill: none;
+    stroke: color-mix(in srgb, var(--color-foreground) 45%, transparent);
+    stroke-width: 3;
+  }
+  .cs-data {
+    fill: none;
+    stroke: var(--color-accent);
+    stroke-width: 1.6;
+  }
+  .cs-dashed {
+    stroke-dasharray: 5 4;
+  }
+  .cs-head-data {
+    fill: var(--color-accent);
+  }
+  .cs-head-power {
+    fill: color-mix(in srgb, var(--color-foreground) 45%, transparent);
+  }
+</style>

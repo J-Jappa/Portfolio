@@ -1,0 +1,22 @@
+---
+// Dev-only scratch page for the Currawong exploded view. Production builds
+// just redirect home. Delete this once the component sits in the real
+// Currawong write-up.
+import Layout from "../layouts/Layout.astro";
+import CurrawongExplode from "@/components/CurrawongExplode.astro";
+
+if (import.meta.env.PROD) return Astro.redirect("/");
+---
+
+<Layout title="Currawong preview">
+  <main class="mx-auto w-full max-w-app px-4">
+    <div class="flex h-[60svh] flex-col justify-end gap-2 pb-12">
+      <p class="t-label">Currawong, pocket music player</p>
+      <h2 class="text-3xl font-semibold tracking-tight">How it goes together</h2>
+    </div>
+    <CurrawongExplode />
+    <div class="h-[80svh] pt-16">
+      <p class="t-label">The write-up carries on here.</p>
+    </div>
+  </main>
+</Layout>

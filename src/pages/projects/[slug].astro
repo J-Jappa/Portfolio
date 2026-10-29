@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
 import { thumbSrc } from "@/utils/thumbs";
+import CurrawongExplode from "@/components/CurrawongExplode.astro";
 
 /** Extract the year from an ISO date string, or return null */
 function yearOf(date?: string): string | null {
@@ -13,7 +14,8 @@ function yearOf(date?: string): string | null {
 export async function getStaticPaths() {
   const projects = (await getCollection(
     "projects",
-    ({ data }) => !data.draft
+    // Drafts still render in `astro dev` so they can be previewed
+    ({ data }) => import.meta.env.DEV || !data.draft
   )) as CollectionEntry<"projects">[];
   return projects.map(p => ({
     params: { slug: p.slug },
@@ -33,7 +35,7 @@ const year = yearOf(p.date);
     {/* ── Back link ──────────────────────────────────────────────── */}
     <a
       href="/"
-      class="group inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm glow-accent transition-all hover:border-accent/60 hover:text-accent"
+      class="group inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm transition-all hover:border-accent/60 hover:text-accent"
     >
       <span
         aria-hidden="true"
@@ -46,89 +48,54 @@ const year = yearOf(p.date);
     <header class="mt-5 mb-6">
       <h1
         class="text-3xl font-semibold tracking-tight text-foreground sm:text-4xl"
-        style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+        style="font-family: var(--font-site);"
       >
         {p.title}
       </h1>
       <p class="mt-2 max-w-[65ch] text-base leading-relaxed opacity-80">
         {p.summary}
       </p>
+      {/* One plain line of context in place of a boxed spec sheet */}
+      <p class="mt-3 max-w-[65ch] text-sm text-foreground/60">
+        {[p.role, year].filter(Boolean).join(", ")}.
+        {
+          p.tags?.includes("Solar Racing") && (
+            <>
+              {" "}Part of Monty, ANU Solar Racing's 2025 car (<a href="/solar-racing/" class="underline decoration-dashed underline-offset-4 hover:text-accent">what is solar racing?</a>).
+            </>
+          )
+        }
+        {
+          p.repo && (
+            <>
+              {" "}
+              <a
+                href={p.repo}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline decoration-dashed underline-offset-4 hover:text-accent"
+              >Code on GitHub</a>.
+            </>
+          )
+        }
+        {
+          p.link && (
+            <>
+              {" "}
+              <a
+                href={p.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="underline decoration-dashed underline-offset-4 hover:text-accent"
+              >See it live</a>.
+            </>
+          )
+        }
+      </p>
     </header>
 
-    {/* ── Spec-sheet strip ─────────────────────────────────────── */}
-    {
-      /*
-        Engineering drawing title block — light hairline border,
-        mono labels, compact grid. Only renders non-empty fields.
-    */
-    }
-    <div
-      class="relative mb-8 rounded-xl border border-border bg-muted/40 before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30 dark:bg-muted/30"
-    >
-      <dl
-        class="grid grid-cols-2 divide-y divide-border sm:grid-cols-3 sm:divide-x sm:divide-y-0 lg:grid-cols-4"
-      >
-        {
-          p.role && (
-            <div class="px-4 py-3">
-              <dt class="mb-1 t-label">Role</dt>
-              <dd class="text-sm font-medium text-foreground">{p.role}</dd>
-            </div>
-          )
-        }
-        {
-          year && (
-            <div class="px-4 py-3">
-              <dt class="mb-1 t-label">Date</dt>
-              <dd class="text-sm font-medium text-foreground">{year}</dd>
-            </div>
-          )
-        }
-        {
-          p.tags?.length > 0 && (
-            <div class="col-span-2 px-4 py-3 sm:col-span-1 lg:col-span-2">
-              <dt class="mb-1.5 t-label">Tags</dt>
-              <dd class="flex flex-wrap gap-1.5">
-                {p.tags.map((tag: string) => (
-                  <span class="rounded border border-border bg-background px-2 py-0.5 t-label text-foreground/70">
-                    {tag}
-                  </span>
-                ))}
-              </dd>
-            </div>
-          )
-        }
-        {
-          (p.repo || p.link) && (
-            <div class="col-span-2 border-t border-border px-4 py-3 sm:col-span-1 sm:border-t-0">
-              <dt class="mb-1 t-label">Links</dt>
-              <dd class="flex gap-3 text-sm">
-                {p.repo && (
-                  <a
-                    href={p.repo}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-accent underline-offset-4 hover:underline"
-                  >
-                    Repo ↗
-                  </a>
-                )}
-                {p.link && (
-                  <a
-                    href={p.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-accent underline-offset-4 hover:underline"
-                  >
-                    Live ↗
-                  </a>
-                )}
-              </dd>
-            </div>
-          )
-        }
-      </dl>
-    </div>
+    {/* ── Interactive 3D hero (frontmatter hero3d) ── */}
+    {p.hero3d === "currawong" && <CurrawongExplode />}
 
     {/* ── Image strip (opens the shared site lightbox) ──────────── */}
     {
@@ -138,10 +105,10 @@ const year = yearOf(p.date);
     */
     }
     {
-      p.images?.length > 0 && (
+      p.images?.length > 0 && !p.hero3d && (
         <div class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {p.images.map((img: { src: string; alt?: string }, i: number) => (
-            <div class="group relative overflow-hidden rounded-xl border border-border transition-all hover:border-accent/50 hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]">
+            <div class="group relative overflow-hidden rounded-xl border border-border hover:border-accent/50">
               <button
                 class="m-0 block aspect-video w-full overflow-hidden border-0 bg-transparent p-0"
                 data-lb-src={img.src}
@@ -152,7 +119,7 @@ const year = yearOf(p.date);
                 <img
                   src={thumbSrc(img.src)}
                   alt={img.alt ?? p.title}
-                  class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
+                  class="h-full w-full object-cover"
                   loading="lazy"
                   decoding="async"
                 />
@@ -160,37 +127,6 @@ const year = yearOf(p.date);
             </div>
           ))}
         </div>
-      )
-    }
-
-    {/* ── Outcomes highlight block ──────────────────────────────── */}
-    {
-      p.outcomes?.length > 0 && (
-        <section
-          class="mb-8 rounded-xl border border-border bg-muted/30 px-5 py-4 dark:bg-muted/20"
-          aria-label="Outcomes"
-          data-animate
-        >
-          <h2 class="mb-4 flex items-baseline gap-2 t-label">
-            Outcomes
-            <span class="text-accent/60" aria-hidden="true">
-              //
-            </span>
-          </h2>
-          <ul class="m-0 list-none space-y-2.5 p-0">
-            {p.outcomes.map((o: string) => (
-              <li class="flex items-baseline gap-2.5">
-                <span
-                  class="shrink-0 t-label text-accent select-none"
-                  aria-hidden="true"
-                >
-                  ↳
-                </span>
-                <span class="text-sm leading-snug text-foreground">{o}</span>
-              </li>
-            ))}
-          </ul>
-        </section>
       )
     }
 
@@ -212,26 +148,22 @@ const year = yearOf(p.date);
         <Content />
       </div>
     </section>
-  </article>
 
-  {/* Scroll-reveal observer */}
-  <script>
-    const obs = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-visible");
-            obs.unobserve(e.target);
-          }
-        });
-      },
-      { threshold: 0.1 }
-    );
-    document.querySelectorAll("[data-animate]").forEach(el => obs.observe(el));
-    document.addEventListener("astro:after-swap", () => {
-      document
-        .querySelectorAll("[data-animate]")
-        .forEach(el => obs.observe(el));
-    });
-  </script>
+    {/* ── Outcomes block ─────────────────────────────────────────── */}
+    {
+      p.outcomes?.length > 0 && (
+        <section class="mx-auto mt-10 max-w-2xl" aria-label="What came of it">
+          <h2
+            class="mb-3 text-xl font-semibold tracking-tight"
+            style="font-family: var(--font-site);"
+          >
+            What came of it
+          </h2>
+          <ul class="ml-5 list-disc space-y-2 text-base leading-relaxed marker:text-accent">
+            {p.outcomes.map((o: string) => <li>{o}</li>)}
+          </ul>
+        </section>
+      )
+    }
+  </article>
 </Layout>

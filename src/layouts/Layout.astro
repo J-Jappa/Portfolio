@@ -57,12 +57,13 @@ const structuredData = {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="canonical" href={canonicalURL} />
 
-    <!-- EB Garamond — site font -->
+    <!-- Site font is Times New Roman (see --font-site in global.css).
+         Tinos is only fetched where Times New Roman isn't installed. -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Tinos:ital,wght@0,400;0,700;1,400;1,700&display=swap"
     />
     <meta name="generator" content={Astro.generator} />
 
@@ -241,16 +242,15 @@ const structuredData = {
     </main>
     <Footer />
 
-    <!-- Shared image viewer: engineering-drawing window in the site style.
-         Explicit margin:auto matters — the Tailwind preflight zeroes every
-         margin, which is what used to pin the old dialogs to the top left. -->
+    <!-- Shared image viewer. Explicit margin:auto matters: the Tailwind
+         preflight zeroes every margin, which is what used to pin the old
+         dialogs to the top left. -->
     <dialog id="site-lightbox" class="site-lb" aria-label="Image viewer">
       <figure class="site-lb-win">
         <div class="site-lb-bar">
-          <span class="t-label">Viewer //</span>
           <form method="dialog">
             <button type="submit" class="site-lb-close" aria-label="Close viewer">
-              ✕ Close
+              Close
             </button>
           </form>
         </div>
@@ -295,41 +295,16 @@ const structuredData = {
     background: var(--color-background);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   }
-  .site-lb-win::before,
-  .site-lb-win::after {
-    content: "";
-    position: absolute;
-    width: 0.5rem;
-    height: 0.5rem;
-    pointer-events: none;
-    z-index: 1;
-  }
-  .site-lb-win::before {
-    top: 0.55rem;
-    left: 0.55rem;
-    border-top: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-    border-left: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
-  .site-lb-win::after {
-    bottom: 0.55rem;
-    right: 0.55rem;
-    border-bottom: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-    border-right: 1px solid color-mix(in srgb, var(--color-accent) 40%, transparent);
-  }
   .site-lb-bar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
+    justify-content: flex-end;
     padding: 0.5rem 0.75rem;
     border-bottom: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-muted) 40%, transparent);
   }
   .site-lb-close {
-    font-family: "EB Garamond", ui-serif, Georgia, serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-family: var(--font-site);
+    font-size: 0.9rem;
     border: 1px solid var(--color-border);
     border-radius: 0.375rem;
     padding: 0.3rem 0.6rem;

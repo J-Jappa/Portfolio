@@ -1,7 +1,6 @@
 ---
 import Layout from "../layouts/Layout.astro";
 import { getCollection, type CollectionEntry } from "astro:content";
-import { SITE } from "@/config";
 import { thumbSrc } from "@/utils/thumbs";
 import CarWireframe from "@/components/CarWireframe.astro";
 
@@ -27,21 +26,29 @@ const sorted = [...projects].sort((a, b) => {
 
 const featured = sorted.slice(0, 3);
 const rest = sorted.slice(3);
+
+// Every project image, for the shuffled strip near the bottom
+const strip = sorted.flatMap(p =>
+  (p.data.images ?? []).map((img: { src: string; alt?: string }) => ({
+    src: thumbSrc(img.src),
+    alt: img.alt ?? p.data.title,
+    slug: p.slug,
+    title: p.data.title,
+  }))
+);
 ---
 
 <Layout
   title="Jasper Japp"
-  description="Engineering portfolio of Jasper Japp: aerodynamics, composites, applied ML, and more."
+  description="Engineering portfolio of Jasper Japp: solar car aerodynamics, Currawong (a haptic-dial music player), carbon structures and bushfire detection."
 >
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- 1 / HERO                                                        -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- Hero -->
   <section
     id="hero"
     class="relative mb-16 flex flex-col gap-10 py-6 lg:mb-20 lg:flex-row lg:items-center lg:gap-12 lg:py-10"
     aria-label="Introduction"
   >
-    <!-- Blueprint-grid interactive accent (desktop pointer; static touch/reduced-motion) -->
+    <!-- Blueprint-grid accent (desktop pointer; static touch/reduced-motion) -->
     <div
       id="hero-grid"
       aria-hidden="true"
@@ -52,139 +59,127 @@ const rest = sorted.slice(3);
 
     <!-- Text column -->
     <div class="relative z-10 flex flex-col gap-5 lg:flex-1">
-      <!-- Location micro-label -->
-      <p class="t-label">
-        Sydney, Australia
-        <span class="ml-2 opacity-50">−33.8688, 151.2093</span>
-      </p>
-
-      <!-- Statement line: the name lives in the header wordmark, so the
-           hero leads with what the work actually is -->
+      <!-- Alternatives Jasper has seen and passed on for now:
+           "Two solar cars, one carbon chassis and a sensor that can smell smoke."
+           "I like the problems where the physics fights back." -->
       <h1
-        class="text-3xl leading-tight font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl"
-        style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+        class="text-3xl leading-tight font-semibold tracking-tight text-foreground sm:text-4xl"
+        style="font-family: var(--font-site);"
       >
         Aerodynamics, carbon fibre and machine learning
       </h1>
 
-      <!-- Hero intro (drafted for owner review, per no-dash preference) -->
+      {/* [check] Jasper's draft, lightly edited */}
       <p class="max-w-2xl text-lg leading-relaxed text-foreground/80">
-        I'm Jasper, an ANU engineering grad based in Sydney. I spent the last
-        few years shaping solar car aerodynamics, laying up carbon fibre, and
-        building machine learning that spots bushfires early. Since May 2026
-        I've been an engineering specialist at AirTrunk. Here's most of what
-        I've been working on, outside of work.
+        Hey! I'm Jasper, thanks for stopping by. I'm an engineer based in
+        Sydney and I like working on a pretty wide range of things. If I keep
+        this updated, you'll see a bit of that here.
       </p>
-
-      <!-- Quick links -->
-      <div class="mt-1 flex flex-wrap gap-3">
+      <p class="max-w-2xl text-lg leading-relaxed text-foreground/80">
+        I spent the last few years studying and building solar powered cars to
+        race from Darwin to Adelaide. I worked on two of them, starting with
+        aerodynamics and then branching out into everything from composites to
+        mechanical design. The second car, SC4 (or Monty), should be on the
+        right or just below this. Feel free to give it a spin.
+      </p>
+      <p class="max-w-2xl text-lg leading-relaxed text-foreground/80">
+        There's plenty more to look around, so click through a project, whether
+        it's <a
+          href="/projects/bushfire-detection/"
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          >machine learning for bushfire detection</a
+        > or a <a
+          href="/projects/currawong/"
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          >responsive MP3 player</a
+        >, or have a look at my <a
+          href="/photoscope/"
+          data-astro-reload
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          >photography</a
+        >. Hopefully something here takes your fancy. These days I'm an
+        Engineering Specialist at AirTrunk here in Sydney.
         <a
           href="/about"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-4 py-2 text-sm font-medium no-underline glow-accent transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
-        >
-          About me <span aria-hidden="true">→</span>
-        </a>
-        <a
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          >More about me</a
+        > or <a
           href="/contact"
-          class="inline-flex items-center gap-1.5 rounded-lg border border-border bg-muted/60 px-4 py-2 text-sm font-medium no-underline glow-accent transition hover:border-accent/60 hover:text-accent focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
-        >
-          Get in touch <span aria-hidden="true">↗</span>
-        </a>
-      </div>
+          class="underline decoration-dashed underline-offset-4 hover:text-accent"
+          >say hello</a
+        >.
+      </p>
     </div>
 
     <!-- Wireframe solar car: three.js x-ray of the CFD surface mesh
          (decorative; the 3D chunk lazy-loads when visible) -->
     <div class="relative z-10 lg:w-96 xl:w-[28rem]">
-      <CarWireframe class="h-56 sm:h-64 xl:h-72" intro />
+      <CarWireframe
+        class="h-56 sm:h-64 xl:h-72"
+        caption="Monty, SC4. Drag to turn it."
+        captionBelow
+        intro
+      />
     </div>
   </section>
 
   <!-- Hairline rule -->
   <hr class="mb-12 border-border" />
 
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- 2 / SELECTED WORK                                               -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- Selected work -->
   <section class="mb-16" aria-labelledby="selected-heading">
     <h2
       id="selected-heading"
-      class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
-      style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+      class="mb-8 text-xl font-semibold"
+      style="font-family: var(--font-site);"
     >
-      <span class="t-label" aria-hidden="true">01 /</span> Selected Work
+      Selected work
     </h2>
 
     <div class="flex flex-col gap-6" id="featured-list">
       {
         featured.map(p => (
-          <article data-animate>
+          <article>
             <a
               href={`/projects/${p.slug}/`}
-              class="group relative block card-hover rounded-2xl p-5 no-underline outline-offset-2 before:absolute before:top-2.5 before:left-2.5 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2.5 after:bottom-2.5 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
+              class="group block card-hover rounded-2xl p-5 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
               data-analytics="project"
               data-project={p.slug}
               data-title={p.data.title}
             >
-              <div>
-                <h3
-                  class="text-lg font-semibold tracking-tight"
-                  style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
-                >
-                  <span class="u-ink">{p.data.title}</span>
-                </h3>
-                <p class="mt-1 text-sm leading-relaxed text-foreground/75">
-                  {p.data.summary}
-                </p>
+              <h3
+                class="text-lg font-semibold tracking-tight"
+                style="font-family: var(--font-site);"
+              >
+                <span class="u-ink">{p.data.title}</span>
+              </h3>
+              <p class="mt-1 text-sm leading-relaxed text-foreground/75">
+                {p.data.summary}
+              </p>
 
-                {(p.data.images ?? []).length > 0 && (
-                  <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                    {(p.data.images ?? [])
-                      .slice(0, 3)
-                      .map((img: { src: string; alt?: string }) => (
-                        <div class="aspect-video overflow-hidden rounded-lg">
-                          <img
-                            src={thumbSrc(img.src)}
-                            alt={img.alt ?? p.data.title}
-                            class="h-full w-full object-cover transition group-hover:brightness-105 group-hover:saturate-110"
-                            loading="lazy"
-                            decoding="async"
-                          />
-                        </div>
-                      ))}
-                  </div>
-                )}
-
-                <div class="min-w-0">
-                  {p.data.stat ? (
-                    <p class="mt-3 font-serif text-sm tracking-wide text-accent-2">
-                      ↳ {p.data.stat}
-                    </p>
-                  ) : null}
-
-                  {p.data.tags?.length ? (
-                    <div class="mt-3 flex flex-wrap gap-1.5">
-                      {p.data.tags.map((tag: string) => (
-                        <span class="inline-block rounded-md border border-border/70 bg-muted/60 px-2 py-0.5 t-label">
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-
-                  <div class="mt-3 flex items-center gap-1 text-sm text-foreground/60">
-                    <span class="transition group-hover:text-accent">
-                      View project
-                    </span>
-                    <span
-                      class="translate-x-0 transition group-hover:translate-x-1"
-                      aria-hidden="true"
-                    >
-                      →
-                    </span>
-                  </div>
+              {(p.data.images ?? []).length > 0 && (
+                <div class="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
+                  {(p.data.images ?? [])
+                    .slice(0, 3)
+                    .map((img: { src: string; alt?: string }) => (
+                      <div class="aspect-video overflow-hidden rounded-lg">
+                        <img
+                          src={thumbSrc(img.src)}
+                          alt={img.alt ?? p.data.title}
+                          class="h-full w-full object-cover transition group-hover:brightness-105 group-hover:saturate-110"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+                    ))}
                 </div>
-              </div>
+              )}
+
+              {p.data.stat ? (
+                <p class="mt-3 font-serif text-sm tracking-wide text-accent-2">
+                  ↳ {p.data.stat}
+                </p>
+              ) : null}
             </a>
           </article>
         ))
@@ -195,21 +190,16 @@ const rest = sorted.slice(3);
   <!-- Hairline rule -->
   <hr class="mb-12 border-border" />
 
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- 3 / ALL PROJECTS                                                -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- All projects -->
   {
     rest.length > 0 && (
       <section class="mb-16" aria-labelledby="all-projects-heading">
         <h2
           id="all-projects-heading"
-          class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
-          style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+          class="mb-8 text-xl font-semibold"
+          style="font-family: var(--font-site);"
         >
-          <span class="t-label" aria-hidden="true">
-            02 /
-          </span>{" "}
-          All Projects
+          All projects
         </h2>
 
         <div
@@ -217,7 +207,7 @@ const rest = sorted.slice(3);
           id="all-projects-list"
         >
           {rest.map(p => (
-            <article data-animate>
+            <article>
               <a
                 href={`/projects/${p.slug}/`}
                 class="group block h-full card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
@@ -246,7 +236,7 @@ const rest = sorted.slice(3);
 
                 <h3
                   class="text-base font-semibold tracking-tight"
-                  style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+                  style="font-family: var(--font-site);"
                 >
                   <span class="u-ink">{p.data.title}</span>
                 </h3>
@@ -259,24 +249,6 @@ const rest = sorted.slice(3);
                     ↳ {p.data.stat}
                   </p>
                 ) : null}
-
-                {p.data.tags?.length ? (
-                  <div class="mt-2 text-xs text-foreground/50">
-                    {p.data.tags.slice(0, 4).join(" · ")}
-                  </div>
-                ) : null}
-
-                <div class="mt-2 flex items-center gap-1 text-sm text-foreground/55">
-                  <span class="transition group-hover:text-accent">
-                    View project
-                  </span>
-                  <span
-                    class="translate-x-0 transition group-hover:translate-x-1"
-                    aria-hidden="true"
-                  >
-                    →
-                  </span>
-                </div>
               </a>
             </article>
           ))}
@@ -288,19 +260,76 @@ const rest = sorted.slice(3);
   <!-- Hairline rule -->
   <hr class="mb-12 border-border" />
 
-  <!-- ════════════════════════════════════════════════════════════════ -->
-  <!-- 4 / ELSEWHERE                                                   -->
-  <!-- ════════════════════════════════════════════════════════════════ -->
+  <!-- Build photos: every project photo, shuffled on each visit and
+       drifting sideways on its own (paused on hover, touch or focus) -->
+  <section class="mb-16" aria-labelledby="strip-heading">
+    <div class="mb-6 flex items-end justify-between gap-4">
+      <h2
+        id="strip-heading"
+        class="text-xl font-semibold"
+        style="font-family: var(--font-site);"
+      >
+        Build photos
+      </h2>
+      <div class="hidden shrink-0 gap-1 sm:flex" aria-hidden="true">
+        <button
+          type="button"
+          class="strip-btn"
+          data-strip-dir="-1"
+          title="Scroll back"
+        >
+          ←
+        </button>
+        <button
+          type="button"
+          class="strip-btn"
+          data-strip-dir="1"
+          title="Scroll forward"
+        >
+          →
+        </button>
+      </div>
+    </div>
+    <ul
+      id="workshop-strip"
+      class="-mx-4 flex gap-3 overflow-x-auto px-4 pb-3"
+      style="scrollbar-width: thin;"
+    >
+      {
+        strip.map(s => (
+          <li class="w-64 shrink-0 sm:w-72">
+            <a
+              href={`/projects/${s.slug}/`}
+              class="group block no-underline"
+              title={s.title}
+            >
+              <div class="aspect-video overflow-hidden rounded-lg border border-border transition-colors group-hover:border-accent/60">
+                <img
+                  src={s.src}
+                  alt={s.alt}
+                  class="h-full w-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <!-- Elsewhere -->
   <section class="mb-4" aria-labelledby="elsewhere-heading">
     <h2
       id="elsewhere-heading"
-      class="mb-8 flex items-baseline gap-3 text-xl font-semibold"
-      style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
+      class="mb-8 text-xl font-semibold"
+      style="font-family: var(--font-site);"
     >
-      <span class="t-label" aria-hidden="true">03 /</span> Elsewhere
+      Elsewhere
     </h2>
 
-    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3" data-animate>
+    <div class="max-w-sm">
       <!-- Photography: styled in PHOTO//SCOPE's own terminal aesthetic -->
       <a
         href="/photoscope/"
@@ -323,75 +352,118 @@ const rest = sorted.slice(3);
           Film photos plotted where they were shot. Mostly 35mm.
         </p>
       </a>
-
-      <!-- Contact -->
-      <a
-        href="/contact"
-        class="group block card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
-      >
-        <p class="mb-2 t-label text-accent">Contact</p>
-        <p
-          class="text-sm font-medium text-foreground transition-colors group-hover:text-accent"
-          style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
-        >
-          <span class="u-ink">Get in touch</span>
-        </p>
-        <p class="mt-1 text-xs leading-relaxed text-foreground/60">
-          I'm always happy to talk roles, projects, or solar cars.
-        </p>
-      </a>
-
-      <!-- LinkedIn -->
-      <a
-        href={SITE.linkedinUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        class="group block card-hover rounded-xl p-4 no-underline outline-offset-2 focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-dashed"
-      >
-        <p class="mb-2 t-label">LinkedIn</p>
-        <p
-          class="text-sm font-medium text-foreground transition-colors group-hover:text-accent"
-          style="font-family: 'EB Garamond', ui-serif, Georgia, serif;"
-        >
-          <span class="u-ink">Jasper Japp ↗</span>
-        </p>
-        <p class="mt-1 text-xs leading-relaxed text-foreground/60">
-          Professional profile and work history.
-        </p>
-      </a>
     </div>
+
+    <p class="mt-5 text-sm text-foreground/70">
+      Or <a
+        href="/contact"
+        class="underline decoration-dashed underline-offset-4 hover:text-accent"
+        >get in touch</a
+      > about roles, projects or solar cars.
+    </p>
   </section>
 </Layout>
 
 <script>
-  /* ── Scroll-reveal ──────────────────────────────────────────────── */
-  function initAnimations() {
-    const els = document.querySelectorAll<HTMLElement>("[data-animate]");
-    const observer = new IntersectionObserver(
-      entries => {
-        entries.forEach(e => {
-          if (e.isIntersecting) {
-            e.target.classList.add("is-visible");
-            observer.unobserve(e.target);
-          }
+  /* ── Build photos strip ─────────────────────────────────────────── */
+  /*
+   * Shuffles the photos on each visit, then drifts them sideways in an
+   * endless loop (the set is cloned once so the wrap is seamless).
+   * Pauses on hover, touch, keyboard focus and after an arrow click, and
+   * when the strip is off screen. Static under prefers-reduced-motion.
+   * Manual scrolling still works; the drift picks up from wherever the
+   * visitor left it.
+   */
+  const STRIP_SPEED = 28; // px per second
+
+  function initStrip() {
+    const ul = document.getElementById("workshop-strip");
+    if (!ul || ul.dataset.shuffled) return;
+    ul.dataset.shuffled = "1";
+    const items = Array.from(ul.children) as HTMLElement[];
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+    items.forEach(li => ul.appendChild(li));
+
+    const reduced = window.matchMedia(
+      "(prefers-reduced-motion: reduce)"
+    ).matches;
+
+    let hovered = false;
+    let focused = false;
+    let visible = false;
+    let holdUntil = 0;
+    const hold = (ms: number) => {
+      holdUntil = performance.now() + ms;
+    };
+
+    document
+      .querySelectorAll<HTMLButtonElement>("[data-strip-dir]")
+      .forEach(btn => {
+        btn.addEventListener("click", () => {
+          hold(3000);
+          const dir = Number(btn.dataset.stripDir || 1);
+          ul.scrollBy({ left: dir * ul.clientWidth * 0.8, behavior: "smooth" });
         });
-      },
-      { threshold: 0.08 }
-    );
-    els.forEach((el, i) => {
-      el.style.transitionDelay = `${i * 55}ms`;
-      observer.observe(el);
+      });
+
+    if (reduced || items.length < 2) return;
+
+    // Clone the set once so scrolling past the end wraps back invisibly
+    items.forEach(li => {
+      const clone = li.cloneNode(true) as HTMLElement;
+      clone.setAttribute("aria-hidden", "true");
+      clone.querySelectorAll("a").forEach(a => a.setAttribute("tabindex", "-1"));
+      ul.appendChild(clone);
     });
+    const loopWidth = () =>
+      (ul.children[items.length] as HTMLElement).offsetLeft -
+      items[0].offsetLeft;
+
+    ul.addEventListener("pointerenter", e => {
+      if (e.pointerType === "mouse") hovered = true;
+    });
+    ul.addEventListener("pointerleave", () => (hovered = false));
+    ul.addEventListener("touchstart", () => hold(4000), { passive: true });
+    ul.addEventListener("wheel", () => hold(2000), { passive: true });
+    ul.addEventListener("focusin", () => (focused = true));
+    ul.addEventListener("focusout", () => (focused = false));
+
+    new IntersectionObserver(entries => {
+      visible = entries.some(e => e.isIntersecting);
+    }).observe(ul);
+
+    // Keep a float position: scrollLeft rounds on some displays, which
+    // would stall a sub-pixel per-frame step.
+    let pos = ul.scrollLeft;
+    let last = performance.now();
+    function tick(now: number) {
+      if (!ul!.isConnected) return;
+      const dt = Math.min(now - last, 100) / 1000;
+      last = now;
+      // The visitor scrolled it themselves: follow their position
+      if (Math.abs(ul!.scrollLeft - pos) > 2) pos = ul!.scrollLeft;
+      if (visible && !hovered && !focused && now > holdUntil) {
+        pos += STRIP_SPEED * dt;
+        const w = loopWidth();
+        if (w > 0 && pos >= w) pos -= w;
+        ul!.scrollLeft = pos;
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
   }
-  initAnimations();
-  document.addEventListener("astro:after-swap", initAnimations);
+  initStrip();
+  document.addEventListener("astro:after-swap", initStrip);
 
   /* ── Blueprint-grid hero accent ─────────────────────────────────── */
   /*
-   * Renders a fine dotted/grid on a canvas behind the hero text.
+   * Renders a fine dotted grid on a canvas behind the hero text.
    * Gently shifts offset with pointer on desktop; completely static on
-   * touch devices. Paused / hidden under prefers-reduced-motion.
-   * No continuous rAF while idle — re-draws only on pointermove,
+   * touch devices. Hidden under prefers-reduced-motion.
+   * No continuous rAF while idle: redraws only on pointermove,
    * theme change, and resize (debounced).
    */
   function initHeroGrid() {
@@ -481,7 +553,7 @@ const rest = sorted.slice(3);
       resizeTimer = setTimeout(resize, 120);
     });
 
-    // Pointer move — desktop only, no continuous loop
+    // Pointer move: desktop only, no continuous loop
     if (!isTouch) {
       section.addEventListener("pointermove", (e: PointerEvent) => {
         if (e.pointerType === "touch") return;
@@ -518,14 +590,31 @@ const rest = sorted.slice(3);
     });
   }
 
-  // The wireframe car itself is mounted by the CarWireframe component.
-
-  // Run once on load, re-init after Astro view transitions
   initHeroGrid();
   document.addEventListener("astro:after-swap", initHeroGrid);
 </script>
 
 <style>
+  .strip-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid var(--color-border);
+    border-radius: 0.5rem;
+    color: color-mix(in srgb, var(--color-foreground) 70%, transparent);
+    background: transparent;
+    transition:
+      color 0.2s ease,
+      border-color 0.2s ease;
+  }
+  .strip-btn:hover,
+  .strip-btn:focus-visible {
+    color: var(--color-accent);
+    border-color: color-mix(in srgb, var(--color-accent) 60%, transparent);
+  }
+
   /* PHOTO//SCOPE card: carries the terminal aesthetic of the page it
      links to, deliberately breaking the site palette in both themes. */
   .scope-card {

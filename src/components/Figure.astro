@@ -28,20 +28,14 @@ const {
 const styleObj = { width, maxWidth, marginInline: "auto" };
 ---
 
-<!--
-  .project-prose scopes the CSS counter so pages without figures are unaffected.
-  The counter is incremented by each <figure class="zine-figure"> inside that context.
-  The ::before on figcaption renders "FIG. 01 — " automatically.
--->
 <figure class="not-prose my-5 zine-figure" style={styleObj}>
   {lightbox ? (
     <>
       {/* Opens the shared #site-lightbox in Layout.astro */}
       <button
         type="button"
-        class="group block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
-               transition-all hover:border-accent/50
-               hover:shadow-[0_4px_20px_color-mix(in_srgb,var(--color-accent)_10%,transparent)]
+        class="block w-full overflow-hidden rounded-xl border border-border p-0 m-0 bg-transparent
+               transition-colors hover:border-accent/50
                focus-visible:outline-2 focus-visible:outline-dashed focus-visible:outline-accent"
         data-lb-src={src}
         data-lb-alt={alt}
@@ -53,7 +47,7 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
           alt={alt}
           loading="lazy"
           decoding="async"
-          class="w-full rounded-xl object-cover transition-transform duration-300 group-hover:scale-[1.01]"
+          class="w-full rounded-xl object-cover"
         />
       </button>
 
@@ -81,50 +75,13 @@ const styleObj = { width, maxWidth, marginInline: "auto" };
   )}
 </figure>
 
-<!--
-  CSS counter for FIG numbering.
-  .project-prose is the scope; counter increments on each .zine-figure.
-  ::before on .zine-caption generates "FIG. 01 — " in mono.
-  Scoped via a <style> block here so it doesn't bleed globally.
-  prefers-reduced-motion: the counter is CSS-only, no motion concerns.
--->
 <style>
-  /* Initialise the counter on the prose scope.
-     Using :where() avoids specificity wars. */
-  :where(.project-prose) {
-    counter-reset: fig-counter;
-  }
-
-  /* Each figure that lives inside .project-prose increments the counter */
-  :where(.project-prose) .zine-figure {
-    counter-increment: fig-counter;
-  }
-
-  /* Caption gets the FIG. prefix prepended automatically */
-  :where(.project-prose) .zine-caption::before {
-    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
-    font-family: "EB Garamond", ui-serif, Georgia, serif;
-    font-size: 0.78rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: color-mix(in srgb, currentColor 55%, transparent);
-    margin-right: 0.25em;
-  }
-
-  /* Caption base style */
+  /* Plain italic caption. No figure numbers: nothing in the prose refers
+     to a figure by number, so a counter would only be decoration. */
   .zine-caption {
     font-size: 0.8rem;
     line-height: 1.5;
     color: color-mix(in srgb, currentColor 65%, transparent);
     font-style: italic;
-  }
-
-  /* Outside .project-prose: no counter prefix, caption still styled */
-  .zine-figure .zine-caption::before {
-    content: none;
-  }
-
-  :where(.project-prose) .zine-figure .zine-caption::before {
-    content: "FIG. " counter(fig-counter, decimal-leading-zero) " · ";
   }
 </style>

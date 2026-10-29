@@ -5,28 +5,21 @@
 // payload (src/data/aero-yaw.json holds only the shape + occurrences).
 import aero from "@/data/aero-yaw.json";
 
-const V = aero.meta.V_car_kmh;
 const payload = JSON.stringify({
   stations: aero.stations,
   weightedRel: aero.weightedRel,
 });
 ---
 
+<!-- The prose around the chart explains the axes, so it carries no title
+     of its own; the line underneath is only the hover readout. -->
 <div class="aero-chart not-prose mx-auto my-8 max-w-3xl" data-chart={payload}>
-  <p class="mb-2 t-label">Yaw sweep // CFD at {V} km/h</p>
-  <div
-    class="relative rounded-xl border border-border bg-muted/30 p-2 before:absolute before:top-2 before:left-2 before:h-2 before:w-2 before:border-t before:border-l before:border-accent/30 after:absolute after:right-2 after:bottom-2 after:h-2 after:w-2 after:border-r after:border-b after:border-accent/30 sm:p-3 dark:bg-muted/20"
-  >
-    <canvas
-      class="block h-64 w-full touch-none sm:h-80"
-      aria-label="Chart of relative drag area versus yaw angle with wind occurrence bars. Absolute values are withheld."
-    ></canvas>
-  </div>
-  <p
-    class="mt-2 min-h-5 font-serif text-[0.8rem] tracking-wide text-foreground/70"
-    data-readout
-  >
-    Hover or tap the curve for station data.
+  <canvas
+    class="block h-64 w-full touch-none sm:h-80"
+    aria-label="Chart of relative drag area versus yaw angle with wind occurrence bars. Absolute values are withheld."
+  ></canvas>
+  <p class="mt-2 min-h-5 text-sm italic text-foreground/65" data-readout>
+    Hover or tap a point.
   </p>
 </div>
 
@@ -81,7 +74,7 @@ const payload = JSON.stringify({
         const occMax = 32;
         const yOcc = (o: number) => H - B - (o / occMax) * (H - T - B);
 
-        ctx!.font = "10px ui-monospace, SFMono-Regular, Menlo, monospace";
+        ctx!.font = `12px ${cssVar("--font-site") || "serif"}`;
         ctx!.lineWidth = 1;
 
         // frame
@@ -118,7 +111,7 @@ const payload = JSON.stringify({
         ctx!.globalAlpha = 0.7;
         ctx!.textBaseline = "alphabetic";
         ctx!.textAlign = "left";
-        ctx!.fillText("relative CdA · values withheld", L + 6, T + 12);
+        ctx!.fillText("relative CdA", L + 6, T + 12);
         ctx!.textAlign = "right";
         ctx!.fillText("occurrence", W - R - 6, T + 12);
         ctx!.globalAlpha = 1;
@@ -162,15 +155,13 @@ const payload = JSON.stringify({
         ctx!.fillStyle = accent2;
         ctx!.textAlign = "left";
         ctx!.textBaseline = "bottom";
-        ctx!.fillText("occurrence weighted CdA", L + 6, yw - 3);
+        ctx!.fillText("weighted CdA", L + 6, yw - 3);
         ctx!.globalAlpha = 1;
 
         // curve
         ctx!.strokeStyle = accent;
         ctx!.lineWidth = 2;
         ctx!.lineJoin = "round";
-        ctx!.shadowColor = accent;
-        ctx!.shadowBlur = 6;
         ctx!.beginPath();
         stations.forEach((s, i) => {
           const x = xOf(s.aoa);
@@ -179,19 +170,14 @@ const payload = JSON.stringify({
           else ctx!.lineTo(x, y);
         });
         ctx!.stroke();
-        ctx!.shadowBlur = 0;
 
-        // station points (diamonds)
+        // station points
         stations.forEach((s, i) => {
           const x = xOf(s.aoa);
           const y = yOf(s.rel);
-          const r = i === hover ? 5 : 3.2;
+          const r = i === hover ? 4.5 : 2.8;
           ctx!.beginPath();
-          ctx!.moveTo(x, y - r);
-          ctx!.lineTo(x + r, y);
-          ctx!.lineTo(x, y + r);
-          ctx!.lineTo(x - r, y);
-          ctx!.closePath();
+          ctx!.arc(x, y, r, 0, Math.PI * 2);
           ctx!.fillStyle = accent;
           ctx!.fill();
           if (i === hover) {
@@ -212,16 +198,16 @@ const payload = JSON.stringify({
       function setReadout() {
         if (!readout) return;
         if (hover < 0) {
-          readout.textContent = "Hover or tap the curve for station data.";
+          readout.textContent = "Hover or tap a point.";
           return;
         }
         const s = stations[hover];
         const windTxt =
           s.wind === 0
-            ? "no crosswind"
-            : `crosswind ${Math.abs(s.wind)} km/h from ${s.wind < 0 ? "right" : "left"}`;
-        const thrust = s.rel < 0 ? " · net thrust" : "";
-        readout.textContent = `${windTxt} · yaw ${s.aoa}° · ${s.occ}% of route${thrust}`;
+            ? "No crosswind"
+            : `${Math.abs(s.wind)} km/h crosswind from the ${s.wind < 0 ? "right" : "left"}`;
+        const thrust = s.rel < 0 ? " Net thrust." : "";
+        readout.textContent = `${windTxt}, ${s.aoa}° yaw, ${s.occ}% of the route.${thrust}`;
       }
 
       // pointerdown too, so a plain tap works on touch screens
